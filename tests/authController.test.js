@@ -106,6 +106,21 @@ describe('registerController', () => {
         expect(userModel).not.toHaveBeenCalled();
     });
 
+    test('malformed request handling', async () => {
+        req = {};
+
+        await registerController(req, res);
+
+        expect(res.status).toHaveBeenCalledWith(500);
+        expect(res.send).toHaveBeenCalledWith(
+            expect.objectContaining({
+                success: false,
+                message: 'Errro in Registeration',
+            }),
+        );
+        expect(userModel).not.toHaveBeenCalled();
+    });
+
     test('does not allow registration of existing user', async () => {
         userModel.findOne.mockResolvedValue({ name: userInfo.name });
 
