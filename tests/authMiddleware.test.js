@@ -11,10 +11,8 @@ jest.mock('../models/userModel.js');
 describe('isAdmin Middleware', () => {
     let req;
 
-    const res = {
-        status: jest.fn().mockReturnThis(),
-        send: jest.fn(),
-    };
+    const res = makeRes();
+
     const next = jest.fn();
 
     beforeEach(() => {

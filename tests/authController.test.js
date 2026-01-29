@@ -10,10 +10,8 @@ jest.mock('../helpers/authHelper.js', () => ({
 describe('registerController', () => {
     let req;
 
-    const res = {
-        status: jest.fn().mockReturnThis(),
-        send: jest.fn(),
-    };
+    const res = makeRes();
+
     const userInfo = Object.freeze({
         name: 'Bob',
         email: 'abc@gmail.com',

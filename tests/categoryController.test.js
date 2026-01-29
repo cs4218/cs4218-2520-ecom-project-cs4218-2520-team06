@@ -6,19 +6,12 @@ import {
   deleteCategoryController,
 } from '../controllers/categoryController.js';
 import categoryModel from "../models/categoryModel.js";
+import { makeRes } from '../helpers/utils.test.js';
 import slugify from "slugify";
 
 // Mocks
 jest.mock("../models/categoryModel.js");
 jest.mock("slugify", () => jest.fn());
-
-// Helpers
-const makeRes = () => {
-  const res = {};
-  res.status = jest.fn().mockReturnValue(res);
-  res.send = jest.fn().mockReturnValue(res);
-  return res;
-}
 
 beforeEach(() => {
   jest.clearAllMocks();
