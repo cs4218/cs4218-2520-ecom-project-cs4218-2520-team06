@@ -1,16 +1,7 @@
 import { registerController } from '../controllers/authController.js';
 import userModel from '../models/userModel.js';
 
-jest.mock('../models/userModel.js', () => {
-    const mock = jest.fn(function (user) {
-        Object.assign(this, user);
-    });
-    mock.findOne = jest.fn();
-    mock.prototype.save = jest.fn(function () {
-        return Promise.resolve(this);
-    });
-    return mock;
-});
+jest.mock('../models/userModel.js');
 
 jest.mock('../helpers/authHelper.js', () => ({
     hashPassword: jest.fn().mockResolvedValue('hashedPassword'),
@@ -18,7 +9,11 @@ jest.mock('../helpers/authHelper.js', () => ({
 
 describe('registerController', () => {
     let req;
-    let res;
+
+    const res = {
+        status: jest.fn().mockReturnThis(),
+        send: jest.fn(),
+    };
     const userInfo = Object.freeze({
         name: 'Bob',
         email: 'abc@gmail.com',
@@ -34,11 +29,6 @@ describe('registerController', () => {
             body: {
                 ...userInfo,
             },
-        };
-
-        res = {
-            status: jest.fn().mockReturnThis(),
-            send: jest.fn(),
         };
 
         jest.clearAllMocks();
