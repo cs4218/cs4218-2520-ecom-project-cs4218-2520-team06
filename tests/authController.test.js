@@ -1,4 +1,8 @@
-import { registerController } from '../controllers/authController.js';
+import {
+    registerController,
+    testController,
+} from '../controllers/authController.js';
+import { makeRes } from '../helpers/utils.test.js';
 import userModel from '../models/userModel.js';
 
 jest.mock('../models/userModel.js');
@@ -94,7 +98,7 @@ describe('registerController', () => {
         expect(userModel).not.toHaveBeenCalled();
     });
 
-    test('malformed request handling', async () => {
+    test('malformed request is handled correctly', async () => {
         req = {};
 
         await registerController(req, res);
@@ -150,4 +154,13 @@ describe('registerController', () => {
             user: expectedUser,
         });
     });
+});
+
+test('testController returns correct response', () => {
+    const req = {};
+    const res = makeRes();
+
+    testController(req, res);
+
+    expect(res.send).toHaveBeenCalledWith('Protected Routes');
 });
