@@ -1,3 +1,4 @@
+import { makeRes } from '../helpers/utils.test.js';
 import { isAdmin } from '../middlewares/authMiddleware';
 import {
     ADMIN_USER_ID,
@@ -19,7 +20,7 @@ describe('isAdmin Middleware', () => {
         jest.clearAllMocks();
     });
 
-    test('malformed request should error', async () => {
+    test('malformed request returns 401 error', async () => {
         req = {};
 
         await isAdmin(req, res, next);
@@ -33,7 +34,7 @@ describe('isAdmin Middleware', () => {
         expect(next).not.toHaveBeenCalled();
     });
 
-    test('non-existent user should return 401 error', async () => {
+    test('non-existent user returns 401 error', async () => {
         req = {
             user: {
                 _id: NON_EXISTENT_USER_ID,
@@ -51,7 +52,7 @@ describe('isAdmin Middleware', () => {
         expect(next).not.toHaveBeenCalled();
     });
 
-    test('user with non-admin role should not be authorised', async () => {
+    test('user with non-admin role is not be authorised', async () => {
         req = {
             user: {
                 _id: NON_ADMIN_USER_ID,
@@ -68,7 +69,7 @@ describe('isAdmin Middleware', () => {
         expect(next).not.toHaveBeenCalled();
     });
 
-    test('user with admin role should be authorised', async () => {
+    test('user with admin role is authorised', async () => {
         req = {
             user: {
                 _id: ADMIN_USER_ID,
