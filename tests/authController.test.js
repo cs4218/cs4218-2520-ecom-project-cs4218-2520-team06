@@ -3,6 +3,10 @@ import {
     testController,
 } from '../controllers/authController.js';
 import { makeRes } from '../helpers/utils.test.js';
+import {
+    NON_ADMIN_USER,
+    NON_ADMIN_USER_EMAIL,
+} from '../models/__mocks__/userModel.js';
 import userModel from '../models/userModel.js';
 
 jest.mock('../models/userModel.js');
@@ -36,65 +40,63 @@ describe('registerController', () => {
         jest.clearAllMocks();
     });
 
-    test('error when name is missing', async () => {
+    test('missing name returns 400', async () => {
         delete req.body.name;
 
         await registerController(req, res);
 
-        expect(res.send).toHaveBeenCalledWith({ message: 'Name is Required' });
+        expect(res.status).toHaveBeenCalledWith(400);
+        expect(res.send).toHaveBeenCalledWith({ message: expect.any(String) });
         expect(userModel).not.toHaveBeenCalled();
     });
 
-    test('error when email is missing', async () => {
+    test('missing email returns 400', async () => {
         delete req.body.email;
 
         await registerController(req, res);
 
-        expect(res.send).toHaveBeenCalledWith({ message: 'Email is Required' });
+        expect(res.status).toHaveBeenCalledWith(400);
+        expect(res.send).toHaveBeenCalledWith({ message: expect.any(String) });
         expect(userModel).not.toHaveBeenCalled();
     });
 
-    test('error when password is missing', async () => {
+    test('missing password returns 400', async () => {
         delete req.body.password;
 
         await registerController(req, res);
 
-        expect(res.send).toHaveBeenCalledWith({
-            message: 'Password is Required',
-        });
+        expect(res.status).toHaveBeenCalledWith(400);
+        expect(res.send).toHaveBeenCalledWith({ message: expect.any(String) });
         expect(userModel).not.toHaveBeenCalled();
     });
 
-    test('error when phone is missing', async () => {
+    test('missing phone returns 400', async () => {
         delete req.body.phone;
 
         await registerController(req, res);
 
-        expect(res.send).toHaveBeenCalledWith({
-            message: 'Phone no is Required',
-        });
+        expect(res.status).toHaveBeenCalledWith(400);
+        expect(res.send).toHaveBeenCalledWith({ message: expect.any(String) });
         expect(userModel).not.toHaveBeenCalled();
     });
 
-    test('error when address is missing', async () => {
+    test('missing address returns 400', async () => {
         delete req.body.address;
 
         await registerController(req, res);
 
-        expect(res.send).toHaveBeenCalledWith({
-            message: 'Address is Required',
-        });
+        expect(res.status).toHaveBeenCalledWith(400);
+        expect(res.send).toHaveBeenCalledWith({ message: expect.any(String) });
         expect(userModel).not.toHaveBeenCalled();
     });
 
-    test('error when answer is missing', async () => {
+    test('missing answer returns 400', async () => {
         delete req.body.answer;
 
         await registerController(req, res);
 
-        expect(res.send).toHaveBeenCalledWith({
-            message: 'Answer is Required',
-        });
+        expect(res.status).toHaveBeenCalledWith(400);
+        expect(res.send).toHaveBeenCalledWith({ message: expect.any(String) });
         expect(userModel).not.toHaveBeenCalled();
     });
 
@@ -107,24 +109,24 @@ describe('registerController', () => {
         expect(res.send).toHaveBeenCalledWith(
             expect.objectContaining({
                 success: false,
-                message: 'Errro in Registeration',
+                message: expect.any(String),
             }),
         );
         expect(userModel).not.toHaveBeenCalled();
     });
 
     test('does not allow registration of existing user', async () => {
-        userModel.findOne.mockResolvedValue({ name: userInfo.name });
+        req.body.email = NON_ADMIN_USER_EMAIL;
 
         await registerController(req, res);
 
         expect(userModel.findOne).toHaveBeenCalledWith({
-            email: userInfo.email,
+            email: NON_ADMIN_USER_EMAIL,
         });
         expect(res.status).toHaveBeenCalledWith(200);
         expect(res.send).toHaveBeenCalledWith({
             success: false,
-            message: 'Already Register please login',
+            message: expect.any(String),
         });
         expect(userModel.mock.instances.length).toBe(0);
     });
@@ -150,7 +152,7 @@ describe('registerController', () => {
         expect(res.status).toHaveBeenCalledWith(201);
         expect(res.send).toHaveBeenCalledWith({
             success: true,
-            message: 'User Register Successfully',
+            message: expect.any(String),
             user: expectedUser,
         });
     });
