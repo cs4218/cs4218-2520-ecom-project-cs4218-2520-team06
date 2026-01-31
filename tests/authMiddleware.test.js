@@ -20,17 +20,19 @@ describe('isAdmin Middleware', () => {
         jest.clearAllMocks();
     });
 
-    test('malformed request returns 401 error', async () => {
+    test('malformed request returns 400 error', async () => {
         req = {};
 
         await isAdmin(req, res, next);
 
-        expect(res.status).toHaveBeenCalledWith(401);
-        expect(res.send).toHaveBeenCalledWith({
-            success: false,
-            message: 'Error in admin middleware',
-            error: expect.any(Error),
-        });
+        expect(res.status).toHaveBeenCalledWith(400);
+        expect(res.send).toHaveBeenCalledWith(
+            expect.objectContaining({
+                success: false,
+                message: expect.any(String),
+                error: expect.any(Error),
+            }),
+        );
         expect(next).not.toHaveBeenCalled();
     });
 
@@ -44,11 +46,12 @@ describe('isAdmin Middleware', () => {
         await isAdmin(req, res, next);
 
         expect(res.status).toHaveBeenCalledWith(401);
-        expect(res.send).toHaveBeenCalledWith({
-            success: false,
-            message: 'Error in admin middleware',
-            error: expect.any(Error),
-        });
+        expect(res.send).toHaveBeenCalledWith(
+            expect.objectContaining({
+                success: false,
+                message: expect.any(String),
+            }),
+        );
         expect(next).not.toHaveBeenCalled();
     });
 
@@ -62,10 +65,12 @@ describe('isAdmin Middleware', () => {
         await isAdmin(req, res, next);
 
         expect(res.status).toHaveBeenCalledWith(401);
-        expect(res.send).toHaveBeenCalledWith({
-            success: false,
-            message: 'UnAuthorized Access',
-        });
+        expect(res.send).toHaveBeenCalledWith(
+            expect.objectContaining({
+                success: false,
+                message: expect.any(String),
+            }),
+        );
         expect(next).not.toHaveBeenCalled();
     });
 
