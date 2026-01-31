@@ -1,19 +1,29 @@
 import {
     registerController,
     testController,
+    loginController,
 } from '../controllers/authController.js';
 import { makeRes } from '../helpers/utils.test.js';
-import {
-    NON_ADMIN_USER,
-    NON_ADMIN_USER_EMAIL,
-} from '../models/__mocks__/userModel.js';
+import { NON_ADMIN_USER_EMAIL } from '../models/__mocks__/userModel.js';
 import userModel from '../models/userModel.js';
+import JWT from 'jsonwebtoken';
 
 jest.mock('../models/userModel.js');
 
 jest.mock('../helpers/authHelper.js', () => ({
     hashPassword: jest.fn().mockResolvedValue('hashedPassword'),
+    comparePassword: jest.fn((password, hashedPassword) => {
+        if (
+            password === 'correctPassword' &&
+            hashedPassword === 'hashedPassword'
+        ) {
+            return Promise.resolve(true);
+        }
+        return Promise.resolve(false);
+    }),
 }));
+
+jest.mock('jsonwebtoken');
 
 describe('registerController', () => {
     let req;
@@ -140,7 +150,6 @@ describe('registerController', () => {
             password: 'hashedPassword',
             answer: userInfo.answer,
         };
-        userModel.findOne.mockResolvedValue(null);
 
         await registerController(req, res);
 
@@ -165,4 +174,92 @@ test('testController returns correct response', () => {
     testController(req, res);
 
     expect(res.send).toHaveBeenCalledWith('Protected Routes');
+});
+
+describe('loginController', () => {
+    let req;
+    const res = makeRes();
+
+    beforeEach(() => {
+        req = {
+            body: {
+                email: 'abc@gmail.com',
+                password: 'password',
+            },
+        };
+        jest.clearAllMocks();
+    });
+
+    test('fails when no email is provided', async () => {
+        delete req.body.email;
+
+        await loginController(req, res);
+
+        expect(res.status).toHaveBeenCalledWith(400);
+        expect(res.send).toHaveBeenCalledWith(
+            expect.objectContaining({
+                success: false,
+                message: expect.any(String),
+            }),
+        );
+    });
+
+    test('fails when no password is provided', async () => {
+        delete req.body.password;
+
+        await loginController(req, res);
+
+        expect(res.status).toHaveBeenCalledWith(400);
+        expect(res.send).toHaveBeenCalledWith(
+            expect.objectContaining({
+                success: false,
+                message: expect.any(String),
+            }),
+        );
+    });
+
+    test('non-existent user returns 401', async () => {
+        req.body.email = 'nonexistent@gmail.com';
+
+        await loginController(req, res);
+
+        expect(res.status).toHaveBeenCalledWith(401);
+        expect(res.send).toHaveBeenCalledWith(
+            expect.objectContaining({
+                success: false,
+                message: expect.any(String),
+            }),
+        );
+    });
+
+    test('incorrect password returns 401', async () => {
+        req.body = { email: NON_ADMIN_USER_EMAIL, password: 'wrongPassword' };
+
+        await loginController(req, res);
+
+        expect(res.status).toHaveBeenCalledWith(401);
+        expect(res.send).toHaveBeenCalledWith(
+            expect.objectContaining({
+                success: false,
+                message: expect.any(String),
+            }),
+        );
+    });
+
+    test('successful login returns user and token', async () => {
+        JWT.sign.mockReturnValueOnce('mocked-jwt-token');
+        req.body = { email: NON_ADMIN_USER_EMAIL, password: 'correctPassword' };
+
+        await loginController(req, res);
+
+        expect(res.status).toHaveBeenCalledWith(200);
+        expect(res.send).toHaveBeenCalledWith(
+            expect.objectContaining({
+                success: true,
+                message: expect.any(String),
+                user: expect.any(Object),
+                token: 'mocked-jwt-token',
+            }),
+        );
+    });
 });
