@@ -99,9 +99,12 @@ describe("Orders Component", () => {
         </MemoryRouter>
       );
 
-      // Assert: Verify API was called to fetch orders
+      // Assert: Verify API was called to fetch orders and user name is displayed
       await waitFor(() => {
         expect(axios.get).toHaveBeenCalledWith("/api/v1/auth/orders");
+      });
+      await waitFor(() => {
+        expect(screen.getByText("John Doe")).toBeInTheDocument();
       });
     });
 
@@ -141,7 +144,7 @@ describe("Orders Component", () => {
   });
 
   describe("Orders Display - Components", () => {
-    it("should render UserMenu component", () => {
+    it("should render UserMenu component", async () => {
       // Arrange: Set up authenticated user with empty orders
       useAuth.mockReturnValue([{ token: "valid-token" }, jest.fn()]);
       axios.get.mockResolvedValueOnce({ data: [] });
@@ -153,11 +156,13 @@ describe("Orders Component", () => {
         </MemoryRouter>
       );
 
-      // Assert: Verify UserMenu component is rendered
-      expect(screen.getByTestId("user-menu")).toBeInTheDocument();
+      // Assert: Verify UserMenu component is rendered and wait for async operations
+      await waitFor(() => {
+        expect(screen.getByTestId("user-menu")).toBeInTheDocument();
+      });
     });
 
-    it("should render Layout component", () => {
+    it("should render Layout component", async () => {
       // Arrange: Set up authenticated user with empty orders
       useAuth.mockReturnValue([{ token: "valid-token" }, jest.fn()]);
       axios.get.mockResolvedValueOnce({ data: [] });
@@ -169,8 +174,10 @@ describe("Orders Component", () => {
         </MemoryRouter>
       );
 
-      // Assert: Verify Layout component is rendered
-      expect(screen.getByTestId("layout")).toBeInTheDocument();
+      // Assert: Verify Layout component is rendered and wait for async operations
+      await waitFor(() => {
+        expect(screen.getByTestId("layout")).toBeInTheDocument();
+      });
     });
   });
 
@@ -188,9 +195,7 @@ describe("Orders Component", () => {
       );
 
       // Assert: Verify buyer name is displayed
-      await waitFor(() => {
-        expect(screen.getByText("John Doe")).toBeInTheDocument();
-      });
+      expect(await screen.findByText("John Doe")).toBeInTheDocument();
     });
 
     it("should display order status", async () => {
@@ -206,10 +211,7 @@ describe("Orders Component", () => {
       );
 
       // Assert: Verify Processing status is displayed
-      await waitFor(() => {
-        // From first order
-        expect(screen.getByText("Processing")).toBeInTheDocument();
-      });
+      expect(await screen.findByText("Processing")).toBeInTheDocument();
     });
 
     it("should display payment status Success when success", async () => {
@@ -225,9 +227,7 @@ describe("Orders Component", () => {
       );
 
       // Assert: Verify Success payment status is displayed
-      await waitFor(() => {
-        expect(screen.getByText("Success")).toBeInTheDocument();
-      });
+      expect(await screen.findByText("Success")).toBeInTheDocument();
     });
 
     it("should display payment status Failed when not success", async () => {
@@ -243,9 +243,7 @@ describe("Orders Component", () => {
       );
 
       // Assert: Verify Failed payment status is displayed
-      await waitFor(() => {
-        expect(screen.getByText("Failed")).toBeInTheDocument();
-      });
+      expect(await screen.findByText("Failed")).toBeInTheDocument();
     });
 
     it("should display moment formatted date", async () => {
@@ -261,9 +259,7 @@ describe("Orders Component", () => {
       );
 
       // Assert: Verify formatted date is displayed
-      await waitFor(() => {
-        expect(screen.getByText("2 days ago")).toBeInTheDocument();
-      });
+      expect(await screen.findByText("2 days ago")).toBeInTheDocument();
     });
 
     it("should display multiple orders data", async () => {
@@ -279,18 +275,11 @@ describe("Orders Component", () => {
       );
 
       // Assert: Verify both orders' buyer names and statuses are displayed
-      await waitFor(() => {
-        expect(screen.getByText("John Doe")).toBeInTheDocument();
-      });
-      await waitFor(() => {
-        expect(screen.getByText("Jane Smith")).toBeInTheDocument();
-      });
-      await waitFor(() => {
-        expect(screen.getByText("Processing")).toBeInTheDocument();
-      });
-      await waitFor(() => {
-        expect(screen.getByText("Shipped")).toBeInTheDocument();
-      });
+      // Use findBy queries which automatically wrap in act and wait
+      expect(await screen.findByText("John Doe")).toBeInTheDocument();
+      expect(await screen.findByText("Jane Smith")).toBeInTheDocument();
+      expect(await screen.findByText("Processing")).toBeInTheDocument();
+      expect(await screen.findByText("Shipped")).toBeInTheDocument();
     });
   });
 
@@ -308,9 +297,7 @@ describe("Orders Component", () => {
       );
 
       // Assert: Verify Test Product 1 name is displayed
-      await waitFor(() => {
-        expect(screen.getByText("Test Product 1")).toBeInTheDocument();
-      });
+      expect(await screen.findByText("Test Product 1")).toBeInTheDocument();
     });
 
     it("should display product description", async () => {
@@ -326,9 +313,9 @@ describe("Orders Component", () => {
       );
 
       // Assert: Verify product description is displayed
-      await waitFor(() => {
-        expect(screen.getByText(/This is a test product/)).toBeInTheDocument();
-      });
+      expect(
+        await screen.findByText(/This is a test product/)
+      ).toBeInTheDocument();
     });
 
     it("should display product price", async () => {
@@ -344,9 +331,7 @@ describe("Orders Component", () => {
       );
 
       // Assert: Verify Test Product 1 price is displayed
-      await waitFor(() => {
-        expect(screen.getByText("Price : 99.99")).toBeInTheDocument();
-      });
+      expect(await screen.findByText("Price : 99.99")).toBeInTheDocument();
     });
 
     it("should display product image", async () => {
@@ -362,13 +347,11 @@ describe("Orders Component", () => {
       );
 
       // Assert: Verify first product image has correct src
-      await waitFor(() => {
-        const images = screen.getAllByRole("img");
-        expect(images[0]).toHaveAttribute(
-          "src",
-          "/api/v1/product/product-photo/prod1"
-        );
-      });
+      const image = await screen.findByRole("img");
+      expect(image).toHaveAttribute(
+        "src",
+        "/api/v1/product/product-photo/prod1"
+      );
     });
 
     it("should display multiple products in an order", async () => {
@@ -384,12 +367,8 @@ describe("Orders Component", () => {
       );
 
       // Assert: Verify both product names are displayed
-      await waitFor(() => {
-        expect(screen.getByText("Test Product 2")).toBeInTheDocument();
-      });
-      await waitFor(() => {
-        expect(screen.getByText("Test Product 3")).toBeInTheDocument();
-      });
+      expect(await screen.findByText("Test Product 2")).toBeInTheDocument();
+      expect(await screen.findByText("Test Product 3")).toBeInTheDocument();
     });
   });
 
@@ -407,9 +386,7 @@ describe("Orders Component", () => {
       );
 
       // Assert: Verify component still renders
-      await waitFor(() => {
-        expect(screen.getByText("All Orders")).toBeInTheDocument();
-      });
+      expect(await screen.findByText("All Orders")).toBeInTheDocument();
     });
 
     it("should render without errors when order has missing optional fields", async () => {
@@ -431,9 +408,7 @@ describe("Orders Component", () => {
       );
 
       // Assert: Verify component renders without crashing with incomplete data
-      await waitFor(() => {
-        expect(screen.getByText("Incomplete User")).toBeInTheDocument();
-      });
+      expect(await screen.findByText("Incomplete User")).toBeInTheDocument();
     });
 
     it("should handle products with missing fields gracefully", async () => {
@@ -466,14 +441,12 @@ describe("Orders Component", () => {
       );
 
       // Assert: Verify component renders without crashing with incomplete product data
-      await waitFor(() => {
-        expect(
-          screen.getByText("User With Incomplete Product")
-        ).toBeInTheDocument();
-      });
-      await waitFor(() => {
-        expect(screen.getByText("Product without a name")).toBeInTheDocument();
-      });
+      expect(
+        await screen.findByText("User With Incomplete Product")
+      ).toBeInTheDocument();
+      expect(
+        await screen.findByText("Product without a name")
+      ).toBeInTheDocument();
     });
   });
 
@@ -513,9 +486,7 @@ describe("Orders Component", () => {
       );
 
       // Assert: Verify component still renders
-      await waitFor(() => {
-        expect(screen.getByText("All Orders")).toBeInTheDocument();
-      });
+      expect(await screen.findByText("All Orders")).toBeInTheDocument();
     });
   });
 
