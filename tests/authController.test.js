@@ -2,13 +2,18 @@ import {
   registerController,
   testController,
   loginController,
+  getOrdersController,
+  getAllOrdersController,
+  orderStatusController,
 } from "../controllers/authController.js";
 import { makeRes } from "../helpers/utils.test.js";
 import { NON_ADMIN_USER_EMAIL } from "../models/__mocks__/userModel.js";
 import userModel from "../models/userModel.js";
+import orderModel from "../models/orderModel.js";
 import JWT from "jsonwebtoken";
 
 jest.mock("../models/userModel.js");
+jest.mock("../models/orderModel.js");
 
 jest.mock("../helpers/authHelper.js", () => ({
   hashPassword: jest.fn().mockResolvedValue("hashedPassword"),
@@ -258,5 +263,90 @@ describe("loginController", () => {
         token: "mocked-jwt-token",
       })
     );
+  });
+});
+
+describe("getOrdersController", () => {
+  const res = makeRes();
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  test("returns 500 when DB fails", async () => {
+    const err = new Error("DB failure");
+    orderModel.find.mockImplementation(() => {
+      throw err;
+    });
+    const consoleSpy = jest.spyOn(console, "log").mockImplementation(() => {});
+
+    const req = { user: { _id: "user123" } };
+
+    await getOrdersController(req, res);
+
+    expect(consoleSpy).toHaveBeenCalledWith(err);
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.send).toHaveBeenCalledWith({
+      success: false,
+      message: "Error WHile Geting Orders",
+      error: err,
+    });
+  });
+});
+
+describe("getAllOrdersController", () => {
+  const res = makeRes();
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  test("returns 500 when DB fails", async () => {
+    const err = new Error("DB failure");
+    orderModel.find.mockImplementation(() => {
+      throw err;
+    });
+    const consoleSpy = jest.spyOn(console, "log").mockImplementation(() => {});
+
+    const req = {};
+
+    await getAllOrdersController(req, res);
+
+    expect(consoleSpy).toHaveBeenCalledWith(err);
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.send).toHaveBeenCalledWith({
+      success: false,
+      message: "Error WHile Geting Orders",
+      error: err,
+    });
+  });
+});
+
+describe("orderStatusController", () => {
+  const res = makeRes();
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  test("returns 500 when DB fails", async () => {
+    const err = new Error("DB failure");
+    orderModel.findByIdAndUpdate.mockRejectedValueOnce(err);
+    const consoleSpy = jest.spyOn(console, "log").mockImplementation(() => {});
+
+    const req = {
+      params: { orderId: "order1" },
+      body: { status: "Shipped" },
+    };
+
+    await orderStatusController(req, res);
+
+    expect(consoleSpy).toHaveBeenCalledWith(err);
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.send).toHaveBeenCalledWith({
+      success: false,
+      message: "Error While Updateing Order",
+      error: err,
+    });
   });
 });
