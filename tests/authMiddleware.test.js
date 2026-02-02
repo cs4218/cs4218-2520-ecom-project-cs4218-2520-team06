@@ -1,88 +1,88 @@
-import { makeRes } from '../helpers/utils.test.js';
-import { isAdmin } from '../middlewares/authMiddleware';
+import { makeRes } from "../helpers/utils.test.js";
+import { isAdmin } from "../middlewares/authMiddleware";
 import {
-    ADMIN_USER_ID,
-    NON_ADMIN_USER_ID,
-    NON_EXISTENT_USER_ID,
-} from '../models/__mocks__/userModel.js';
-import userModel from '../models/userModel.js';
+  ADMIN_USER_ID,
+  NON_ADMIN_USER_ID,
+  NON_EXISTENT_USER_ID,
+} from "../models/__mocks__/userModel.js";
+import userModel from "../models/userModel.js";
 
-jest.mock('../models/userModel.js');
+jest.mock("../models/userModel.js");
 
-describe('isAdmin Middleware', () => {
-    let req;
+describe("isAdmin Middleware", () => {
+  let req;
 
-    const res = makeRes();
+  const res = makeRes();
 
-    const next = jest.fn();
+  const next = jest.fn();
 
-    beforeEach(() => {
-        jest.clearAllMocks();
-    });
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
 
-    test('malformed request returns 400 error', async () => {
-        req = {};
+  test("malformed request returns 400 error", async () => {
+    req = {};
 
-        await isAdmin(req, res, next);
+    await isAdmin(req, res, next);
 
-        expect(res.status).toHaveBeenCalledWith(400);
-        expect(res.send).toHaveBeenCalledWith(
-            expect.objectContaining({
-                success: false,
-                message: expect.any(String),
-                error: expect.any(Error),
-            }),
-        );
-        expect(next).not.toHaveBeenCalled();
-    });
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.send).toHaveBeenCalledWith(
+      expect.objectContaining({
+        success: false,
+        message: expect.any(String),
+        error: expect.any(Error),
+      })
+    );
+    expect(next).not.toHaveBeenCalled();
+  });
 
-    test('non-existent user returns 401 error', async () => {
-        req = {
-            user: {
-                _id: NON_EXISTENT_USER_ID,
-            },
-        };
+  test("non-existent user returns 401 error", async () => {
+    req = {
+      user: {
+        _id: NON_EXISTENT_USER_ID,
+      },
+    };
 
-        await isAdmin(req, res, next);
+    await isAdmin(req, res, next);
 
-        expect(res.status).toHaveBeenCalledWith(401);
-        expect(res.send).toHaveBeenCalledWith(
-            expect.objectContaining({
-                success: false,
-                message: expect.any(String),
-            }),
-        );
-        expect(next).not.toHaveBeenCalled();
-    });
+    expect(res.status).toHaveBeenCalledWith(401);
+    expect(res.send).toHaveBeenCalledWith(
+      expect.objectContaining({
+        success: false,
+        message: expect.any(String),
+      })
+    );
+    expect(next).not.toHaveBeenCalled();
+  });
 
-    test('user with non-admin role is not be authorised', async () => {
-        req = {
-            user: {
-                _id: NON_ADMIN_USER_ID,
-            },
-        };
+  test("user with non-admin role is not be authorised", async () => {
+    req = {
+      user: {
+        _id: NON_ADMIN_USER_ID,
+      },
+    };
 
-        await isAdmin(req, res, next);
+    await isAdmin(req, res, next);
 
-        expect(res.status).toHaveBeenCalledWith(401);
-        expect(res.send).toHaveBeenCalledWith(
-            expect.objectContaining({
-                success: false,
-                message: expect.any(String),
-            }),
-        );
-        expect(next).not.toHaveBeenCalled();
-    });
+    expect(res.status).toHaveBeenCalledWith(401);
+    expect(res.send).toHaveBeenCalledWith(
+      expect.objectContaining({
+        success: false,
+        message: expect.any(String),
+      })
+    );
+    expect(next).not.toHaveBeenCalled();
+  });
 
-    test('user with admin role is authorised', async () => {
-        req = {
-            user: {
-                _id: ADMIN_USER_ID,
-            },
-        };
+  test("user with admin role is authorised", async () => {
+    req = {
+      user: {
+        _id: ADMIN_USER_ID,
+      },
+    };
 
-        await isAdmin(req, res, next);
+    await isAdmin(req, res, next);
 
-        expect(next).toHaveBeenCalled();
-    });
+    expect(next).toHaveBeenCalled();
+  });
 });
