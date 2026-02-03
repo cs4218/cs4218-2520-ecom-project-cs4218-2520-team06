@@ -275,7 +275,7 @@ describe("getOrdersController", () => {
 
   test("returns 500 when DB fails", async () => {
     const err = new Error("DB failure");
-    orderModel.find.mockImplementation(() => {
+    orderModel.find.mockImplementationOnce(() => {
       throw err;
     });
     const consoleSpy = jest.spyOn(console, "log").mockImplementation(() => {});
@@ -292,6 +292,38 @@ describe("getOrdersController", () => {
       error: err,
     });
   });
+
+  test("successfully returns order data for specific buyer", async () => {
+    const mockOrders = [
+      {
+        _id: "order1",
+        products: [{ _id: "prod1", name: "Laptop" }],
+        buyer: { _id: "user123", name: "John Doe" },
+        status: "Processing",
+        payment: { method: "card" },
+      },
+      {
+        _id: "order2",
+        products: [{ _id: "prod2", name: "Mouse" }],
+        buyer: { _id: "user123", name: "John Doe" },
+        status: "Shipped",
+        payment: { method: "card" },
+      },
+    ];
+
+    orderModel.find.mockImplementationOnce(() => ({
+      populate: jest.fn().mockReturnThis(),
+      sort: jest.fn().mockReturnThis(),
+      then: jest.fn((callback) => Promise.resolve(callback(mockOrders))),
+    }));
+
+    const req = { user: { _id: "user123" } };
+
+    await getOrdersController(req, res);
+
+    expect(orderModel.find).toHaveBeenCalledWith({ buyer: "user123" });
+    expect(res.json).toHaveBeenCalledWith(mockOrders);
+  });
 });
 
 describe("getAllOrdersController", () => {
@@ -303,7 +335,7 @@ describe("getAllOrdersController", () => {
 
   test("returns 500 when DB fails", async () => {
     const err = new Error("DB failure");
-    orderModel.find.mockImplementation(() => {
+    orderModel.find.mockImplementationOnce(() => {
       throw err;
     });
     const consoleSpy = jest.spyOn(console, "log").mockImplementation(() => {});
@@ -319,6 +351,40 @@ describe("getAllOrdersController", () => {
       message: "Error WHile Geting Orders",
       error: err,
     });
+  });
+
+  test("successfully returns orders", async () => {
+    const mockOrders = [
+      {
+        _id: "order1",
+        products: [{ _id: "prod1", name: "Laptop" }],
+        buyer: { _id: "user1", name: "John Doe" },
+        status: "Processing",
+        payment: { method: "card" },
+        createdAt: new Date("2024-01-02"),
+      },
+      {
+        _id: "order2",
+        products: [{ _id: "prod2", name: "Mouse" }],
+        buyer: { _id: "user2", name: "Jane Smith" },
+        status: "Shipped",
+        payment: { method: "card" },
+        createdAt: new Date("2024-01-01"),
+      },
+    ];
+
+    orderModel.find.mockImplementationOnce(() => ({
+      populate: jest.fn().mockReturnThis(),
+      sort: jest.fn().mockReturnThis(),
+      then: jest.fn((callback) => Promise.resolve(callback(mockOrders))),
+    }));
+
+    const req = {};
+
+    await getAllOrdersController(req, res);
+
+    expect(orderModel.find).toHaveBeenCalledWith({});
+    expect(res.json).toHaveBeenCalledWith(mockOrders);
   });
 });
 
@@ -348,5 +414,32 @@ describe("orderStatusController", () => {
       message: "Error While Updateing Order",
       error: err,
     });
+  });
+
+  test("successfully returns order update status", async () => {
+    const mockUpdatedOrder = {
+      _id: "order1",
+      status: "Delivered",
+      products: [{ _id: "prod1", name: "Laptop" }],
+      buyer: { _id: "user1", name: "John Doe" },
+      payment: { method: "card" },
+    };
+
+    // Override the mock to return custom data
+    orderModel.findByIdAndUpdate.mockResolvedValueOnce(mockUpdatedOrder);
+
+    const req = {
+      params: { orderId: "order1" },
+      body: { status: "Delivered" },
+    };
+
+    await orderStatusController(req, res);
+
+    expect(orderModel.findByIdAndUpdate).toHaveBeenCalledWith(
+      "order1",
+      { status: "Delivered" },
+      { new: true }
+    );
+    expect(res.json).toHaveBeenCalledWith(mockUpdatedOrder);
   });
 });
