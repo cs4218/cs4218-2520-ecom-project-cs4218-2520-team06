@@ -61,4 +61,6 @@ userModel.findById = jest.fn((id) => {
   }
 });
 
+userModel.findByIdAndUpdate = jest.fn();
+
 export default userModel;

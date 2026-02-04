@@ -2,12 +2,16 @@ import {
   registerController,
   testController,
   loginController,
+  forgotPasswordController,
   getOrdersController,
   getAllOrdersController,
   orderStatusController,
 } from "../controllers/authController.js";
 import { makeRes } from "../helpers/utils.test.js";
-import { NON_ADMIN_USER_EMAIL } from "../models/__mocks__/userModel.js";
+import {
+  NON_ADMIN_USER_EMAIL,
+  NON_ADMIN_USER,
+} from "../models/__mocks__/userModel.js";
 import userModel from "../models/userModel.js";
 import orderModel from "../models/orderModel.js";
 import JWT from "jsonwebtoken";
@@ -248,6 +252,24 @@ describe("loginController", () => {
     );
   });
 
+  test("handles DB errors gracefully", async () => {
+    const err = new Error("DB failure");
+    userModel.findOne.mockImplementationOnce(() => {
+      throw err;
+    });
+
+    await loginController(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.send).toHaveBeenCalledWith(
+      expect.objectContaining({
+        success: false,
+        message: expect.any(String),
+        error: err,
+      })
+    );
+  });
+
   test("successful login returns user and token", async () => {
     JWT.sign.mockReturnValueOnce("mocked-jwt-token");
     req.body = { email: NON_ADMIN_USER_EMAIL, password: "correctPassword" };
@@ -261,6 +283,123 @@ describe("loginController", () => {
         message: expect.any(String),
         user: expect.any(Object),
         token: "mocked-jwt-token",
+      })
+    );
+  });
+});
+
+describe("forgotPasswordController", () => {
+  let req;
+  const res = makeRes();
+
+  beforeEach(() => {
+    req = {
+      body: {
+        email: "user@email.com",
+        answer: "user's answer",
+        newPassword: "newPassword123",
+      },
+    };
+    jest.clearAllMocks();
+  });
+
+  test("errors when email is missing", async () => {
+    delete req.body.email;
+
+    await forgotPasswordController(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.send).toHaveBeenCalledWith(
+      expect.objectContaining({
+        success: false,
+        message: expect.any(String),
+      })
+    );
+  });
+
+  test("errors when answer is missing", async () => {
+    delete req.body.answer;
+
+    await forgotPasswordController(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.send).toHaveBeenCalledWith(
+      expect.objectContaining({
+        success: false,
+        message: expect.any(String),
+      })
+    );
+  });
+
+  test("errors when newPassword is missing", async () => {
+    delete req.body.newPassword;
+
+    await forgotPasswordController(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.send).toHaveBeenCalledWith(
+      expect.objectContaining({
+        success: false,
+        message: expect.any(String),
+      })
+    );
+  });
+
+  test("returns 404 when no matching user-answer pair", async () => {
+    userModel.findOne.mockResolvedValueOnce(null);
+
+    await forgotPasswordController(req, res);
+
+    expect(userModel.findOne).toHaveBeenCalledWith({
+      email: req.body.email,
+      answer: req.body.answer,
+    });
+    expect(res.status).toHaveBeenCalledWith(404);
+    expect(res.send).toHaveBeenCalledWith(
+      expect.objectContaining({
+        success: false,
+        message: expect.any(String),
+      })
+    );
+    expect(userModel.findByIdAndUpdate).not.toHaveBeenCalled();
+  });
+
+  test("handles DB errors gracefully", async () => {
+    const err = new Error("DB failure");
+    userModel.findOne.mockImplementationOnce(() => {
+      throw err;
+    });
+
+    await forgotPasswordController(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.send).toHaveBeenCalledWith(
+      expect.objectContaining({
+        success: false,
+        message: expect.any(String),
+        error: err,
+      })
+    );
+  });
+
+  test("successful password reset", async () => {
+    userModel.findOne.mockResolvedValueOnce(NON_ADMIN_USER);
+
+    await forgotPasswordController(req, res);
+
+    expect(userModel.findOne).toHaveBeenCalledWith({
+      email: req.body.email,
+      answer: req.body.answer,
+    });
+    expect(userModel.findByIdAndUpdate).toHaveBeenCalledWith(
+      NON_ADMIN_USER._id,
+      { password: "hashedPassword" }
+    );
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.send).toHaveBeenCalledWith(
+      expect.objectContaining({
+        success: true,
+        message: expect.any(String),
       })
     );
   });
