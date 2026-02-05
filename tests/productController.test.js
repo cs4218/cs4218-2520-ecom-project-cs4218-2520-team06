@@ -33,12 +33,16 @@ jest.mock("braintree", () => ({
   },
 }));
 
-beforeEach(() => {
-  jest.clearAllMocks();
-});
-
 // Create Product Tests
 describe("createProductController", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+  
   const testProduct = Object.freeze({
     name: "Phone",
     description: "test phone",
@@ -50,7 +54,7 @@ describe("createProductController", () => {
     quantity: 10,
   });
 
-  test("returns error when name is missing", async () => {
+  it("returns error when name is missing", async () => {
     const req = { fields: { ...testProduct }, files: {} };
     const res = makeRes();
     delete req.fields.name;
@@ -63,7 +67,7 @@ describe("createProductController", () => {
     });
   });
 
-  test("returns error when description is missing", async () => {
+  it("returns error when description is missing", async () => {
     const req = { fields: { ...testProduct }, files: {} };
     const res = makeRes();
     delete req.fields.description;
@@ -76,7 +80,7 @@ describe("createProductController", () => {
     });
   });
 
-  test("returns error when price is missing", async () => {
+  it("returns error when price is missing", async () => {
     const req = { fields: { ...testProduct }, files: {} };
     const res = makeRes();
     delete req.fields.price;
@@ -89,7 +93,7 @@ describe("createProductController", () => {
     });
   });
 
-  test("returns error when category is missing", async () => {
+  it("returns error when category is missing", async () => {
     const req = { fields: { ...testProduct }, files: {} };
     const res = makeRes();
     delete req.fields.category;
@@ -102,7 +106,7 @@ describe("createProductController", () => {
     });
   });
 
-  test("returns error when quantity is missing", async () => {
+  it("returns error when quantity is missing", async () => {
     const req = { fields: { ...testProduct }, files: {} };
     const res = makeRes();
     delete req.fields.quantity;
@@ -115,7 +119,7 @@ describe("createProductController", () => {
     });
   });
 
-  test("returns error when photo is given but size is too big", async () => {
+  it("returns error when photo is given but size is too big", async () => {
     const req = {
       fields: { ...testProduct },
       files: { photo: { size: 99999999 } },
@@ -130,7 +134,7 @@ describe("createProductController", () => {
     });
   });
 
-  test("returns 201 when product is created successfully", async () => {
+  it("returns 201 when product is created successfully", async () => {
     const req = { fields: { ...testProduct }, files: {} };
     const res = makeRes();
     slugify.mockReturnValueOnce("phone");
@@ -152,7 +156,7 @@ describe("createProductController", () => {
     });
   });
 
-  test("updates product photo info when valid photo is given", async () => {
+  it("updates product photo info when valid photo is given", async () => {
     const req = {
       fields: { ...testProduct },
       files: {
@@ -177,7 +181,7 @@ describe("createProductController", () => {
     expect(productModel.prototype.save).toHaveBeenCalledTimes(1);
   });
 
-  test("does not update product photo info when no photo is given", async () => {
+  it("does not update product photo info when no photo is given", async () => {
     const req = { fields: { ...testProduct }, files: {} };
     const res = makeRes();
     slugify.mockReturnValueOnce("phone");
@@ -191,7 +195,7 @@ describe("createProductController", () => {
     expect(productModel.prototype.save).toHaveBeenCalledTimes(1);
   });
 
-  test("returns 500 when error is thrown", async () => {
+  it("returns 500 when error is thrown", async () => {
     const req = { fields: { ...testProduct }, files: {} };
     const res = makeRes();
     const err = new Error("DB failure");
@@ -212,6 +216,14 @@ describe("createProductController", () => {
 
 // Update Product Test
 describe("updateProductController", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+  
   const testProduct = Object.freeze({
     name: "Phone",
     description: "test phone",
@@ -223,7 +235,7 @@ describe("updateProductController", () => {
     quantity: 10,
   });
 
-  test("returns error when name is missing", async () => {
+  it("returns error when name is missing", async () => {
     const req = { fields: { ...testProduct }, files: {} };
     const res = makeRes();
     delete req.fields.name;
@@ -236,7 +248,7 @@ describe("updateProductController", () => {
     });
   });
 
-  test("returns error when description is missing", async () => {
+  it("returns error when description is missing", async () => {
     const req = { fields: { ...testProduct }, files: {} };
     const res = makeRes();
     delete req.fields.description;
@@ -249,7 +261,7 @@ describe("updateProductController", () => {
     });
   });
 
-  test("returns error when price is missing", async () => {
+  it("returns error when price is missing", async () => {
     const req = { fields: { ...testProduct }, files: {} };
     const res = makeRes();
     delete req.fields.price;
@@ -262,7 +274,7 @@ describe("updateProductController", () => {
     });
   });
 
-  test("returns error when category is missing", async () => {
+  it("returns error when category is missing", async () => {
     const req = { fields: { ...testProduct }, files: {} };
     const res = makeRes();
     delete req.fields.category;
@@ -275,7 +287,7 @@ describe("updateProductController", () => {
     });
   });
 
-  test("returns error when quantity is missing", async () => {
+  it("returns error when quantity is missing", async () => {
     const req = { fields: { ...testProduct }, files: {} };
     const res = makeRes();
     delete req.fields.quantity;
@@ -288,7 +300,7 @@ describe("updateProductController", () => {
     });
   });
 
-  test("returns error when photo is given but size is too big", async () => {
+  it("returns error when photo is given but size is too big", async () => {
     const req = {
       fields: { ...testProduct },
       files: { photo: { size: 99999999 } },
@@ -303,7 +315,7 @@ describe("updateProductController", () => {
     });
   });
 
-  test("returns 201 when product is updated successfully", async () => {
+  it("returns 201 when product is updated successfully", async () => {
     const req = {
       params: { pid: "testPid" },
       fields: { ...testProduct },
@@ -316,7 +328,7 @@ describe("updateProductController", () => {
       save: jest.fn().mockResolvedValue(true),
     };
     slugify.mockReturnValueOnce("phone");
-    productModel.findByIdAndUpdate.mockReturnValueOnce(updated);
+    productModel.findByIdAndUpdate.mockResolvedValueOnce(updated);
 
     await updateProductController(req, res);
 
@@ -338,7 +350,7 @@ describe("updateProductController", () => {
     });
   });
 
-  test("updates product photo info when valid photo is given", async () => {
+  it("updates product photo info when valid photo is given", async () => {
     const req = {
       params: { pid: "testPid" },
       fields: { ...testProduct },
@@ -359,7 +371,7 @@ describe("updateProductController", () => {
       save: jest.fn().mockResolvedValue(true),
     };
 
-    productModel.findByIdAndUpdate.mockReturnValueOnce(updated);
+    productModel.findByIdAndUpdate.mockResolvedValueOnce(updated);
     slugify.mockReturnValueOnce("phone");
     fs.readFileSync.mockReturnValueOnce(Buffer.from("fake-bytes"));
 
@@ -371,7 +383,7 @@ describe("updateProductController", () => {
     expect(updated.save).toHaveBeenCalledTimes(1);
   });
 
-  test("does not update product photo info when no photo is given", async () => {
+  it("does not update product photo info when no photo is given", async () => {
     const req = {
       params: { pid: "testPid" },
       fields: { ...testProduct },
@@ -385,7 +397,7 @@ describe("updateProductController", () => {
       save: jest.fn().mockResolvedValue(true),
     };
 
-    productModel.findByIdAndUpdate.mockReturnValueOnce(updated);
+    productModel.findByIdAndUpdate.mockResolvedValueOnce(updated);
     slugify.mockReturnValueOnce("phone");
 
     await updateProductController(req, res);
@@ -396,7 +408,7 @@ describe("updateProductController", () => {
     expect(updated.save).toHaveBeenCalledTimes(1);
   });
 
-  test("returns 500 when error is thrown", async () => {
+  it("returns 500 when error is thrown", async () => {
     const req = {
       params: { pid: "testPid" },
       fields: { ...testProduct },
@@ -421,10 +433,18 @@ describe("updateProductController", () => {
 
 // Delete Product Test
 describe("deleteProductController", () => {
-  test("returns 200 when product is successfully deleted", async () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+  
+  it("returns 200 when product is successfully deleted", async () => {
     const req = { params: { pid: "testPid" } };
     const res = makeRes();
-    const selectMock = jest.fn().mockReturnValueOnce({ _id: "testPid" });
+    const selectMock = jest.fn().mockResolvedValueOnce({ _id: "testPid" });
     productModel.findByIdAndDelete.mockReturnValueOnce({ select: selectMock });
 
     await deleteProductController(req, res);
@@ -438,13 +458,12 @@ describe("deleteProductController", () => {
     });
   });
 
-  test("returns 500 when error is thrown", async () => {
+  it("returns 500 when error is thrown", async () => {
     const req = { params: { pid: "testPid" } };
     const res = makeRes();
     const err = new Error("DB failure");
-    productModel.findByIdAndDelete.mockImplementation(() => {
-      throw err;
-    });
+    const selectMock = jest.fn().mockRejectedValueOnce(err);
+    productModel.findByIdAndDelete.mockReturnValueOnce({ select: selectMock });
     const consoleSpy = jest.spyOn(console, "log").mockImplementation(() => {});
 
     await deleteProductController(req, res);

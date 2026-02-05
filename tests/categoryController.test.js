@@ -13,13 +13,17 @@ import slugify from "slugify";
 jest.mock("../models/categoryModel.js");
 jest.mock("slugify", () => jest.fn());
 
-beforeEach(() => {
-  jest.clearAllMocks();
-});
-
 // Create Category Tests
 describe("createCategoryController", () => {
-  test("returns 401 if name is missing", async () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+  
+  it("returns 401 if name is missing", async () => {
     const req = { body: {} };
     const res = makeRes();
 
@@ -27,11 +31,12 @@ describe("createCategoryController", () => {
 
     expect(res.status).toHaveBeenCalledWith(401);
     expect(res.send).toHaveBeenCalledWith({ message: "Name is required" });
+    expect(slugify).not.toHaveBeenCalled();
     expect(categoryModel.findOne).not.toHaveBeenCalled();
     expect(categoryModel.prototype.save).not.toHaveBeenCalled();
   });
 
-  test("returns 200 if category already exists", async () => {
+  it("returns 200 if category already exists", async () => {
     const req = { body: { name: "Electronics" } };
     const res = makeRes();
     categoryModel.findOne.mockResolvedValueOnce({
@@ -50,7 +55,7 @@ describe("createCategoryController", () => {
     expect(categoryModel.prototype.save).not.toHaveBeenCalled();
   });
 
-  test("returns 201 when new category is successfully created", async () => {
+  it("returns 201 when new category is successfully created", async () => {
     const req = { body: { name: "Electronics" } };
     const res = makeRes();
     categoryModel.findOne.mockResolvedValueOnce(null);
@@ -70,7 +75,7 @@ describe("createCategoryController", () => {
     });
   });
 
-  test("returns 500 when error is thrown", async () => {
+  it("returns 500 when error is thrown", async () => {
     const req = { body: { name: "Electronics" } };
     const res = makeRes();
     const err = new Error("DB failure");
@@ -91,7 +96,15 @@ describe("createCategoryController", () => {
 
 // Update Category Tests
 describe("updateCategoryController", () => {
-  test("returns 200 when category is updated successfully", async () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+  
+  it("returns 200 when category is updated successfully", async () => {
     const req = {
       body: { name: "Electronics" },
       params: { id: "testId" },
@@ -123,7 +136,7 @@ describe("updateCategoryController", () => {
     });
   });
 
-  test("returns 500 when error is thrown", async () => {
+  it("returns 500 when error is thrown", async () => {
     const req = {
       body: { name: "Electronics" },
       params: { id: "testId" },
@@ -147,7 +160,15 @@ describe("updateCategoryController", () => {
 
 // Get All Categories Tests
 describe("categoryController", () => {
-  test("returns 200 when all categories retrieved successfully", async () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it("returns 200 when all categories retrieved successfully", async () => {
     let req;
     const res = makeRes();
     categoryModel.find.mockResolvedValueOnce({});
@@ -163,7 +184,7 @@ describe("categoryController", () => {
     });
   });
 
-  test("returns 500 when error is thrown", async () => {
+  it("returns 500 when error is thrown", async () => {
     let req;
     const res = makeRes();
     const err = new Error("DB failure");
@@ -184,10 +205,18 @@ describe("categoryController", () => {
 
 // Single Category Test
 describe("singleCategoryController", () => {
-  test("returns 200 when the specified category is retrieved successfully", async () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+  
+  it("returns 200 when the specified category is retrieved successfully", async () => {
     const req = { params: { slug: "book" } };
     const res = makeRes();
-    categoryModel.findOne.mockReturnValueOnce({ name: "Book", slug: "book" });
+    categoryModel.findOne.mockResolvedValueOnce({ name: "Book", slug: "book" });
 
     await singleCategoryController(req, res);
 
@@ -200,7 +229,7 @@ describe("singleCategoryController", () => {
     });
   });
 
-  test("returns 500 when error is thrown", async () => {
+  it("returns 500 when error is thrown", async () => {
     const req = { params: { slug: "book" } };
     const res = makeRes();
     const err = new Error("DB failure");
@@ -221,7 +250,15 @@ describe("singleCategoryController", () => {
 
 // Delete Category Test
 describe("deleteCategoryController", () => {
-  test("returns 200 when category successfully deleted", async () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+  
+  it("returns 200 when category successfully deleted", async () => {
     const req = { params: { id: "test" } };
     const res = makeRes();
 
@@ -235,7 +272,7 @@ describe("deleteCategoryController", () => {
     });
   });
 
-  test("returns 500 when error is thrown", async () => {
+  it("returns 500 when error is thrown", async () => {
     const req = { params: { id: "test" } };
     const res = makeRes();
     const err = new Error("DB failure");
