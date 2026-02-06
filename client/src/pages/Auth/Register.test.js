@@ -27,7 +27,12 @@ jest.mock("../../context/search", () => ({
   useSearch: jest.fn(() => [{ keyword: "" }, jest.fn()]), // Mock useSearch hook to return null state and a mock function
 }));
 
-jest.mock("../../hooks/useCategory", () => jest.fn(() => []));
+jest.mock("../../components/Layout", () => {
+  return {
+    __esModule: true,
+    default: ({ children }) => children,
+  };
+});
 
 Object.defineProperty(window, "localStorage", {
   value: {
@@ -102,7 +107,9 @@ describe("Register Component", () => {
   });
 
   it("should display error message on failed registration", async () => {
-    axios.post.mockRejectedValueOnce({ message: "Error in registration" });
+    const errorPayload = { message: "Error in registration" };
+    axios.post.mockRejectedValueOnce(errorPayload);
+    const consoleLogSpy = jest.spyOn(console, "log").mockImplementation();
 
     const { getByText, getByPlaceholderText } = render(
       <MemoryRouter initialEntries={["/register"]}>
@@ -137,6 +144,7 @@ describe("Register Component", () => {
     fireEvent.click(getByText("REGISTER"));
 
     await waitFor(() => expect(axios.post).toHaveBeenCalled());
+    expect(consoleLogSpy).toHaveBeenCalledWith(errorPayload);
     expect(toast.error).toHaveBeenCalledWith("Something went wrong");
     expect(navigate).not.toHaveBeenCalled();
   });

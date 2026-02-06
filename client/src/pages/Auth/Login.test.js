@@ -29,7 +29,12 @@ jest.mock("../../context/search", () => ({
   useSearch: jest.fn(() => [{ keyword: "" }, jest.fn()]), // Mock useSearch hook to return null state and a mock function
 }));
 
-jest.mock("../../hooks/useCategory", () => jest.fn(() => []));
+jest.mock("../../components/Layout", () => {
+  return {
+    __esModule: true,
+    default: ({ children }) => children,
+  };
+});
 
 Object.defineProperty(window, "localStorage", {
   value: {
@@ -163,7 +168,9 @@ describe("Login Component", () => {
   });
 
   it("should display error message on failed login", async () => {
-    axios.post.mockRejectedValueOnce({ message: "Invalid credentials" });
+    const errorPayload = { message: "Invalid credentials" };
+    axios.post.mockRejectedValueOnce(errorPayload);
+    const consoleLogSpy = jest.spyOn(console, "log").mockImplementation();
 
     const { getByPlaceholderText, getByText } = render(
       <MemoryRouter initialEntries={["/login"]}>
@@ -182,6 +189,7 @@ describe("Login Component", () => {
     fireEvent.click(getByText("LOGIN"));
 
     await waitFor(() => expect(axios.post).toHaveBeenCalled());
+    expect(consoleLogSpy).toHaveBeenCalledWith(errorPayload);
     expect(toast.error).toHaveBeenCalledWith("Something went wrong");
     expect(mockSetAuth).not.toHaveBeenCalled();
     expect(window.localStorage.setItem).not.toHaveBeenCalled();
