@@ -118,9 +118,11 @@ describe("registerController", () => {
 
   test("malformed request is handled correctly", async () => {
     req = {};
+    const consoleSpy = jest.spyOn(console, "log").mockImplementation();
 
     await registerController(req, res);
 
+    expect(consoleSpy).toHaveBeenCalled();
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.send).toHaveBeenCalledWith(
       expect.objectContaining({
