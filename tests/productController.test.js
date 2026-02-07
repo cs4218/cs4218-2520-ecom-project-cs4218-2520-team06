@@ -517,8 +517,7 @@ describe("getProductController", () => {
       populate: jest.fn().mockReturnThis(),
       select: jest.fn().mockReturnThis(),
       limit: jest.fn().mockReturnThis(),
-      sort: jest.fn().mockReturnThis(),
-      exec: jest.fn().mockResolvedValueOnce(dummyProducts),
+      sort: jest.fn().mockResolvedValueOnce(dummyProducts),
     });
 
     // Act
@@ -547,8 +546,7 @@ describe("getProductController", () => {
       populate: jest.fn().mockReturnThis(),
       select: jest.fn().mockReturnThis(),
       limit: jest.fn().mockReturnThis(),
-      sort: jest.fn().mockReturnThis(),
-      exec: jest.fn().mockRejectedValueOnce(err),
+      sort: jest.fn().mockRejectedValueOnce(err),
     });
 
     // Act
@@ -594,8 +592,7 @@ describe("getSingleProductController", () => {
 
     productModel.findOne.mockReturnValueOnce({
       select: jest.fn().mockReturnThis(),
-      populate: jest.fn().mockReturnThis(),
-      exec: jest.fn().mockResolvedValueOnce(product),
+      populate: jest.fn().mockResolvedValueOnce(product),
     });
 
     // Act
@@ -623,8 +620,7 @@ describe("getSingleProductController", () => {
     const err = new Error("get single product error");
     productModel.findOne.mockReturnValueOnce({
       select: jest.fn().mockReturnThis(),
-      populate: jest.fn().mockReturnThis(),
-      exec: jest.fn().mockRejectedValueOnce(err),
+      populate: jest.fn().mockRejectedValueOnce(err),
     });
 
     // Act
@@ -666,8 +662,7 @@ describe("productPhotoController", () => {
     };
 
     productModel.findById.mockReturnValueOnce({
-      select: jest.fn().mockReturnThis(),
-      exec: jest.fn().mockResolvedValueOnce(product),
+      select: jest.fn().mockResolvedValueOnce(product),
     });
 
     // Act
@@ -694,8 +689,7 @@ describe("productPhotoController", () => {
     };
 
     productModel.findById.mockReturnValueOnce({
-      select: jest.fn().mockReturnThis(),
-      exec: jest.fn().mockResolvedValueOnce(product),
+      select: jest.fn().mockResolvedValueOnce(product),
     });
 
     // Act
@@ -723,8 +717,7 @@ describe("productPhotoController", () => {
     };
 
     productModel.findById.mockReturnValueOnce({
-      select: jest.fn().mockReturnThis(),
-      exec: jest.fn().mockResolvedValueOnce(null),
+      select: jest.fn().mockResolvedValueOnce(null),
     });
 
     // Act
@@ -750,8 +743,7 @@ describe("productPhotoController", () => {
     const product = {};
 
     productModel.findById.mockReturnValueOnce({
-      select: jest.fn().mockReturnThis(),
-      exec: jest.fn().mockResolvedValueOnce(product),
+      select: jest.fn().mockResolvedValueOnce(product),
     });
 
     // Act
@@ -782,8 +774,7 @@ describe("productPhotoController", () => {
     };
 
     productModel.findById.mockReturnValueOnce({
-      select: jest.fn().mockReturnThis(),
-      exec: jest.fn().mockResolvedValueOnce(product),
+      select: jest.fn().mockResolvedValueOnce(product),
     });
 
     // Act
@@ -810,8 +801,7 @@ describe("productPhotoController", () => {
 
     const err = new Error("get product photo error");
     productModel.findById.mockReturnValueOnce({
-      select: jest.fn().mockReturnThis(),
-      exec: jest.fn().mockRejectedValueOnce(err),
+      select: jest.fn().mockRejectedValueOnce(err),
     });
 
     // Act
@@ -849,11 +839,11 @@ describe("productFiltersController", () => {
     };
     const res = makeRes();
 
-    const products = [{
+    const dummyProducts = [{
       _id: "1",
     }];
 
-    productModel.find.mockReturnValueOnce(products);
+    productModel.find.mockReturnValueOnce(dummyProducts);
 
     // Act
     await productFiltersController(req, res);
@@ -871,7 +861,7 @@ describe("productFiltersController", () => {
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.send).toHaveBeenCalledWith({
       success: true,
-      products: products,
+      products: dummyProducts,
     });
   });
 
@@ -880,11 +870,11 @@ describe("productFiltersController", () => {
     const req = { body: { checked: [], radio: [] } };
     const res = makeRes();
 
-    const products = [{
+    const dummyProducts = [{
       _id: "1",
     }];
 
-    productModel.find.mockReturnValueOnce(products);
+    productModel.find.mockReturnValueOnce(dummyProducts);
 
     // Act
     await productFiltersController(req, res);
@@ -896,7 +886,7 @@ describe("productFiltersController", () => {
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.send).toHaveBeenCalledWith({
       success: true,
-      products: products,
+      products: dummyProducts,
     });
   });
 
@@ -980,6 +970,116 @@ describe("productCountController", () => {
     expect(res.send).toHaveBeenCalledWith({
       success: false,
       message: "Error in product count",
+      error: err,
+    });
+  });
+});
+
+describe("productListController", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it("returns 200 when product list is successfully returned using a specified page value", async () => {
+    // Arrange
+    const req = { params: { page: 2 }};
+    const res = makeRes();
+
+    const dummyProducts = [
+      {
+        _id: "1",
+      },
+      {
+        _id: "2",
+      }
+    ];
+
+    productModel.find.mockReturnValueOnce({
+      select: jest.fn().mockReturnThis(),
+      skip: jest.fn().mockReturnThis(),
+      limit: jest.fn().mockReturnThis(),
+      sort: jest.fn().mockReturnValueOnce(dummyProducts),
+    });
+
+    // Act
+    await productListController(req, res);
+    
+    // Assert
+    expect(productModel.find).toHaveBeenCalledWith({});
+
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.send).toHaveBeenCalledWith({
+      success: true,
+      products: dummyProducts,
+    });
+  });
+
+  it("returns 200 when product list is successfully returned without a specified page value", async () => {
+    // Arrange
+    const req = { params: {}};
+    const res = makeRes();
+
+    const dummyProducts = [
+      {
+        _id: "1",
+      },
+      {
+        _id: "2",
+      }
+    ];
+
+    productModel.find.mockReturnValueOnce({
+      select: jest.fn().mockReturnThis(),
+      skip: jest.fn().mockReturnThis(),
+      limit: jest.fn().mockReturnThis(),
+      sort: jest.fn().mockReturnValueOnce(dummyProducts),
+    });
+
+    // Act
+    await productListController(req, res);
+    
+    // Assert
+    expect(productModel.find).toHaveBeenCalledWith({});
+
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.send).toHaveBeenCalledWith({
+      success: true,
+      products: dummyProducts,
+    });
+  });
+
+  it("returns 400 when error is thrown", async () => {
+    // Arrange
+    const req = { params: { page: 2 }};
+    const res = makeRes();
+
+    const consoleSpy = jest.spyOn(global.console, "log").mockImplementation(() => {});
+
+    const err = new Error("list product error");
+    productModel.find.mockReturnValueOnce({
+      select: jest.fn().mockReturnThis(),
+      skip: jest.fn().mockReturnThis(),
+      limit: jest.fn().mockReturnThis(),
+      sort: jest.fn().mockRejectedValueOnce(err),
+    });
+
+    // Act
+    await productListController(req, res);
+    
+    // Assert
+    expect(productModel.find).toHaveBeenCalledWith({});
+
+    expect(consoleSpy).toHaveBeenCalledTimes(1);
+    expect(consoleSpy).toHaveBeenCalledWith(err);
+
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.send).toHaveBeenCalledWith({
+      success: false,
+      message: "Error in per page control",
       error: err,
     });
   });

@@ -69,8 +69,7 @@ export const getProductController = async (req, res) => {
       .populate("category")
       .select("-photo")
       .limit(12)
-      .sort({ createdAt: -1 })
-      .exec();
+      .sort({ createdAt: -1 });
     res.status(200).send({
       success: true,
       countTotal: products.length,
@@ -92,8 +91,7 @@ export const getSingleProductController = async (req, res) => {
     const product = await productModel
       .findOne({ slug: req.params.slug })
       .select("-photo")
-      .populate("category")
-      .exec();
+      .populate("category");
     res.status(200).send({
       success: true,
       message: "Single Product Fetched",
@@ -114,8 +112,7 @@ export const productPhotoController = async (req, res) => {
   try {
     const product = await productModel
       .findById(req.params.pid)
-      .select("photo")
-      .exec();
+      .select("photo");
 
     if (!product || !product.photo || !product.photo.data) {
       return res.status(404).send({
@@ -265,7 +262,7 @@ export const productListController = async (req, res) => {
     console.log(error);
     res.status(400).send({
       success: false,
-      message: "error in per page ctrl",
+      message: "Error in per page control",
       error,
     });
   }
