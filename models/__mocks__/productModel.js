@@ -4,9 +4,11 @@ const productModel = jest.fn(function (doc = {}) {
 });
 
 productModel.find = jest.fn();
-productModel.findOne = jest.fn();
+productModel.findById = jest.fn();
 productModel.findByIdAndUpdate = jest.fn();
 productModel.findByIdAndDelete = jest.fn();
+productModel.findOne = jest.fn();
+
 productModel.prototype.save = jest.fn(function () {
   return Promise.resolve(this);
 });

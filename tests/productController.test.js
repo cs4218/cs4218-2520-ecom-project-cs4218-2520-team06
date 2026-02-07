@@ -642,3 +642,162 @@ describe("getSingleProductController", () => {
     });
   });
 });
+
+// Get photo tests
+describe("productPhotoController", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it("returns 200 when the photo is successfully retrieved", async () => {
+    // Arrange
+    const req = { params: { pid: "testPid" } };
+    const res = makeRes();
+
+    const product = {
+      photo: {
+        data: Buffer.from('testBuffer'),
+        contentType: "testContentType",
+      }
+    };
+
+    productModel.findById.mockReturnValueOnce({
+      select: jest.fn().mockReturnThis(),
+      exec: jest.fn().mockResolvedValueOnce(product),
+    });
+
+    // Act
+    await productPhotoController(req, res)
+
+    // Assert
+    expect(productModel.findById).toHaveBeenCalledTimes(1);
+    expect(productModel.findById).toHaveBeenCalledWith(req.params.pid);
+
+    expect(res.set).toHaveBeenCalledWith("Content-Type", product.photo.contentType);
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.send).toHaveBeenCalledWith(product.photo.data)
+  });
+
+  it("returns 404 when the product cannot be found", async () => {
+    // Arrange
+    const req = { params: { pid: "testPid" } };
+    const res = makeRes();
+
+    const product = {
+      photo: {
+        data: Buffer.from('testBuffer'),
+        contentType: "testContentType",
+      }
+    };
+
+    productModel.findById.mockReturnValueOnce({
+      select: jest.fn().mockReturnThis(),
+      exec: jest.fn().mockResolvedValueOnce(null),
+    });
+
+    // Act
+    await productPhotoController(req, res)
+
+    // Assert
+    expect(productModel.findById).toHaveBeenCalledTimes(1);
+    expect(productModel.findById).toHaveBeenCalledWith(req.params.pid);
+
+    expect(res.set).not.toHaveBeenCalled();
+    expect(res.status).toHaveBeenCalledWith(404);
+    expect(res.send).toHaveBeenCalledWith({
+        success: false,
+        message: "Photo not found for this product",
+      })
+  });
+
+  it("returns 404 when the product's photo does not exist", async () => {
+    // Arrange
+    const req = { params: { pid: "testPid" } };
+    const res = makeRes();
+
+    const product = {};
+
+    productModel.findById.mockReturnValueOnce({
+      select: jest.fn().mockReturnThis(),
+      exec: jest.fn().mockResolvedValueOnce(product),
+    });
+
+    // Act
+    await productPhotoController(req, res)
+
+    // Assert
+    expect(productModel.findById).toHaveBeenCalledTimes(1);
+    expect(productModel.findById).toHaveBeenCalledWith(req.params.pid);
+
+    expect(res.set).not.toHaveBeenCalled();
+    expect(res.status).toHaveBeenCalledWith(404);
+    expect(res.send).toHaveBeenCalledWith({
+        success: false,
+        message: "Photo not found for this product",
+      })
+  });
+
+  it("returns 404 when the product's photo does not contain data", async () => {
+    // Arrange
+    const req = { params: { pid: "testPid" } };
+    const res = makeRes();
+
+    const product = {
+      photo: {
+        data: null,
+        contentType: "testContentType",
+      }
+    };
+
+    productModel.findById.mockReturnValueOnce({
+      select: jest.fn().mockReturnThis(),
+      exec: jest.fn().mockResolvedValueOnce(product),
+    });
+
+    // Act
+    await productPhotoController(req, res)
+
+    // Assert
+    expect(productModel.findById).toHaveBeenCalledTimes(1);
+    expect(productModel.findById).toHaveBeenCalledWith(req.params.pid);
+
+    expect(res.set).not.toHaveBeenCalled();
+    expect(res.status).toHaveBeenCalledWith(404);
+    expect(res.send).toHaveBeenCalledWith({
+        success: false,
+        message: "Photo not found for this product",
+      })
+  });
+
+  it("returns 500 when error is thrown", async () => {
+    // Arrange
+    const req = { params: { pid: "testPid" } };
+    const res = makeRes();
+
+    const consoleSpy = jest.spyOn(global.console, "log").mockImplementation(() => {});
+
+    const err = new Error("get product photo error");
+    productModel.findById.mockReturnValueOnce({
+      select: jest.fn().mockReturnThis(),
+      exec: jest.fn().mockRejectedValueOnce(err),
+    });
+
+    // Act
+    await productPhotoController(req, res);
+
+    // Assert
+    expect(consoleSpy).toHaveBeenCalledTimes(1);
+    expect(consoleSpy).toHaveBeenCalledWith(err)
+
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.send).toHaveBeenCalledWith({
+      success: false,
+      message: "Error while getting photo",
+      error: err,
+    });
+  });
+});
