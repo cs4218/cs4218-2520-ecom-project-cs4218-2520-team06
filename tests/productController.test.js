@@ -522,7 +522,7 @@ describe("getProductController", () => {
     });
 
     // Act
-    await getProductController(null, res)
+    await getProductController(null, res);
 
     // Assert
     expect(productModel.find).toHaveBeenCalledTimes(1);
@@ -534,7 +534,7 @@ describe("getProductController", () => {
       countTotal: dummyProducts.length,
       message: "All Products Fetched",
       products: dummyProducts
-    })
+    });
   });
 
   it("returns 500 when error is thrown", async () => {
@@ -556,7 +556,7 @@ describe("getProductController", () => {
 
     // Assert
     expect(consoleSpy).toHaveBeenCalledTimes(1);
-    expect(consoleSpy).toHaveBeenCalledWith(err)
+    expect(consoleSpy).toHaveBeenCalledWith(err);
 
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.send).toHaveBeenCalledWith({
@@ -599,7 +599,7 @@ describe("getSingleProductController", () => {
     });
 
     // Act
-    await getSingleProductController(req, res)
+    await getSingleProductController(req, res);
 
     // Assert
     expect(productModel.findOne).toHaveBeenCalledTimes(1);
@@ -610,7 +610,7 @@ describe("getSingleProductController", () => {
       success: true,
       message: "Single Product Fetched",
       product: product
-    })
+    });
   });
 
   it("returns 500 when error is thrown", async () => {
@@ -632,7 +632,7 @@ describe("getSingleProductController", () => {
 
     // Assert
     expect(consoleSpy).toHaveBeenCalledTimes(1);
-    expect(consoleSpy).toHaveBeenCalledWith(err)
+    expect(consoleSpy).toHaveBeenCalledWith(err);
 
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.send).toHaveBeenCalledWith({
@@ -671,7 +671,7 @@ describe("productPhotoController", () => {
     });
 
     // Act
-    await productPhotoController(req, res)
+    await productPhotoController(req, res);
 
     // Assert
     expect(productModel.findById).toHaveBeenCalledTimes(1);
@@ -679,7 +679,7 @@ describe("productPhotoController", () => {
 
     expect(res.set).toHaveBeenCalledWith("Content-Type", product.photo.contentType);
     expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.send).toHaveBeenCalledWith(product.photo.data)
+    expect(res.send).toHaveBeenCalledWith(product.photo.data);
   });
 
   it("returns 200 with the default mime type if the photo is missing a mime type", async () => {
@@ -699,7 +699,7 @@ describe("productPhotoController", () => {
     });
 
     // Act
-    await productPhotoController(req, res)
+    await productPhotoController(req, res);
 
     // Assert
     expect(productModel.findById).toHaveBeenCalledTimes(1);
@@ -707,7 +707,7 @@ describe("productPhotoController", () => {
 
     expect(res.set).toHaveBeenCalledWith("Content-Type", "application/octet-stream");
     expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.send).toHaveBeenCalledWith(product.photo.data)
+    expect(res.send).toHaveBeenCalledWith(product.photo.data);
   });
 
   it("returns 404 when the product cannot be found", async () => {
@@ -728,7 +728,7 @@ describe("productPhotoController", () => {
     });
 
     // Act
-    await productPhotoController(req, res)
+    await productPhotoController(req, res);
 
     // Assert
     expect(productModel.findById).toHaveBeenCalledTimes(1);
@@ -737,9 +737,9 @@ describe("productPhotoController", () => {
     expect(res.set).not.toHaveBeenCalled();
     expect(res.status).toHaveBeenCalledWith(404);
     expect(res.send).toHaveBeenCalledWith({
-        success: false,
-        message: "Photo not found for this product",
-      })
+      success: false,
+      message: "Photo not found for this product",
+    });
   });
 
   it("returns 404 when the product's photo does not exist", async () => {
@@ -755,7 +755,7 @@ describe("productPhotoController", () => {
     });
 
     // Act
-    await productPhotoController(req, res)
+    await productPhotoController(req, res);
 
     // Assert
     expect(productModel.findById).toHaveBeenCalledTimes(1);
@@ -764,9 +764,9 @@ describe("productPhotoController", () => {
     expect(res.set).not.toHaveBeenCalled();
     expect(res.status).toHaveBeenCalledWith(404);
     expect(res.send).toHaveBeenCalledWith({
-        success: false,
-        message: "Photo not found for this product",
-      })
+      success: false,
+      message: "Photo not found for this product",
+    });
   });
 
   it("returns 404 when the product's photo does not contain data", async () => {
@@ -787,7 +787,7 @@ describe("productPhotoController", () => {
     });
 
     // Act
-    await productPhotoController(req, res)
+    await productPhotoController(req, res);
 
     // Assert
     expect(productModel.findById).toHaveBeenCalledTimes(1);
@@ -796,9 +796,9 @@ describe("productPhotoController", () => {
     expect(res.set).not.toHaveBeenCalled();
     expect(res.status).toHaveBeenCalledWith(404);
     expect(res.send).toHaveBeenCalledWith({
-        success: false,
-        message: "Photo not found for this product",
-      })
+      success: false,
+      message: "Photo not found for this product",
+    });
   });
 
   it("returns 500 when error is thrown", async () => {
@@ -819,7 +819,7 @@ describe("productPhotoController", () => {
 
     // Assert
     expect(consoleSpy).toHaveBeenCalledTimes(1);
-    expect(consoleSpy).toHaveBeenCalledWith(err)
+    expect(consoleSpy).toHaveBeenCalledWith(err);
 
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.send).toHaveBeenCalledWith({
@@ -856,7 +856,7 @@ describe("productFiltersController", () => {
     productModel.find.mockReturnValueOnce(products);
 
     // Act
-    await productFiltersController(req, res)
+    await productFiltersController(req, res);
 
     // Assert
     expect(productModel.find).toHaveBeenCalled();
@@ -887,7 +887,7 @@ describe("productFiltersController", () => {
     productModel.find.mockReturnValueOnce(products);
 
     // Act
-    await productFiltersController(req, res)
+    await productFiltersController(req, res);
     
     // Assert
     expect(productModel.find).toHaveBeenCalled();
@@ -897,7 +897,7 @@ describe("productFiltersController", () => {
     expect(res.send).toHaveBeenCalledWith({
       success: true,
       products: products,
-    })
+    });
   });
 
   it("returns 400 when error is thrown", async () => {
@@ -911,7 +911,7 @@ describe("productFiltersController", () => {
     productModel.find.mockRejectedValueOnce(err);
 
     // Act
-    await productFiltersController(req, res)
+    await productFiltersController(req, res);
     
     // Assert
     expect(consoleSpy).toHaveBeenCalledTimes(1);
@@ -922,6 +922,65 @@ describe("productFiltersController", () => {
       success: false,
       message: "Error While Filtering Products",
       error: err,
-    })
+    });
+  });
+});
+
+describe("productCountController", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it("returns 200 when count is successfully returned", async () => {
+    // Arrange
+    const res = makeRes();
+
+    const total = 10;
+
+    productModel.find.mockReturnValueOnce({
+      estimatedDocumentCount: jest.fn().mockReturnValueOnce(total),
+    });
+
+    // Act
+    await productCountController(null, res);
+    
+    // Assert
+    expect(productModel.find).toHaveBeenCalledWith({});
+
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.send).toHaveBeenCalledWith({
+      success: true,
+      total: total,
+    });
+  });
+
+  it("returns 400 when error is thrown", async () => {
+    // Arrange
+    const res = makeRes();
+
+    const consoleSpy = jest.spyOn(global.console, "log").mockImplementation(() => {});
+
+    const err = new Error("count product error");
+    productModel.find.mockReturnValueOnce({
+      estimatedDocumentCount: jest.fn().mockRejectedValueOnce(err),
+    });
+
+    // Act
+    await productCountController(null, res);
+    
+    // Assert
+    expect(consoleSpy).toHaveBeenCalledTimes(1);
+    expect(consoleSpy).toHaveBeenCalledWith(err);
+
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.send).toHaveBeenCalledWith({
+      success: false,
+      message: "Error in product count",
+      error: err,
+    });
   });
 });
