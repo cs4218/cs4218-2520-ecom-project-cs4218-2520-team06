@@ -566,3 +566,79 @@ describe("getProductController", () => {
     });
   });
 });
+
+// Get single product test
+describe("getSingleProductController", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it("returns 200 when a single product is fetched", async () => {
+    // Arrange
+    const req = { params: { slug: "testSlug" } };
+    const res = makeRes();
+
+    const product = [{
+      _id: "1",
+      name: "Product A",
+      price: 100,
+      category: { _id: "c1", name: "Cat" },
+      quantity: 2,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    }];
+
+    productModel.findOne.mockReturnValueOnce({
+      select: jest.fn().mockReturnThis(),
+      populate: jest.fn().mockReturnThis(),
+      exec: jest.fn().mockResolvedValueOnce(product),
+    });
+
+    // Act
+    await getSingleProductController(req, res)
+
+    // Assert
+    expect(productModel.findOne).toHaveBeenCalledTimes(1);
+    expect(productModel.findOne).toHaveBeenCalledWith({ slug: req.params.slug });
+
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.send).toHaveBeenCalledWith({
+      success: true,
+      message: "Single Product Fetched",
+      product: product
+    })
+  });
+
+  it("returns 500 when error is thrown", async () => {
+    // Arrange
+    const req = { params: { slug: "testSlug" } };
+    const res = makeRes();
+
+    const consoleSpy = jest.spyOn(global.console, "log").mockImplementation(() => {});
+
+    const err = new Error("get single product error");
+    productModel.findOne.mockReturnValueOnce({
+      select: jest.fn().mockReturnThis(),
+      populate: jest.fn().mockReturnThis(),
+      exec: jest.fn().mockRejectedValueOnce(err),
+    });
+
+    // Act
+    await getSingleProductController(req, res);
+
+    // Assert
+    expect(consoleSpy).toHaveBeenCalledTimes(1);
+    expect(consoleSpy).toHaveBeenCalledWith(err)
+
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.send).toHaveBeenCalledWith({
+      success: false,
+      message: "Error while getting single product",
+      error: err,
+    });
+  });
+});
