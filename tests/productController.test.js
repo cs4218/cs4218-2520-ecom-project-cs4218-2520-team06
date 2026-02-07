@@ -477,3 +477,92 @@ describe("deleteProductController", () => {
     });
   });
 });
+
+// Get Product Test
+describe("getProductController", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it("returns 200 when all products are fetched", async () => {
+    // Arrange
+    const res = makeRes();
+
+    const dummyProducts = [
+      {
+        _id: "1",
+        name: "Product A",
+        price: 100,
+        category: { _id: "c1", name: "Cat" },
+        quantity: 2,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      {
+        _id: "2",
+        name: "Product B",
+        price: 200,
+        category: { _id: "c2", name: "Cat2" },
+        quantity: 5,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+    ];
+
+    productModel.find.mockReturnValueOnce({
+      populate: jest.fn().mockReturnThis(),
+      select: jest.fn().mockReturnThis(),
+      limit: jest.fn().mockReturnThis(),
+      sort: jest.fn().mockReturnThis(),
+      exec: jest.fn().mockResolvedValueOnce(dummyProducts),
+    });
+
+    // Act
+    await getProductController(null, res)
+
+    // Assert
+    expect(productModel.find).toHaveBeenCalledTimes(1);
+    expect(productModel.find).toHaveBeenCalledWith({});
+
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.send).toHaveBeenCalledWith({
+      success: true,
+      countTotal: dummyProducts.length,
+      message: "All Products Fetched",
+      products: dummyProducts
+    })
+  });
+
+  it("returns 500 when error is thrown", async () => {
+    // Arrange
+    const res = makeRes();
+    const consoleSpy = jest.spyOn(global.console, "log").mockImplementation(() => {});
+
+    const err = new Error("get product error");
+    productModel.find.mockReturnValueOnce({
+      populate: jest.fn().mockReturnThis(),
+      select: jest.fn().mockReturnThis(),
+      limit: jest.fn().mockReturnThis(),
+      sort: jest.fn().mockReturnThis(),
+      exec: jest.fn().mockRejectedValueOnce(err),
+    });
+
+    // Act
+    await getProductController(null, res);
+
+    // Assert
+    expect(consoleSpy).toHaveBeenCalledTimes(1);
+    expect(consoleSpy).toHaveBeenCalledWith(err)
+
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.send).toHaveBeenCalledWith({
+      success: false,
+      message: "Error in getting products",
+      error: err.message,
+    });
+  });
+});
