@@ -829,3 +829,99 @@ describe("productPhotoController", () => {
     });
   });
 });
+
+describe("productFiltersController", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it("returns 200 when product filtering is successful with valid filter", async () => {
+    // Arrange
+    const req = {
+      body: {
+        checked: ["c1", "c2"],
+        radio: ["r1", "r2"],
+      }
+    };
+    const res = makeRes();
+
+    const products = [{
+      _id: "1",
+    }];
+
+    productModel.find.mockReturnValueOnce(products);
+
+    // Act
+    await productFiltersController(req, res)
+
+    // Assert
+    expect(productModel.find).toHaveBeenCalled();
+    expect(productModel.find).toHaveBeenCalledWith({
+      category: req.body.checked,
+      price: {
+        $gte: "r1",
+        $lte: "r2",
+      }
+    });
+
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.send).toHaveBeenCalledWith({
+      success: true,
+      products: products,
+    });
+  });
+
+  it("returns 200 when product filtering is successful with empty filters", async () => {
+    // Arrange
+    const req = { body: { checked: [], radio: [] } };
+    const res = makeRes();
+
+    const products = [{
+      _id: "1",
+    }];
+
+    productModel.find.mockReturnValueOnce(products);
+
+    // Act
+    await productFiltersController(req, res)
+    
+    // Assert
+    expect(productModel.find).toHaveBeenCalled();
+    expect(productModel.find).toHaveBeenCalledWith({});
+
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.send).toHaveBeenCalledWith({
+      success: true,
+      products: products,
+    })
+  });
+
+  it("returns 400 when error is thrown", async () => {
+    // Arrange
+    const req = { body: { checked: [], radio: [] } };
+    const res = makeRes();
+
+    const consoleSpy = jest.spyOn(global.console, "log").mockImplementation(() => {});
+
+    const err = new Error("filter product error");
+    productModel.find.mockRejectedValueOnce(err);
+
+    // Act
+    await productFiltersController(req, res)
+    
+    // Assert
+    expect(consoleSpy).toHaveBeenCalledTimes(1);
+    expect(consoleSpy).toHaveBeenCalledWith(err);
+
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.send).toHaveBeenCalledWith({
+      success: false,
+      message: "Error While Filtering Products",
+      error: err,
+    })
+  });
+});
