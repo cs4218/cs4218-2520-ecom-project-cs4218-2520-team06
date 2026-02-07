@@ -682,6 +682,34 @@ describe("productPhotoController", () => {
     expect(res.send).toHaveBeenCalledWith(product.photo.data)
   });
 
+  it("returns 200 with the default mime type if the photo is missing a mime type", async () => {
+    // Arrange
+    const req = { params: { pid: "testPid" } };
+    const res = makeRes();
+
+    const product = {
+      photo: {
+        data: Buffer.from('testBuffer'),
+      }
+    };
+
+    productModel.findById.mockReturnValueOnce({
+      select: jest.fn().mockReturnThis(),
+      exec: jest.fn().mockResolvedValueOnce(product),
+    });
+
+    // Act
+    await productPhotoController(req, res)
+
+    // Assert
+    expect(productModel.findById).toHaveBeenCalledTimes(1);
+    expect(productModel.findById).toHaveBeenCalledWith(req.params.pid);
+
+    expect(res.set).toHaveBeenCalledWith("Content-Type", "application/octet-stream");
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.send).toHaveBeenCalledWith(product.photo.data)
+  });
+
   it("returns 404 when the product cannot be found", async () => {
     // Arrange
     const req = { params: { pid: "testPid" } };

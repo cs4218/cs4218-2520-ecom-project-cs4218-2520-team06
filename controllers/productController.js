@@ -124,7 +124,10 @@ export const productPhotoController = async (req, res) => {
       });
     }
 
-    res.set("Content-Type", product.photo.contentType);
+    // a default mimetype is set if contentType is null
+    const mimeType = product.photo.contentType || "application/octet-stream";
+    res.set("Content-Type", mimeType);
+
     return res.status(200).send(product.photo.data);
   } catch (error) {
     console.log(error);
