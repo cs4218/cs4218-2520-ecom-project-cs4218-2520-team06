@@ -13,6 +13,7 @@ import {
   productCategoryController,
   braintreeTokenController,
 } from "../controllers/productController.js";
+import categoryModel from "../models/categoryModel.js";
 import productModel from "../models/productModel.js";
 import slugify from "slugify";
 import fs from "fs";
@@ -20,6 +21,7 @@ import braintree, { BraintreeGateway, Environment } from "braintree";
 import { makeRes } from "../helpers/utils.test.js";
 
 // Mocks
+jest.mock("../models/categoryModel.js");
 jest.mock("../models/productModel.js");
 jest.mock("slugify", () => jest.fn());
 jest.mock("fs", () => ({ readFileSync: jest.fn() }));
@@ -1231,6 +1233,98 @@ describe("relatedProductController", () => {
     expect(res.send).toHaveBeenCalledWith({
       success: false,
       message: "Error while getting related products",
+      error: err,
+    });
+  });
+});
+
+describe("productCategoryController", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it("returns 200 when products of the specified category are successfully retrieved", async () => {
+    // Arrange
+    const req = { 
+      params: { 
+        slug: "testSlug",
+      }
+    };
+    const res = makeRes();
+
+    const dummyProducts = [
+      {
+        _id: "1",
+      },
+      {
+        _id: "2",
+      }
+    ];
+
+    categoryModel.findOne.mockResolvedValueOnce(dummyProducts[0]);
+    productModel.find.mockReturnValueOnce({
+      populate: jest.fn().mockResolvedValueOnce(dummyProducts),
+    });
+
+    // Act
+    await productCategoryController(req, res);
+    
+    // Assert
+    expect(categoryModel.findOne).toHaveBeenCalled();
+    expect(productModel.find).toHaveBeenCalled();
+
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.send).toHaveBeenCalledWith({
+      success: true,
+      category: dummyProducts[0],
+      products: dummyProducts,
+    });
+  });
+
+  it("returns 400 when error is thrown", async () => {
+    // Arrange
+    const req = { 
+      params: { 
+        slug: "testSlug",
+      }
+    };
+    const res = makeRes();
+
+    const dummyProducts = [
+      {
+        _id: "1",
+      },
+      {
+        _id: "2",
+      }
+    ];
+
+    const consoleSpy = jest.spyOn(global.console, "log").mockImplementation(() => {});
+
+    const err = new Error("search product category error");
+    categoryModel.findOne.mockResolvedValueOnce(dummyProducts[0]);
+    productModel.find.mockReturnValueOnce({
+      populate: jest.fn().mockRejectedValueOnce(err),
+    });
+
+    // Act
+    await productCategoryController(req, res);
+    
+    // Assert
+    expect(categoryModel.findOne).toHaveBeenCalled();
+    expect(productModel.find).toHaveBeenCalled();
+
+    expect(consoleSpy).toHaveBeenCalledTimes(1);
+    expect(consoleSpy).toHaveBeenCalledWith(err);
+
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.send).toHaveBeenCalledWith({
+      success: false,
+      message: "Error while getting products",
       error: err,
     });
   });
