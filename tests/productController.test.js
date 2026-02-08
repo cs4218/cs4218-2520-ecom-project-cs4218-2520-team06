@@ -1084,3 +1084,137 @@ describe("productListController", () => {
     });
   });
 });
+
+describe("searchProductController", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it("returns 200 when product search is successful", async () => {
+    // Arrange
+    const req = { params: { keyword: "dummyKeyword" }};
+    const res = makeRes();
+
+    const dummyProducts = [
+      {
+        _id: "1",
+      },
+      {
+        _id: "2",
+      }
+    ];
+
+    productModel.find.mockReturnValueOnce({
+      select: jest.fn().mockResolvedValueOnce(dummyProducts),
+    });
+
+    // Act
+    await searchProductController(req, res);
+    
+    // Assert
+    expect(productModel.find).toHaveBeenCalled();
+
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith(dummyProducts);
+  });
+
+  it("returns 400 when error is thrown", async () => {
+    // Arrange
+    const req = { params: { keyword: "keyword" }};
+    const res = makeRes();
+
+    const consoleSpy = jest.spyOn(global.console, "log").mockImplementation(() => {});
+
+    const err = new Error("search product error");
+    productModel.find.mockReturnValueOnce({
+      select: jest.fn().mockRejectedValueOnce(err),
+    });
+
+    // Act
+    await searchProductController(req, res);
+    
+    // Assert
+    expect(productModel.find).toHaveBeenCalled();
+
+    expect(consoleSpy).toHaveBeenCalledTimes(1);
+    expect(consoleSpy).toHaveBeenCalledWith(err);
+
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.send).toHaveBeenCalledWith({
+      success: false,
+      message: "Error In Search Product API",
+      error: err,
+    });
+  });
+});
+
+describe("relatedProductController", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it("returns 200 when product search is successful", async () => {
+    // Arrange
+    const req = { params: { keyword: "dummyKeyword" }};
+    const res = makeRes();
+
+    const dummyProducts = [
+      {
+        _id: "1",
+      },
+      {
+        _id: "2",
+      }
+    ];
+
+    productModel.find.mockReturnValueOnce({
+      select: jest.fn().mockResolvedValueOnce(dummyProducts),
+    });
+
+    // Act
+    await relatedProductController(req, res);
+    
+    // Assert
+    expect(productModel.find).toHaveBeenCalled();
+
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith(dummyProducts);
+  });
+
+  it("returns 400 when error is thrown", async () => {
+    // Arrange
+    const req = { params: { keyword: "keyword" }};
+    const res = makeRes();
+
+    const consoleSpy = jest.spyOn(global.console, "log").mockImplementation(() => {});
+
+    const err = new Error("search product error");
+    productModel.find.mockReturnValueOnce({
+      select: jest.fn().mockRejectedValueOnce(err),
+    });
+
+    // Act
+    await searchProductController(req, res);
+    
+    // Assert
+    expect(productModel.find).toHaveBeenCalled();
+
+    expect(consoleSpy).toHaveBeenCalledTimes(1);
+    expect(consoleSpy).toHaveBeenCalledWith(err);
+
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.send).toHaveBeenCalledWith({
+      success: false,
+      message: "Error In Search Product API",
+      error: err,
+    });
+  });
+});
