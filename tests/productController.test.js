@@ -9,7 +9,7 @@ import {
   productCountController,
   productListController,
   searchProductController,
-  realtedProductController,
+  relatedProductController,
   productCategoryController,
   braintreeTokenController,
 } from "../controllers/productController.js";
@@ -1161,9 +1161,14 @@ describe("relatedProductController", () => {
     jest.restoreAllMocks();
   });
 
-  it("returns 200 when product search is successful", async () => {
+  it("returns 200 when related products are successfully retrieved", async () => {
     // Arrange
-    const req = { params: { keyword: "dummyKeyword" }};
+    const req = { 
+      params: { 
+        pid: "testPid",
+        cid: "testCid",
+      }
+    };
     const res = makeRes();
 
     const dummyProducts = [
@@ -1176,7 +1181,9 @@ describe("relatedProductController", () => {
     ];
 
     productModel.find.mockReturnValueOnce({
-      select: jest.fn().mockResolvedValueOnce(dummyProducts),
+      select: jest.fn().mockReturnThis(),
+      limit: jest.fn().mockReturnThis(),
+      populate: jest.fn().mockResolvedValueOnce(dummyProducts),
     });
 
     // Act
@@ -1186,23 +1193,33 @@ describe("relatedProductController", () => {
     expect(productModel.find).toHaveBeenCalled();
 
     expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith(dummyProducts);
+    expect(res.send).toHaveBeenCalledWith({
+      success: true,
+      products: dummyProducts,
+    });
   });
 
   it("returns 400 when error is thrown", async () => {
     // Arrange
-    const req = { params: { keyword: "keyword" }};
+    const req = { 
+      params: { 
+        pid: "testPid",
+        cid: "testCid",
+      }
+    };
     const res = makeRes();
 
     const consoleSpy = jest.spyOn(global.console, "log").mockImplementation(() => {});
 
-    const err = new Error("search product error");
+    const err = new Error("search related product error");
     productModel.find.mockReturnValueOnce({
-      select: jest.fn().mockRejectedValueOnce(err),
+      select: jest.fn().mockReturnThis(),
+      limit: jest.fn().mockReturnThis(),
+      populate: jest.fn().mockRejectedValueOnce(err),
     });
 
     // Act
-    await searchProductController(req, res);
+    await relatedProductController(req, res);
     
     // Assert
     expect(productModel.find).toHaveBeenCalled();
@@ -1213,7 +1230,7 @@ describe("relatedProductController", () => {
     expect(res.status).toHaveBeenCalledWith(400);
     expect(res.send).toHaveBeenCalledWith({
       success: false,
-      message: "Error In Search Product API",
+      message: "Error while getting related products",
       error: err,
     });
   });
