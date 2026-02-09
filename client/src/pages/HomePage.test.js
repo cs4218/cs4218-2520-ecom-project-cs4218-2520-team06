@@ -2,7 +2,7 @@ import React from "react";
 import "@testing-library/jest-dom";
 import HomePage from "./HomePage";
 import { act, render, screen, waitFor } from "@testing-library/react";
-import { BrowserRouter as Router, useNavigate } from "react-router-dom";
+import { BrowserRouter as Router } from "react-router-dom";
 import { useCart } from "../context/cart";
 import axios from "axios";
 import { describe } from "node:test";
