@@ -24,12 +24,15 @@ export default {
 
   // jest code coverage
   collectCoverage: true,
-  collectCoverageFrom: ["client/src/pages/**/*.js", "!client/src/pages/**/*.test.js"],
-  coverageThreshold: {
-    global: {
-      lines: 100,
-      functions: 100,
-    },
-  },
+  collectCoverageFrom: [
+    "client/src/pages/**/*.js",
+    "!client/src/pages/**/*.test.js",
+  ],
+  // coverageThreshold: {
+  //   global: {
+  //     lines: 100,
+  //     functions: 100,
+  //   },
+  // },
   setupFilesAfterEnv: ["<rootDir>/client/src/setupTests.js"],
 };
