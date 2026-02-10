@@ -16,7 +16,7 @@ describe("UserMenu Component", () => {
     expect(getByText("Profile")).toBeInTheDocument();
     expect(getByText("Orders")).toBeInTheDocument();
   });
-  
+
   it("Profile link navigates to /dashboard/user/profile", () => {
     const { getByText } = render(
       <MemoryRouter>

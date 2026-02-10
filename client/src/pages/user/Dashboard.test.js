@@ -36,7 +36,7 @@ describe("Dashboard Component", () => {
     expect(getByText("john.doe@example.com")).toBeInTheDocument();
     expect(getByText("123 Main St")).toBeInTheDocument();
   });
-  
+
   it("renders the Layout component with correct title", () => {
     const { getByText } = render(
       <MemoryRouter>
@@ -46,7 +46,7 @@ describe("Dashboard Component", () => {
 
     expect(getByText("Dashboard - Ecommerce App")).toBeInTheDocument();
   });
-  
+
   it("renders the UserMenu component", () => {
     const { getByText } = render(
       <MemoryRouter>

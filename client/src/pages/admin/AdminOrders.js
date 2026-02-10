@@ -52,7 +52,7 @@ const AdminOrders = () => {
           <h1 className="text-center">All Orders</h1>
           {orders?.map((o, i) => {
             return (
-              <div className="border shadow">
+              <div className="border shadow" key={o._id}>
                 <table className="table">
                   <thead>
                     <tr>
@@ -74,7 +74,7 @@ const AdminOrders = () => {
                           defaultValue={o?.status}
                         >
                           {status.map((s, i) => (
-                            <Option key={i} value={s}>
+                            <Option key={`${s}-${i}`} value={s}>
                               {s}
                             </Option>
                           ))}

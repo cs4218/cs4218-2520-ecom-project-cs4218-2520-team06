@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 import { render } from "@testing-library/react";
 import axios from "axios";
 import { MemoryRouter, Routes, Route } from "react-router-dom";
@@ -18,7 +18,7 @@ describe("PrivateRoute Component", () => {
     jest.clearAllMocks();
     mockAuthValue = { token: true };
   });
-  
+
   it("renders Outlet component", async () => {
     axios.get.mockResolvedValueOnce({ data: { ok: true } });
     const { findByText } = render(
@@ -32,7 +32,7 @@ describe("PrivateRoute Component", () => {
     );
     expect(await findByText("Outlet Element")).toBeInTheDocument();
   });
-  
+
   it("renders Spinner component", async () => {
     axios.get.mockResolvedValueOnce({ data: { ok: false } });
     const { findByText } = render(
