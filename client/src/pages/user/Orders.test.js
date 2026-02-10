@@ -143,8 +143,8 @@ describe("Orders Component", () => {
     });
   });
 
-  describe("Orders Display - Components", () => {
-    it("should render UserMenu component", async () => {
+  describe("Components rendering", () => {
+    it("should render essential components", async () => {
       // Arrange: Set up authenticated user with empty orders
       useAuth.mockReturnValue([{ token: "valid-token" }, jest.fn()]);
       axios.get.mockResolvedValueOnce({ data: [] });
@@ -156,25 +156,10 @@ describe("Orders Component", () => {
         </MemoryRouter>
       );
 
-      // Assert: Verify UserMenu component is rendered and wait for async operations
+      // Assert: Verify UserMenu and Layout components are rendered
       await waitFor(() => {
         expect(screen.getByTestId("user-menu")).toBeInTheDocument();
       });
-    });
-
-    it("should render Layout component", async () => {
-      // Arrange: Set up authenticated user with empty orders
-      useAuth.mockReturnValue([{ token: "valid-token" }, jest.fn()]);
-      axios.get.mockResolvedValueOnce({ data: [] });
-
-      // Act: Render the Orders component
-      render(
-        <MemoryRouter>
-          <Orders />
-        </MemoryRouter>
-      );
-
-      // Assert: Verify Layout component is rendered and wait for async operations
       await waitFor(() => {
         expect(screen.getByTestId("layout")).toBeInTheDocument();
       });
