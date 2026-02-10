@@ -6,10 +6,12 @@ import {
   getOrdersController,
   getAllOrdersController,
   orderStatusController,
+  updateProfileController,
 } from "../controllers/authController.js";
 import { makeRes } from "../helpers/utils.test.js";
 import {
   NON_ADMIN_USER_EMAIL,
+  NON_ADMIN_USER_ID,
   NON_ADMIN_USER,
 } from "../models/__mocks__/userModel.js";
 import userModel from "../models/userModel.js";
@@ -582,5 +584,188 @@ describe("orderStatusController", () => {
       { new: true }
     );
     expect(res.json).toHaveBeenCalledWith(mockUpdatedOrder);
+  });
+});
+
+describe("updateProfileController", () => {
+  let req;
+  const res = makeRes();
+  const existingUser = {
+    name: "Old Name",
+    phone: "9876543210",
+    address: "Old Address",
+    password: "oldHashedPassword",
+  };
+
+  const existingUserWithId = {
+    _id: NON_ADMIN_USER_ID,
+    ...existingUser,
+  };
+
+  const { hashPassword } = jest.requireMock("../helpers/authHelper.js");
+
+  beforeEach(() => {
+    req = {
+      user: { _id: NON_ADMIN_USER_ID },
+      body: {},
+    };
+    jest.clearAllMocks();
+  });
+
+  test("password less than 6 characters returns error", async () => {
+    req.body = { password: "12345" };
+
+    await updateProfileController(req, res);
+
+    expect(res.json).toHaveBeenCalledWith({
+      error: "Passsword is required and 6 character long",
+    });
+    expect(hashPassword).not.toHaveBeenCalled();
+    expect(userModel.findByIdAndUpdate).not.toHaveBeenCalled();
+  });
+
+  test("partial update preserves other fields", async () => {
+    userModel.findById.mockResolvedValueOnce(existingUser);
+    userModel.findByIdAndUpdate.mockResolvedValueOnce({
+      ...existingUserWithId,
+      name: "New Name",
+    });
+
+    req.body = { name: "New Name" };
+
+    await updateProfileController(req, res);
+
+    expect(userModel.findByIdAndUpdate).toHaveBeenCalledWith(
+      NON_ADMIN_USER_ID,
+      {
+        ...existingUser,
+        name: "New Name",
+      }
+    );
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.send).toHaveBeenCalledWith(
+      expect.objectContaining({
+        success: true,
+        message: "Profile Updated SUccessfully",
+        updatedUser: expect.objectContaining({
+          ...existingUserWithId,
+          name: "New Name",
+        }),
+      })
+    );
+  });
+
+  test("password update calls hashPassword and updates correctly", async () => {
+    userModel.findById.mockResolvedValueOnce(existingUser);
+    userModel.findByIdAndUpdate.mockResolvedValueOnce({
+      ...existingUserWithId,
+      password: "hashedPassword",
+    });
+
+    req.body = { password: "newPass123" };
+
+    await updateProfileController(req, res);
+
+    expect(hashPassword).toHaveBeenCalledWith("newPass123");
+    expect(userModel.findByIdAndUpdate).toHaveBeenCalledWith(
+      NON_ADMIN_USER_ID,
+      expect.objectContaining({
+        ...existingUser,
+        password: "hashedPassword",
+      })
+    );
+  });
+
+  test("multiple fields update correctly", async () => {
+    userModel.findById.mockResolvedValueOnce(existingUser);
+    userModel.findByIdAndUpdate.mockResolvedValueOnce({
+      ...existingUser,
+      name: "New Name",
+      phone: "2222222222",
+      address: "New Address",
+    });
+
+    req.body = {
+      name: "New Name",
+      phone: "2222222222",
+      address: "New Address",
+    };
+
+    await updateProfileController(req, res);
+
+    expect(userModel.findByIdAndUpdate).toHaveBeenCalledWith(
+      NON_ADMIN_USER_ID,
+      {
+        ...existingUser,
+        name: "New Name",
+        phone: "2222222222",
+        address: "New Address",
+      }
+    );
+  });
+
+  test("no password update does not call hashPassword", async () => {
+    userModel.findById.mockResolvedValueOnce(existingUser);
+    userModel.findByIdAndUpdate.mockResolvedValueOnce(existingUser);
+
+    req.body = { name: "Updated Name" };
+
+    await updateProfileController(req, res);
+
+    expect(hashPassword).not.toHaveBeenCalled();
+  });
+
+  test("empty strings clear fields to blank", async () => {
+    const existingUser = {
+      _id: NON_ADMIN_USER_ID,
+      name: "Old Name",
+      phone: "9876543210",
+      address: "Old Address",
+      password: "hashedPassword",
+    };
+    userModel.findById.mockResolvedValueOnce(existingUser);
+    userModel.findByIdAndUpdate.mockResolvedValueOnce({
+      ...existingUser,
+      name: "",
+      phone: "",
+      address: "",
+    });
+
+    req.body = {
+      name: "",
+      phone: "",
+      address: "",
+    };
+
+    await updateProfileController(req, res);
+
+    expect(userModel.findByIdAndUpdate).toHaveBeenCalledWith(
+      NON_ADMIN_USER_ID,
+      {
+        name: "",
+        password: "hashedPassword",
+        phone: "",
+        address: "",
+      }
+    );
+    expect(res.status).toHaveBeenCalledWith(200);
+  });
+
+  test("handles DB error gracefully", async () => {
+    const err = new Error("DB failure");
+    userModel.findById.mockRejectedValueOnce(err);
+    const consoleSpy = jest.spyOn(console, "log").mockImplementation(() => {});
+
+    req.body = { name: "New Name" };
+
+    await updateProfileController(req, res);
+
+    expect(consoleSpy).toHaveBeenCalledWith(err);
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.send).toHaveBeenCalledWith({
+      success: false,
+      message: "Error while Update profile",
+      error: err,
+    });
   });
 });

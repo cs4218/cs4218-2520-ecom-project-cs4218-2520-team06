@@ -164,26 +164,22 @@ export const testController = (req, res) => {
   }
 };
 
-//update prfole
+//update profile
 export const updateProfileController = async (req, res) => {
   try {
-    const { name, email, password, address, phone } = req.body;
+    const { name, password, address, phone } = req.body;
     const user = await userModel.findById(req.user._id);
     //password
     if (password && password.length < 6) {
       return res.json({ error: "Passsword is required and 6 character long" });
     }
     const hashedPassword = password ? await hashPassword(password) : undefined;
-    const updatedUser = await userModel.findByIdAndUpdate(
-      req.user._id,
-      {
-        name: name || user.name,
-        password: hashedPassword || user.password,
-        phone: phone || user.phone,
-        address: address || user.address,
-      },
-      { new: true }
-    );
+    const updatedUser = await userModel.findByIdAndUpdate(req.user._id, {
+      name: name === "" ? name : name || user.name,
+      password: hashedPassword || user.password,
+      phone: phone === "" ? phone : phone || user.phone,
+      address: address === "" ? address : address || user.address,
+    });
     res.status(200).send({
       success: true,
       message: "Profile Updated SUccessfully",
@@ -193,7 +189,7 @@ export const updateProfileController = async (req, res) => {
     console.log(error);
     res.status(400).send({
       success: false,
-      message: "Error WHile Update profile",
+      message: "Error while Update profile",
       error,
     });
   }
