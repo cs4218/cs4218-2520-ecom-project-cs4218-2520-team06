@@ -1,7 +1,6 @@
 import React from 'react'
 import { Link } from 'react-router-dom';
 
-// Kok Bo Chang, A0273542E
 const Footer = () => {
   return (
     <div className="footer">
