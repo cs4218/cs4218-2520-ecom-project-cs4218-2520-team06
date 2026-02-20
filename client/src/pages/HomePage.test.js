@@ -49,7 +49,7 @@ describe("HomePage", () => {
   });
 
   describe("HomePage Component", () => {
-    test("renders categories fetched from API", async () => {
+    test("should render categories fetched from API", async () => {
       const mockCategories = [
         { _id: "1", name: "Category 1" },
         { _id: "2", name: "Category 2" },
@@ -80,7 +80,7 @@ describe("HomePage", () => {
       });
     });
 
-    test("renders products fetched from API", async () => {
+    test("should render products fetched from API", async () => {
       const mockProducts = [
         { _id: "p1", name: "Product 1", price: 100, description: "Desc 1" },
         { _id: "p2", name: "Product 2", price: 200, description: "Desc 2" },
@@ -112,7 +112,7 @@ describe("HomePage", () => {
       });
     });
 
-    test("get more products on page change", async () => {
+    test("should get more products on page change", async () => {
       const mockProductsPage1 = [
         { _id: "p1", name: "Product 1", price: 100, description: "Desc 1" },
       ];
@@ -165,7 +165,7 @@ describe("HomePage", () => {
   });
 
   describe("HomePage Interactions", () => {
-    test("adds product to cart on 'ADD TO CART' button click", async () => {
+    test("should add product to cart on 'ADD TO CART' button click", async () => {
       const mockProducts = [
         { _id: "p1", name: "Product 1", price: 100, description: "Desc 1" },
       ];
@@ -203,7 +203,7 @@ describe("HomePage", () => {
       });
     });
 
-    test("navigates to product details on 'MORE DETAILS' button click", async () => {
+    test("should navigate to product details on 'MORE DETAILS' button click", async () => {
       const mockProducts = [
         {
           _id: "p1",
@@ -241,7 +241,7 @@ describe("HomePage", () => {
     });
 
     describe("Filter Products", () => {
-      test("filters products based on category selection", async () => {
+      test("should filter products based on category selection", async () => {
         const mockCategories = [
           { _id: "1", name: "Category 1" },
           { _id: "2", name: "Category 2" },
@@ -306,7 +306,7 @@ describe("HomePage", () => {
         });
       });
 
-      test("filters products based on price range selection", async () => {
+      test("should filter products based on price range selection", async () => {
         const mockCategories = [{ _id: "1", name: "Category 1" }];
         const mockFilteredProducts = [
           {
@@ -369,7 +369,7 @@ describe("HomePage", () => {
         });
       });
 
-      test("resets filters when 'RESET FILTERS' button is clicked", async () => {
+      test("should reset filters when 'RESET FILTERS' button is clicked", async () => {
         const mockCategories = [{ _id: "1", name: "Category 1" }];
         const mockAllProducts = [
           { _id: "p1", name: "Product 1", price: 100, description: "Desc 1" },
@@ -418,7 +418,7 @@ describe("HomePage", () => {
       });
     });
 
-    test("remove category filter when checkbox is unchecked", async () => {
+    test("should remove category filter when checkbox is unchecked", async () => {
       const mockCategories = [
         { _id: "1", name: "Category 1" },
         { _id: "2", name: "Category 2" },
@@ -474,7 +474,7 @@ describe("HomePage", () => {
   });
 
   describe("HomePage Errors", () => {
-    test("handles API errors gracefully", async () => {
+    test("should handle API errors gracefully", async () => {
       const error = new Error("API Error");
       axios.get.mockImplementation((url) => {
         return Promise.reject(error);
@@ -494,7 +494,7 @@ describe("HomePage", () => {
       });
     });
 
-    test("handles load more errors gracefully", async () => {
+    test("should handle load more errors gracefully", async () => {
       const mockProducts = [
         { _id: "p1", name: "Product 1", price: 100, description: "Desc 1" },
       ];
@@ -544,7 +544,7 @@ describe("HomePage", () => {
       });
     });
 
-    test("handles filter API errors gracefully", async () => {
+    test("should handle filter API errors gracefully", async () => {
       const mockCategories = [
         { _id: "1", name: "Category 1" },
         { _id: "2", name: "Category 2" },

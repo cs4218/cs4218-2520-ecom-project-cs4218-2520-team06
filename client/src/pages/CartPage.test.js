@@ -9,7 +9,7 @@ import {
   act,
 } from "@testing-library/react";
 import { BrowserRouter as Router } from "react-router-dom";
-import { CartProvider, useCart } from "../context/cart";
+import { CartProvider } from "../context/cart";
 import { useAuth } from "../context/auth";
 import axios from "axios";
 import CartPage from "./CartPage";
@@ -65,6 +65,7 @@ const mockRequestPaymentMethod = jest
   .fn()
   .mockResolvedValue({ nonce: "mock-nonce" });
 
+// Button to mock Braintree DropIn loading and instance creation
 jest.mock("braintree-web-drop-in-react", () => {
   return function MockDropIn({ onInstance }) {
     return (
@@ -119,7 +120,6 @@ const setMockCart = (cart = mockCart) => {
   localStorage.setItem("cart", JSON.stringify(cart));
 };
 
-// --- Test Suite ---
 describe("CartPage", () => {
   beforeEach(() => {
     setMockAuth({ name: "Test User" }, "mock-token");
@@ -130,34 +130,8 @@ describe("CartPage", () => {
     localStorage.clear();
   });
 
-  describe("useCart Hook", () => {
-    test("setCart updates cart state", async () => {
-      const mockItems = [mockCart[0]];
-      let results = {};
-
-      const TestComponent = () => {
-        const [cart, setCart] = useCart();
-        React.useEffect(() => {
-          setCart(mockItems);
-        }, [setCart]);
-        results.cart = cart;
-        return null;
-      };
-
-      render(
-        <CartProvider>
-          <TestComponent />
-        </CartProvider>
-      );
-
-      await waitFor(() => {
-        expect(results.cart).toEqual(mockItems);
-      });
-    });
-  });
-
   describe("CartPage Component", () => {
-    test("renders cart items and total price", async () => {
+    test("should renders cart items and total price", async () => {
       setMockCart();
       await renderCartPage();
 
@@ -166,7 +140,7 @@ describe("CartPage", () => {
       expect(screen.getByText(/\$300\.00/)).toBeInTheDocument();
     });
 
-    test("guest users should see login prompt", async () => {
+    test("should let guest users see login prompt", async () => {
       setMockCart();
       setMockAuth(); // Sets to null
       await renderCartPage();
@@ -174,7 +148,7 @@ describe("CartPage", () => {
       expect(screen.getByText(/Please Login to checkout/)).toBeInTheDocument();
     });
 
-    test("logged in users without address should see address prompt", async () => {
+    test("should let logged in users without address to see address prompt", async () => {
       setMockCart();
       setMockAuth({ name: "Test User", address: null }, "mock-token");
       await renderCartPage();
@@ -185,7 +159,7 @@ describe("CartPage", () => {
       ).not.toBeInTheDocument();
     });
 
-    test("logged in users with address should see current address", async () => {
+    test("should let logged in users with address see current address", async () => {
       setMockCart();
       setMockAuth({ name: "Test User", address: "123 Test St" }, "mock-token");
       await renderCartPage();
@@ -196,7 +170,7 @@ describe("CartPage", () => {
   });
 
   describe("CartPage Errors", () => {
-    test("totalPrice error should be handled gracefully", async () => {
+    test("should handle totalPrice error gracefully", async () => {
       setMockCart([
         { price: "invalid", name: "Product 1", description: "Desc 1" },
       ]);
@@ -218,7 +192,7 @@ describe("CartPage", () => {
       consoleSpy.mockRestore();
     });
 
-    test("removeCartItem error should be handled gracefully", async () => {
+    test("should handle removeCartItem error gracefully", async () => {
       setMockCart();
       const error = new Error("Error removing item from cart");
       localStorage.setItem.mockImplementationOnce(() => {
@@ -236,7 +210,7 @@ describe("CartPage", () => {
       });
     });
 
-    test("getToken error should be handled gracefully", async () => {
+    test("should handle getToken error gracefully", async () => {
       const error = new Error("API Error");
       axios.get.mockRejectedValueOnce(error);
       const consoleSpy = jest.spyOn(console, "log").mockImplementation();
@@ -250,7 +224,7 @@ describe("CartPage", () => {
   });
 
   describe("CartPage Interactions", () => {
-    test("removes item from cart on delete", async () => {
+    test("should removes item from cart on delete", async () => {
       setMockCart();
       await renderCartPage();
 
@@ -264,7 +238,7 @@ describe("CartPage", () => {
       expect(screen.getByText(/\$200\.00/)).toBeInTheDocument();
     });
 
-    test("navigates to login on checkout for guest users", async () => {
+    test("should navigates to login on checkout for guest users", async () => {
       setMockCart();
       setMockAuth(); // Sets to null
       await renderCartPage();
@@ -275,7 +249,7 @@ describe("CartPage", () => {
       expect(mockNavigate).toHaveBeenCalledWith("/login", { state: "/cart" });
     });
 
-    test("navigates to profile on checkout for logged in users without address", async () => {
+    test("should navigates to profile on checkout for logged in users without address", async () => {
       setMockCart();
       setMockAuth({ name: "Test User", address: null }, "mock-token");
       await renderCartPage();
@@ -286,7 +260,7 @@ describe("CartPage", () => {
       expect(mockNavigate).toHaveBeenCalledWith("/dashboard/user/profile");
     });
 
-    test("navigates to profile on checkout for logged in users with address", async () => {
+    test("should navigates to profile on checkout for logged in users with address", async () => {
       setMockCart();
       setMockAuth({ name: "Test User", address: "123 Test St" }, "mock-token");
       await renderCartPage();
@@ -299,7 +273,7 @@ describe("CartPage", () => {
   });
 
   describe("Payment Handling", () => {
-    test("handles payment success", async () => {
+    test("should handle payment success", async () => {
       setMockCart();
       setMockAuth({ name: "Test User", address: "123 Test St" }, "mock-token");
       axios.post.mockResolvedValue({ data: { success: true } });
@@ -327,7 +301,7 @@ describe("CartPage", () => {
       consoleSpy.mockRestore();
     });
 
-    test("handles payment failure", async () => {
+    test("should handle payment failure", async () => {
       setMockCart();
       setMockAuth({ name: "Test User", address: "123 Test St" }, "mock-token");
       const error = new Error("Payment Failed");

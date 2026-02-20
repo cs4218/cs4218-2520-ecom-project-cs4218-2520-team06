@@ -1,7 +1,7 @@
 // Hans Delano, A0273456X
 import React from "react";
 import "@testing-library/jest-dom";
-import { act, render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import { BrowserRouter as Router } from "react-router-dom";
 import { useCart } from "../context/cart";
 import axios from "axios";
@@ -50,7 +50,7 @@ describe("CategoryProduct", () => {
   });
 
   describe("CategoryProduct Component", () => {
-    test("renders products from category", async () => {
+    test("should renders products from category", async () => {
       const mockProducts = [
         { _id: "p1", name: "Product 1", price: 100, description: "Desc 1" },
         { _id: "p2", name: "Product 2", price: 200, description: "Desc 2" },
@@ -84,7 +84,7 @@ describe("CategoryProduct", () => {
   });
 
   describe("CategoryProduct Interactions", () => {
-    test("adds product to cart on 'ADD TO CART' button click", async () => {
+    test("should add product to cart on 'ADD TO CART' button click", async () => {
       const mockProducts = [
         { _id: "p1", name: "Product 1", price: 100, description: "Desc 1" },
       ];
@@ -117,7 +117,7 @@ describe("CategoryProduct", () => {
       });
     });
 
-    test("navigates to product details on 'MORE DETAILS' button click", async () => {
+    test("should navigates to product details on 'MORE DETAILS' button click", async () => {
       const mockProducts = [
         {
           _id: "p1",
@@ -151,7 +151,7 @@ describe("CategoryProduct", () => {
   });
 
   describe("CategoryProduct Errors", () => {
-    test("handles API errors gracefully", async () => {
+    test("should handles API errors gracefully", async () => {
       const error = new Error("API Error");
       axios.get.mockImplementation((url) => {
         return Promise.reject(error);
@@ -170,7 +170,7 @@ describe("CategoryProduct", () => {
       });
     });
 
-    test("handles no category in param", async () => {
+    test("should handles no category in param", async () => {
       const { useParams } = require("react-router-dom");
       useParams.mockReturnValue({ slug: null });
 
