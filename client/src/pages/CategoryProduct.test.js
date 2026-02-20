@@ -164,7 +164,6 @@ describe("CategoryProduct", () => {
         </Router>
       );
 
-      // Since errors are logged to console, we can check that no products or categories are rendered
       await waitFor(() => {
         expect(consoleSpy).toHaveBeenCalledWith(error);
       });
@@ -180,7 +179,6 @@ describe("CategoryProduct", () => {
         </Router>
       );
 
-      // Ensure no API call is made and component renders without crashing
       expect(axios.get).not.toHaveBeenCalled();
     });
   });
