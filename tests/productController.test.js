@@ -481,6 +481,7 @@ describe("deleteProductController", () => {
 });
 
 // Get Product Test
+// Kok Bo Chang, A0273542E
 describe("getProductController", () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -490,7 +491,8 @@ describe("getProductController", () => {
     jest.restoreAllMocks();
   });
 
-  it("returns 200 when all products are fetched", async () => {
+  // Kok Bo Chang, A0273542E
+  test("returns 200 when all products are fetched", async () => {
     // Arrange
     const res = makeRes();
 
@@ -538,7 +540,8 @@ describe("getProductController", () => {
     });
   });
 
-  it("returns 500 when error is thrown", async () => {
+  // Kok Bo Chang, A0273542E
+  test("returns 500 when error is thrown", async () => {
     // Arrange
     const res = makeRes();
     const consoleSpy = jest.spyOn(global.console, "log").mockImplementation(() => {});
@@ -568,6 +571,7 @@ describe("getProductController", () => {
 });
 
 // Get single product test
+// Kok Bo Chang, A0273542E
 describe("getSingleProductController", () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -577,7 +581,8 @@ describe("getSingleProductController", () => {
     jest.restoreAllMocks();
   });
 
-  it("returns 200 when a single product is fetched", async () => {
+  // Kok Bo Chang, A0273542E
+  test("returns 200 when a single product is fetched", async () => {
     // Arrange
     const req = { params: { slug: "testSlug" } };
     const res = makeRes();
@@ -612,7 +617,8 @@ describe("getSingleProductController", () => {
     });
   });
 
-  it("returns 500 when error is thrown", async () => {
+  // Kok Bo Chang, A0273542E
+  test("returns 500 when error is thrown", async () => {
     // Arrange
     const req = { params: { slug: "testSlug" } };
     const res = makeRes();
@@ -642,6 +648,7 @@ describe("getSingleProductController", () => {
 });
 
 // Get photo tests
+// Kok Bo Chang, A0273542E
 describe("productPhotoController", () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -651,7 +658,8 @@ describe("productPhotoController", () => {
     jest.restoreAllMocks();
   });
 
-  it("returns 200 when the photo is successfully retrieved", async () => {
+  // Kok Bo Chang, A0273542E
+  test("returns 200 when the photo is successfully retrieved", async () => {
     // Arrange
     const req = { params: { pid: "testPid" } };
     const res = makeRes();
@@ -679,7 +687,8 @@ describe("productPhotoController", () => {
     expect(res.send).toHaveBeenCalledWith(product.photo.data);
   });
 
-  it("returns 200 with the default mime type if the photo is missing a mime type", async () => {
+  // Kok Bo Chang, A0273542E
+  test("returns 200 with the default mime type if the photo is missing a mime type", async () => {
     // Arrange
     const req = { params: { pid: "testPid" } };
     const res = makeRes();
@@ -706,7 +715,8 @@ describe("productPhotoController", () => {
     expect(res.send).toHaveBeenCalledWith(product.photo.data);
   });
 
-  it("returns 404 when the product cannot be found", async () => {
+  // Kok Bo Chang, A0273542E
+  test("returns 404 when the product cannot be found", async () => {
     // Arrange
     const req = { params: { pid: "testPid" } };
     const res = makeRes();
@@ -737,7 +747,8 @@ describe("productPhotoController", () => {
     });
   });
 
-  it("returns 404 when the product's photo does not exist", async () => {
+  // Kok Bo Chang, A0273542E
+  test("returns 404 when the product's photo does not exist", async () => {
     // Arrange
     const req = { params: { pid: "testPid" } };
     const res = makeRes();
@@ -763,7 +774,8 @@ describe("productPhotoController", () => {
     });
   });
 
-  it("returns 404 when the product's photo does not contain data", async () => {
+  // Kok Bo Chang, A0273542E
+  test("returns 404 when the product's photo does not contain data", async () => {
     // Arrange
     const req = { params: { pid: "testPid" } };
     const res = makeRes();
@@ -794,7 +806,8 @@ describe("productPhotoController", () => {
     });
   });
 
-  it("returns 500 when error is thrown", async () => {
+  // Kok Bo Chang, A0273542E
+  test("returns 500 when error is thrown", async () => {
     // Arrange
     const req = { params: { pid: "testPid" } };
     const res = makeRes();
@@ -822,6 +835,7 @@ describe("productPhotoController", () => {
   });
 });
 
+// Kok Bo Chang, A0273542E
 describe("productFiltersController", () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -831,7 +845,8 @@ describe("productFiltersController", () => {
     jest.restoreAllMocks();
   });
 
-  it("returns 200 when product filtering is successful with valid filter", async () => {
+  // Kok Bo Chang, A0273542E
+  test("returns 200 when product filtering is successful with valid filter", async () => {
     // Arrange
     const req = {
       body: {
@@ -867,7 +882,8 @@ describe("productFiltersController", () => {
     });
   });
 
-  it("returns 200 when product filtering is successful with empty filters", async () => {
+  // Kok Bo Chang, A0273542E
+  test("returns 200 when product filtering is successful with empty filters", async () => {
     // Arrange
     const req = { body: { checked: [], radio: [] } };
     const res = makeRes();
@@ -892,7 +908,8 @@ describe("productFiltersController", () => {
     });
   });
 
-  it("returns 400 when error is thrown", async () => {
+  // Kok Bo Chang, A0273542E
+  test("returns 400 when error is thrown", async () => {
     // Arrange
     const req = { body: { checked: [], radio: [] } };
     const res = makeRes();
@@ -918,6 +935,7 @@ describe("productFiltersController", () => {
   });
 });
 
+// Kok Bo Chang, A0273542E
 describe("productCountController", () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -927,7 +945,8 @@ describe("productCountController", () => {
     jest.restoreAllMocks();
   });
 
-  it("returns 200 when count is successfully returned", async () => {
+  // Kok Bo Chang, A0273542E
+  test("returns 200 when count is successfully returned", async () => {
     // Arrange
     const res = makeRes();
 
@@ -950,7 +969,8 @@ describe("productCountController", () => {
     });
   });
 
-  it("returns 400 when error is thrown", async () => {
+  // Kok Bo Chang, A0273542E
+  test("returns 400 when error is thrown", async () => {
     // Arrange
     const res = makeRes();
 
@@ -977,6 +997,7 @@ describe("productCountController", () => {
   });
 });
 
+// Kok Bo Chang, A0273542E
 describe("productListController", () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -986,7 +1007,8 @@ describe("productListController", () => {
     jest.restoreAllMocks();
   });
 
-  it("returns 200 when product list is successfully returned using a specified page value", async () => {
+  // Kok Bo Chang, A0273542E
+  test("returns 200 when product list is successfully returned using a specified page value", async () => {
     // Arrange
     const req = { params: { page: 2 }};
     const res = makeRes();
@@ -1020,7 +1042,8 @@ describe("productListController", () => {
     });
   });
 
-  it("returns 200 when product list is successfully returned without a specified page value", async () => {
+  // Kok Bo Chang, A0273542E
+  test("returns 200 when product list is successfully returned without a specified page value", async () => {
     // Arrange
     const req = { params: {}};
     const res = makeRes();
@@ -1054,7 +1077,8 @@ describe("productListController", () => {
     });
   });
 
-  it("returns 400 when error is thrown", async () => {
+  // Kok Bo Chang, A0273542E
+  test("returns 400 when error is thrown", async () => {
     // Arrange
     const req = { params: { page: 2 }};
     const res = makeRes();
@@ -1087,6 +1111,7 @@ describe("productListController", () => {
   });
 });
 
+// Kok Bo Chang, A0273542E
 describe("searchProductController", () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -1096,7 +1121,8 @@ describe("searchProductController", () => {
     jest.restoreAllMocks();
   });
 
-  it("returns 200 when product search is successful", async () => {
+  // Kok Bo Chang, A0273542E
+  test("returns 200 when product search is successful", async () => {
     // Arrange
     const req = { params: { keyword: "dummyKeyword" }};
     const res = makeRes();
@@ -1124,7 +1150,8 @@ describe("searchProductController", () => {
     expect(res.json).toHaveBeenCalledWith(dummyProducts);
   });
 
-  it("returns 400 when error is thrown", async () => {
+  // Kok Bo Chang, A0273542E
+  test("returns 400 when error is thrown", async () => {
     // Arrange
     const req = { params: { keyword: "keyword" }};
     const res = makeRes();
@@ -1154,6 +1181,7 @@ describe("searchProductController", () => {
   });
 });
 
+// Kok Bo Chang, A0273542E
 describe("relatedProductController", () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -1163,7 +1191,8 @@ describe("relatedProductController", () => {
     jest.restoreAllMocks();
   });
 
-  it("returns 200 when related products are successfully retrieved", async () => {
+  // Kok Bo Chang, A0273542E
+  test("returns 200 when related products are successfully retrieved", async () => {
     // Arrange
     const req = { 
       params: { 
@@ -1201,7 +1230,8 @@ describe("relatedProductController", () => {
     });
   });
 
-  it("returns 400 when error is thrown", async () => {
+  // Kok Bo Chang, A0273542E
+  test("returns 400 when error is thrown", async () => {
     // Arrange
     const req = { 
       params: { 
@@ -1238,6 +1268,7 @@ describe("relatedProductController", () => {
   });
 });
 
+// Kok Bo Chang, A0273542E
 describe("productCategoryController", () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -1247,7 +1278,8 @@ describe("productCategoryController", () => {
     jest.restoreAllMocks();
   });
 
-  it("returns 200 when products of the specified category are successfully retrieved", async () => {
+  // Kok Bo Chang, A0273542E
+  test("returns 200 when products of the specified category are successfully retrieved", async () => {
     // Arrange
     const req = { 
       params: { 
@@ -1285,7 +1317,8 @@ describe("productCategoryController", () => {
     });
   });
 
-  it("returns 400 when error is thrown", async () => {
+  // Kok Bo Chang, A0273542E
+  test("returns 400 when error is thrown", async () => {
     // Arrange
     const req = { 
       params: { 
