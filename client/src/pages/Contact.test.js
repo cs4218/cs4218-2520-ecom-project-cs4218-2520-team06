@@ -1,17 +1,15 @@
 import React from "react";
-import Header from "../components/Header";
-import Footer from "../components/Footer";
-import { Helmet } from 'react-helmet';
-import { render, getByAltText, getByRole, getByText } from "@testing-library/react";
+import Layout from "../components/Layout";
+import { render, getByAltText, getByText } from "@testing-library/react";
 import Contact from "./Contact";
 
-jest.mock("../components/Header", () => () => (
-  <div>Header</div>
-));
-
-jest.mock("../components/Footer", () => () => (
-  <div>Footer</div>
-));
+jest.mock("./../components/Layout", () => {
+  return ({ children }) => (
+    <div data-testid="layout">
+      {children}
+    </div>
+  );
+});
 
 // Kok Bo Chang, A0273542E
 describe("Contact component", () => {
