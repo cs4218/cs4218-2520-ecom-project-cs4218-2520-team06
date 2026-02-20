@@ -2,7 +2,7 @@ import React from "react";
 import Layout from "../components/Layout";
 import { render, getByAltText, getByText, getByRole } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
-import Pagenotfound from "./Pagenotfound";
+import PageNotFound from "./PageNotFound";
 
 jest.mock("./../components/Layout", () => {
   return ({ children }) => (
@@ -13,7 +13,7 @@ jest.mock("./../components/Layout", () => {
 });
 
 // Kok Bo Chang, A0273542E
-describe.only("Pagenotfound component", () => {
+describe.only("PageNotFound component", () => {
     beforeEach(() => {
         jest.clearAllMocks();
     });
@@ -29,7 +29,7 @@ describe.only("Pagenotfound component", () => {
         // Act
         const { container } = render(
             <MemoryRouter>
-                <Pagenotfound />
+                <PageNotFound />
             </MemoryRouter>
         );
 
@@ -49,7 +49,7 @@ describe.only("Pagenotfound component", () => {
         // Act
         const { container } = render(
             <MemoryRouter>
-                <Pagenotfound />
+                <PageNotFound />
             </MemoryRouter>
         );
 
