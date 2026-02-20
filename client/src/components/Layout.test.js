@@ -1,6 +1,6 @@
 import React from "react";
 import { Helmet } from "react-helmet"
-import { render, getByTestId, getByText } from "@testing-library/react";
+import { render, getByTestId } from "@testing-library/react";
 import Layout from "./Layout";
 import Header from "./Header";
 import Footer from "./Footer"
@@ -101,6 +101,7 @@ describe("Layout component", () => {
         );
     });
 
+    // Kok Bo Chang, A0273542E
     test("renders non-default prop values passed to it", () => {
         // Arrange
         const title = "Dummy Title";

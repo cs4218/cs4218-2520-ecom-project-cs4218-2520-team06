@@ -203,6 +203,7 @@ describe("ProductDetails component", () => {
         });
     });
     
+    // Kok Bo Chang, A0273542E
     describe("Interactions pertaining to related products", () => {
         // Kok Bo Chang, A0273542E
         test("renders empty related products correctly", async () => {
