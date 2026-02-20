@@ -1,3 +1,4 @@
+// Gabriel Chang, A0276978Y
 import { hashPassword, comparePassword } from "../helpers/authHelper";
 
 describe("hashPassword", () => {

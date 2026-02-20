@@ -33,6 +33,7 @@ jest.mock("../helpers/authHelper.js", () => ({
 
 jest.mock("jsonwebtoken");
 
+// Gabriel Chang, A0276978Y
 describe("registerController", () => {
   let req;
 
@@ -177,6 +178,7 @@ describe("registerController", () => {
   });
 });
 
+// Gabriel Chang, A0276978Y
 test("testController returns correct response", () => {
   const req = {};
   const res = makeRes();
@@ -186,6 +188,7 @@ test("testController returns correct response", () => {
   expect(res.send).toHaveBeenCalledWith("Protected Routes");
 });
 
+// Gabriel Chang, A0276978Y
 describe("loginController", () => {
   let req;
   const res = makeRes();
@@ -292,6 +295,7 @@ describe("loginController", () => {
   });
 });
 
+// Gabriel Chang, A0276978Y
 describe("forgotPasswordController", () => {
   let req;
   const res = makeRes();
