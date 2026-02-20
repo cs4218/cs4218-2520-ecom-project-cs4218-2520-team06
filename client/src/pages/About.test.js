@@ -4,11 +4,11 @@ import { render, getByAltText, getByText } from "@testing-library/react";
 import About from "./About";
 
 jest.mock("./../components/Layout", () => {
-  return ({ children }) => (
-    <div data-testid="layout">
-      {children}
-    </div>
-  );
+    return ({ children }) => (
+        <div data-testid="layout">
+            {children}
+        </div>
+    );
 });
 
 // Kok Bo Chang, A0273542E

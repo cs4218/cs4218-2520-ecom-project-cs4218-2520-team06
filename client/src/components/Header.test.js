@@ -18,7 +18,7 @@ jest.mock("../context/search", () => ({
     useSearch: jest.fn(() => [{ keyword: "", results: [] }, jest.fn()]),
 }));
 jest.mock("react-hot-toast", () => ({
-  success: jest.fn(),
+    success: jest.fn(),
 }));
 
 // Kok Bo Chang, A0273542E
