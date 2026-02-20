@@ -1,6 +1,7 @@
 import React from "react";
-import { render, getByRole, getByText, queryByText, within } from "@testing-library/react";
+import { act, render, getByRole, getByText, queryByText, within } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
+import toast from "react-hot-toast";
 import Header from "./Header";
 import useCategory from "../hooks/useCategory";
 import { useAuth } from "../context/auth";
@@ -15,6 +16,9 @@ jest.mock("../hooks/useCategory");
 jest.mock("../context/cart");
 jest.mock("../context/search", () => ({
     useSearch: jest.fn(() => [{ keyword: "", results: [] }, jest.fn()]),
+}));
+jest.mock("react-hot-toast", () => ({
+  success: jest.fn(),
 }));
 
 // Kok Bo Chang, A0273542E
@@ -226,6 +230,40 @@ describe("Header component", () => {
 
         expect(queryByText(container, "Login")).not.toBeInTheDocument();
         expect(queryByText(container, "Register")).not.toBeInTheDocument()
+    });
+
+    // Kok Bo Chang, A0273542E
+    test("logging out clears auth state, removes localStorage, and shows toast", async () => {
+        // Arrange
+        const setAuthMock = jest.fn();
+        useAuth.mockReturnValue([
+            { user: { name: "dummy_name", role: ROLE_USER }, token: "token" },
+            setAuthMock,
+        ]);
+
+        const removeItemSpy = jest.spyOn(Storage.prototype, "removeItem");
+
+        const { container } = render(
+            <MemoryRouter>
+                <Header />
+            </MemoryRouter>
+        );
+
+        // Act
+        const logout = getByText(container, "Logout");
+        act(() => {
+            logout.click();
+        });
+
+        // Assert
+        expect(setAuthMock).toHaveBeenCalledWith({
+            user: null,
+            token: "",
+        });
+
+        expect(removeItemSpy).toHaveBeenCalledWith("auth");
+
+        expect(toast.success).toHaveBeenCalledWith("Logout Successful");
     });
 
     // Kok Bo Chang, A0273542E
