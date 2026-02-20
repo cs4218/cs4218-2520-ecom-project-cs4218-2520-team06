@@ -1,6 +1,7 @@
+// Kok Bo Chang, A0273542E
 import React from "react";
 import "@testing-library/jest-dom";
-import { screen, render, waitFor, within } from "@testing-library/react";
+import { act, screen, render, waitFor, within } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { useCart } from "../context/cart";
 import axios from "axios";
@@ -8,6 +9,7 @@ import { describe } from "node:test";
 import ProductDetails from "./ProductDetails";
 import toast from "react-hot-toast";
 import { useParams } from "react-router-dom";
+import userEvent from "@testing-library/user-event";
 
 jest.mock("axios");
 jest.mock("../context/cart", () => ({
@@ -104,7 +106,7 @@ describe("ProductDetails component", () => {
     });
 
     // Kok Bo Chang, A0273542E
-    describe("Interactions pertaining to the main displayed product", () => {
+    describe("interactions pertaining to the main displayed product", () => {
         // Kok Bo Chang, A0273542E
         test("renders main product details correctly", async () => {
             // Arrange
@@ -113,11 +115,13 @@ describe("ProductDetails component", () => {
                 .mockResolvedValueOnce({ data: { products: [] } });
 
             // Act
-            render(
-                <MemoryRouter>
-                    <ProductDetails />
-                </MemoryRouter>
-            );
+            await act(async () => {
+                render(
+                    <MemoryRouter>
+                        <ProductDetails />
+                    </MemoryRouter>
+                );
+            });
 
             // Assert
             expect(axios.get).toHaveBeenCalledWith("/api/v1/product/get-product/test-slug");
@@ -187,8 +191,8 @@ describe("ProductDetails component", () => {
             await screen.findByText(nameRegExp);
 
             const addToCartButton = await screen.findByRole("button", { name: /Add to Cart/i });
-            addToCartButton.click();
-
+            await userEvent.click(addToCartButton);
+            
             // Assert
             await waitFor(() => expect(axios.get).toHaveBeenCalledWith("/api/v1/product/get-product/test-slug"));
 
@@ -314,7 +318,7 @@ describe("ProductDetails component", () => {
             for (const rp of relatedProducts) {
                 const card = await screen.findByTestId(`related-product-${rp._id}`);
                 const addToCartButton = within(card).getByRole("button", { name: /Add to Cart/i });
-                addToCartButton.click();
+                await userEvent.click(addToCartButton);
 
                 expect(mockSetCart).toHaveBeenCalledWith(
                     expect.arrayContaining([expect.objectContaining(rp)])
@@ -347,9 +351,8 @@ describe("ProductDetails component", () => {
 
                 const card = await screen.findByTestId(`related-product-${rp._id}`);
                 const moreDetailsButton = within(card).getByRole("button", { name: /More Details/i });
-
-                moreDetailsButton.click();
-
+                await userEvent.click(moreDetailsButton);
+                
                 await waitFor(() =>
                     expect(mockNavigate).toHaveBeenNthCalledWith(i + 1, `/product/${rp.slug}`)
                 );

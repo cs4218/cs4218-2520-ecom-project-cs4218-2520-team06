@@ -1,3 +1,4 @@
+// Kok Bo Chang, A0273542E
 import React from "react";
 import { render, act, getByText } from "@testing-library/react";
 import Spinner from "./Spinner";
