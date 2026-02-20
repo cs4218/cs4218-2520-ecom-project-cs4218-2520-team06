@@ -2,8 +2,8 @@ import React from "react";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import { Helmet } from 'react-helmet';
-import { render, getByAltText, getByRole, getByText } from "@testing-library/react";
-import Contact from "./Contact";
+import { render, getAllByText, getByAltText, getByRole, getByText } from "@testing-library/react";
+import Policy from "./Policy";
 
 jest.mock("../components/Header", () => () => (
   <div>Header</div>
@@ -14,7 +14,7 @@ jest.mock("../components/Footer", () => () => (
 ));
 
 // Kok Bo Chang, A0273542E
-describe("Contact component", () => {
+describe("Policy component", () => {
     beforeEach(() => {
         jest.clearAllMocks();
     });
@@ -24,11 +24,11 @@ describe("Contact component", () => {
     });
 
     // Kok Bo Chang, A0273542E
-    test("renders the contact image with the correct alt text", () => {
+    test("renders the image with the correct alt text", () => {
         // Empty Arrange
 
         // Act
-        const { container } = render(<Contact />);
+        const { container } = render(<Policy />);
 
         // Assert
         const image = getByAltText(container, /contactus/i);
@@ -36,15 +36,20 @@ describe("Contact component", () => {
     });
 
     // Kok Bo Chang, A0273542E
-    test("displays the correct contact information", () => {
+    test("privacy policy contains text content", () => {
         // Empty Arrange
 
         // Act
-        const { container } = render(<Contact />);
+        const { container } = render(<Policy />);
 
         // Assert
-        expect(getByText(container, /help@ecommerceapp\.com/i)).toBeInTheDocument();
-        expect(getByText(container, /012-3456789/)).toBeInTheDocument();
-        expect(getByText(container, /1800-0000-0000/i)).toBeInTheDocument();
-  });
+        const paragraphs = getAllByText(container, (content, element) => {
+            return (
+                element.tagName.toLowerCase() === "p" &&
+                content.trim().length > 0
+            );
+        });
+
+        expect(paragraphs.length).toBeGreaterThan(0);
+    });
 });
