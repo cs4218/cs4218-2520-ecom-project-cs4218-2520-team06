@@ -88,4 +88,20 @@ describe("SearchInput", () => {
       expect(navigate).not.toHaveBeenCalled();
     });
   });
+
+  test("submits search with single-character keyword (boundary 1)", async () => {
+    const setSearchState = jest.fn();
+    const navigate = jest.fn();
+    useNavigate.mockReturnValue(navigate);
+    useSearch.mockReturnValue([{ keyword: "a", results: [] }, setSearchState]);
+    axios.get.mockResolvedValue({ data: [{ _id: "1" }] });
+    render(<SearchInput />);
+
+    fireEvent.submit(screen.getByRole("search"));
+
+    await waitFor(() => {
+      expect(axios.get).toHaveBeenCalledWith("/api/v1/product/search/a");
+    });
+    expect(navigate).toHaveBeenCalledWith("/search");
+  });
 });
