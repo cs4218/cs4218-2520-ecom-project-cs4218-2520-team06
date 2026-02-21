@@ -58,12 +58,15 @@ describe("createProductController", () => {
   });
 
   it("returns error when name is missing", async () => {
+    // Arrange: Set up request with product data but no name
     const req = { fields: { ...testProduct }, files: {} };
     const res = makeRes();
     delete req.fields.name;
 
+    // Act: Call createProductController
     await createProductController(req, res);
 
+    // Assert: Verify error response
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.send).toHaveBeenCalledWith({
       error: "Name is Required",
@@ -71,12 +74,15 @@ describe("createProductController", () => {
   });
 
   it("returns error when description is missing", async () => {
+    // Arrange: Set up request with product data but no description
     const req = { fields: { ...testProduct }, files: {} };
     const res = makeRes();
     delete req.fields.description;
 
+    // Act: Call createProductController
     await createProductController(req, res);
 
+    // Assert: Verify error response
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.send).toHaveBeenCalledWith({
       error: "Description is Required",
@@ -84,12 +90,15 @@ describe("createProductController", () => {
   });
 
   it("returns error when price is missing", async () => {
+    // Arrange: Set up request with product data but no price
     const req = { fields: { ...testProduct }, files: {} };
     const res = makeRes();
     delete req.fields.price;
 
+    // Act: Call createProductController
     await createProductController(req, res);
 
+    // Assert: Verify error response
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.send).toHaveBeenCalledWith({
       error: "Price is Required",
@@ -97,12 +106,15 @@ describe("createProductController", () => {
   });
 
   it("returns error when category is missing", async () => {
+    // Arrange: Set up request with product data but no category
     const req = { fields: { ...testProduct }, files: {} };
     const res = makeRes();
     delete req.fields.category;
 
+    // Act: Call createProductController
     await createProductController(req, res);
 
+    // Assert: Verify error response
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.send).toHaveBeenCalledWith({
       error: "Category is Required",
@@ -110,12 +122,15 @@ describe("createProductController", () => {
   });
 
   it("returns error when quantity is missing", async () => {
+    // Arrange: Set up request with product data but no quantity
     const req = { fields: { ...testProduct }, files: {} };
     const res = makeRes();
     delete req.fields.quantity;
 
+    // Act: Call createProductController
     await createProductController(req, res);
 
+    // Assert: Verify error response
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.send).toHaveBeenCalledWith({
       error: "Quantity is Required",
@@ -123,14 +138,17 @@ describe("createProductController", () => {
   });
 
   it("returns error when photo is given but size is too big", async () => {
+    // Arrange: Set up request with product data and oversized photo
     const req = {
       fields: { ...testProduct },
       files: { photo: { size: 99999999 } },
     };
     const res = makeRes();
 
+    // Act: Call createProductController
     await createProductController(req, res);
 
+    // Assert: Verify error response
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.send).toHaveBeenCalledWith({
       error: "photo is Required and should be less then 1mb",
@@ -138,12 +156,15 @@ describe("createProductController", () => {
   });
 
   it("returns 201 when product is created successfully", async () => {
+    // Arrange: Set up request with valid product data
     const req = { fields: { ...testProduct }, files: {} };
     const res = makeRes();
     slugify.mockReturnValueOnce("phone");
 
+    // Act: Call createProductController
     await createProductController(req, res);
 
+    // Assert: Verify product was created successfully
     expect(slugify).toHaveBeenCalledWith(testProduct.name);
     expect(productModel.prototype.save).toHaveBeenCalledTimes(1);
 
@@ -160,6 +181,7 @@ describe("createProductController", () => {
   });
 
   it("updates product photo info when valid photo is given", async () => {
+    // Arrange: Set up request with valid product data and photo
     const req = {
       fields: { ...testProduct },
       files: {
@@ -175,8 +197,10 @@ describe("createProductController", () => {
     slugify.mockReturnValueOnce("phone");
     fs.readFileSync.mockReturnValueOnce(Buffer.from("fake-bytes"));
 
+    // Act: Call createProductController
     await createProductController(req, res);
 
+    // Assert: Verify photo data was attached to product
     const instance = productModel.mock.instances[0];
     expect(fs.readFileSync).toHaveBeenCalledWith("testPath");
     expect(instance.photo.data).toEqual(Buffer.from("fake-bytes"));
@@ -185,12 +209,15 @@ describe("createProductController", () => {
   });
 
   it("does not update product photo info when no photo is given", async () => {
+    // Arrange: Set up request with valid product data but no photo
     const req = { fields: { ...testProduct }, files: {} };
     const res = makeRes();
     slugify.mockReturnValueOnce("phone");
 
+    // Act: Call createProductController
     await createProductController(req, res);
 
+    // Assert: Verify no photo data was attached to product
     const instance = productModel.mock.instances[0];
     expect(fs.readFileSync).not.toHaveBeenCalled();
     expect(instance.photo.data).toBeUndefined();
@@ -199,14 +226,17 @@ describe("createProductController", () => {
   });
 
   it("returns 500 when error is thrown", async () => {
+    // Arrange: Set up request and mock database error
     const req = { fields: { ...testProduct }, files: {} };
     const res = makeRes();
     const err = new Error("DB failure");
     productModel.prototype.save.mockRejectedValueOnce(err);
     const consoleSpy = jest.spyOn(console, "log").mockImplementation(() => {});
 
+    // Act: Call createProductController
     await createProductController(req, res);
 
+    // Assert: Verify error was logged and 500 response returned
     expect(consoleSpy).toHaveBeenCalledWith(err);
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.send).toHaveBeenCalledWith({
@@ -240,12 +270,15 @@ describe("updateProductController", () => {
   });
 
   it("returns error when name is missing", async () => {
+    // Arrange: Set up request with product data but no name
     const req = { fields: { ...testProduct }, files: {} };
     const res = makeRes();
     delete req.fields.name;
 
+    // Act: Call updateProductController
     await updateProductController(req, res);
 
+    // Assert: Verify error response
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.send).toHaveBeenCalledWith({
       error: "Name is Required",
@@ -253,12 +286,15 @@ describe("updateProductController", () => {
   });
 
   it("returns error when description is missing", async () => {
+    // Arrange: Set up request with product data but no description
     const req = { fields: { ...testProduct }, files: {} };
     const res = makeRes();
     delete req.fields.description;
 
+    // Act: Call updateProductController
     await updateProductController(req, res);
 
+    // Assert: Verify error response
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.send).toHaveBeenCalledWith({
       error: "Description is Required",
@@ -266,12 +302,15 @@ describe("updateProductController", () => {
   });
 
   it("returns error when price is missing", async () => {
+    // Arrange: Set up request with product data but no price
     const req = { fields: { ...testProduct }, files: {} };
     const res = makeRes();
     delete req.fields.price;
 
+    // Act: Call updateProductController
     await updateProductController(req, res);
 
+    // Assert: Verify error response
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.send).toHaveBeenCalledWith({
       error: "Price is Required",
@@ -279,12 +318,15 @@ describe("updateProductController", () => {
   });
 
   it("returns error when category is missing", async () => {
+    // Arrange: Set up request with product data but no category
     const req = { fields: { ...testProduct }, files: {} };
     const res = makeRes();
     delete req.fields.category;
 
+    // Act: Call updateProductController
     await updateProductController(req, res);
 
+    // Assert: Verify error response
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.send).toHaveBeenCalledWith({
       error: "Category is Required",
@@ -292,12 +334,15 @@ describe("updateProductController", () => {
   });
 
   it("returns error when quantity is missing", async () => {
+    // Arrange: Set up request with product data but no quantity
     const req = { fields: { ...testProduct }, files: {} };
     const res = makeRes();
     delete req.fields.quantity;
 
+    // Act: Call updateProductController
     await updateProductController(req, res);
 
+    // Assert: Verify error response
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.send).toHaveBeenCalledWith({
       error: "Quantity is Required",
@@ -305,14 +350,17 @@ describe("updateProductController", () => {
   });
 
   it("returns error when photo is given but size is too big", async () => {
+    // Arrange: Set up request with product data and oversized photo
     const req = {
       fields: { ...testProduct },
       files: { photo: { size: 99999999 } },
     };
     const res = makeRes();
 
+    // Act: Call updateProductController
     await updateProductController(req, res);
 
+    // Assert: Verify error response
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.send).toHaveBeenCalledWith({
       error: "photo is Required and should be less then 1mb",
@@ -320,6 +368,7 @@ describe("updateProductController", () => {
   });
 
   it("returns 201 when product is updated successfully", async () => {
+    // Arrange: Set up request with product ID and valid update data
     const req = {
       params: { pid: "testPid" },
       fields: { ...testProduct },
@@ -334,8 +383,10 @@ describe("updateProductController", () => {
     slugify.mockReturnValueOnce("phone");
     productModel.findByIdAndUpdate.mockResolvedValueOnce(updated);
 
+    // Act: Call updateProductController
     await updateProductController(req, res);
 
+    // Assert: Verify product was updated successfully
     expect(productModel.findByIdAndUpdate).toHaveBeenCalledWith(
       "testPid",
       { ...testProduct, slug: "phone" },
@@ -355,6 +406,7 @@ describe("updateProductController", () => {
   });
 
   it("updates product photo info when valid photo is given", async () => {
+    // Arrange: Set up request with product ID, update data, and photo
     const req = {
       params: { pid: "testPid" },
       fields: { ...testProduct },
@@ -379,8 +431,10 @@ describe("updateProductController", () => {
     slugify.mockReturnValueOnce("phone");
     fs.readFileSync.mockReturnValueOnce(Buffer.from("fake-bytes"));
 
+    // Act: Call updateProductController
     await updateProductController(req, res);
 
+    // Assert: Verify photo data was attached to product
     expect(fs.readFileSync).toHaveBeenCalledWith("testPath");
     expect(updated.photo.data).toEqual(Buffer.from("fake-bytes"));
     expect(updated.photo.contentType).toBe("testType");
@@ -388,6 +442,7 @@ describe("updateProductController", () => {
   });
 
   it("does not update product photo info when no photo is given", async () => {
+    // Arrange: Set up request with product ID and update data but no photo
     const req = {
       params: { pid: "testPid" },
       fields: { ...testProduct },
@@ -404,8 +459,10 @@ describe("updateProductController", () => {
     productModel.findByIdAndUpdate.mockResolvedValueOnce(updated);
     slugify.mockReturnValueOnce("phone");
 
+    // Act: Call updateProductController
     await updateProductController(req, res);
 
+    // Assert: Verify no photo data was attached to product
     expect(fs.readFileSync).not.toHaveBeenCalled();
     expect(updated.photo.data).toBeUndefined();
     expect(updated.photo.contentType).toBeUndefined();
@@ -413,6 +470,7 @@ describe("updateProductController", () => {
   });
 
   it("returns 500 when error is thrown", async () => {
+    // Arrange: Set up request and mock database error
     const req = {
       params: { pid: "testPid" },
       fields: { ...testProduct },
@@ -423,8 +481,10 @@ describe("updateProductController", () => {
     productModel.findByIdAndUpdate.mockRejectedValueOnce(err);
     const consoleSpy = jest.spyOn(console, "log").mockImplementation(() => {});
 
+    // Act: Call updateProductController
     await updateProductController(req, res);
 
+    // Assert: Verify error was logged and 500 response returned
     expect(consoleSpy).toHaveBeenCalledWith(err);
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.send).toHaveBeenCalledWith({
@@ -447,13 +507,16 @@ describe("deleteProductController", () => {
   });
   
   it("returns 200 when product is successfully deleted", async () => {
+    // Arrange: Set up request with product ID
     const req = { params: { pid: "testPid" } };
     const res = makeRes();
     const selectMock = jest.fn().mockResolvedValueOnce({ _id: "testPid" });
     productModel.findByIdAndDelete.mockReturnValueOnce({ select: selectMock });
 
+    // Act: Call deleteProductController
     await deleteProductController(req, res);
 
+    // Assert: Verify product was deleted successfully
     expect(productModel.findByIdAndDelete).toHaveBeenCalledWith("testPid");
     expect(selectMock).toHaveBeenCalledWith("-photo");
     expect(res.status).toHaveBeenCalledWith(200);
@@ -464,6 +527,7 @@ describe("deleteProductController", () => {
   });
 
   it("returns 500 when error is thrown", async () => {
+    // Arrange: Set up request and mock database error
     const req = { params: { pid: "testPid" } };
     const res = makeRes();
     const err = new Error("DB failure");
@@ -471,8 +535,10 @@ describe("deleteProductController", () => {
     productModel.findByIdAndDelete.mockReturnValueOnce({ select: selectMock });
     const consoleSpy = jest.spyOn(console, "log").mockImplementation(() => {});
 
+    // Act: Call deleteProductController
     await deleteProductController(req, res);
 
+    // Assert: Verify error was logged and 500 response returned
     expect(consoleSpy).toHaveBeenCalledWith(err);
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.send).toHaveBeenCalledWith({

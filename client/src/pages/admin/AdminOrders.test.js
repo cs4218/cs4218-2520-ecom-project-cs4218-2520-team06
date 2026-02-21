@@ -42,6 +42,7 @@ describe("AdminOrders Component", () => {
   });
 
   it("renders orders correctly", async () => {
+    // Arrange: Set up mock orders data and API response
     const mockOrders = [
       {
         _id: "order-1",
@@ -76,6 +77,7 @@ describe("AdminOrders Component", () => {
     ];
     axios.get.mockResolvedValueOnce({ data: mockOrders });
 
+    // Act: Render the AdminOrders component
     let renderResult;
     await act(async () => {
       renderResult = render(
@@ -88,11 +90,13 @@ describe("AdminOrders Component", () => {
     });
     const { findByText } = renderResult;
 
+    // Assert: Verify that products from orders are displayed
     expect(await findByText("Product A")).toBeInTheDocument();
     expect(await findByText("Product B")).toBeInTheDocument();
   });
 
   it("handles when order status changes", async () => {
+    // Arrange: Set up mock orders and API responses
     const mockOrders = [
       {
         _id: "order-1",
@@ -113,7 +117,8 @@ describe("AdminOrders Component", () => {
     axios.get.mockResolvedValueOnce({ data: mockOrders });
     axios.get.mockResolvedValueOnce({ data: mockOrders });
     axios.put.mockResolvedValueOnce({ data: { success: true } });
-
+    
+    // Act : Render the AdminOrders component and change order status
     let renderResult;
     await act(async () => {
       renderResult = render(
@@ -125,28 +130,32 @@ describe("AdminOrders Component", () => {
       );
     });
     const { findByText, getByTestId } = renderResult;
-
+    
+    // Assert: Verify initial order status is displayed
     expect(await findByText("Product A")).toBeInTheDocument();
 
+    // Act: Change the order status via the select dropdown
     const statusSelect = getByTestId("status-select");
     await act(async () => {
       fireEvent.change(statusSelect, { target: { value: "Shipped" } });
     });
 
+    // Assert: Verify PUT request was made with correct data and orders were refetched
     await waitFor(() =>
       expect(axios.put).toHaveBeenCalledWith(
         "/api/v1/auth/order-status/order-1",
         { status: "Shipped" }
       )
     );
-
     await waitFor(() => expect(axios.get).toHaveBeenCalledTimes(2));
   });
 
   it("does not fetch orders when auth token is missing", async () => {
+    // Arrange: Mock useAuth to return an empty token
     const { useAuth } = require("../../context/auth");
     useAuth.mockImplementationOnce(() => [{ token: "" }, jest.fn()]);
 
+    // Act: Render the AdminOrders component without authentication
     await act(async () => {
       render(
         <MemoryRouter>
@@ -157,14 +166,17 @@ describe("AdminOrders Component", () => {
       );
     });
 
+    // Assert: Verify no API call was made
     expect(axios.get).not.toHaveBeenCalled();
   });
 
   it("logs error when fetching orders fails", async () => {
+    // Arrange: Set up API to reject with an error and spy on console.log
     const error = new Error("fetch failed");
     axios.get.mockRejectedValueOnce(error);
     const consoleSpy = jest.spyOn(console, "log").mockImplementation(() => {});
 
+    // Act: Render the AdminOrders component
     await act(async () => {
       render(
         <MemoryRouter>
@@ -175,10 +187,12 @@ describe("AdminOrders Component", () => {
       );
     });
 
+    // Assert: Verify error was logged to console
     await waitFor(() => expect(consoleSpy).toHaveBeenCalledWith(error));
   });
 
   it("logs error when status update fails", async () => {
+    // Arrange: Set up mock orders, failed PUT request, and spy on console.log
     const mockOrders = [
       {
         _id: "order-1",
@@ -200,7 +214,8 @@ describe("AdminOrders Component", () => {
     axios.get.mockResolvedValueOnce({ data: mockOrders });
     axios.put.mockRejectedValueOnce(error);
     const consoleSpy = jest.spyOn(console, "log").mockImplementation(() => {});
-
+    
+    // Act: Render the AdminOrders component and attempt to change order status
     let renderResult;
     await act(async () => {
       renderResult = render(
@@ -212,14 +227,17 @@ describe("AdminOrders Component", () => {
       );
     });
     const { findByText, getByTestId } = renderResult;
-
+    
+    // Assert: Verify initial order status is displayed
     expect(await findByText("Product A")).toBeInTheDocument();
 
+    // Act: Attempt to change order status
     const statusSelect = getByTestId("status-select");
     await act(async () => {
       fireEvent.change(statusSelect, { target: { value: "Shipped" } });
     });
 
+    // Assert: Verify error was logged to console
     await waitFor(() => expect(consoleSpy).toHaveBeenCalledWith(error));
   });
 });

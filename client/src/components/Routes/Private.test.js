@@ -21,7 +21,10 @@ describe("PrivateRoute Component", () => {
   });
 
   it("renders Outlet component", async () => {
+    // Arrange: Mock axios.get to resolve with a successful response
     axios.get.mockResolvedValueOnce({ data: { ok: true } });
+    
+    // Act: Render the PrivateRoute component wrapped in MemoryRouter and Routes
     const { findByText } = render(
       <MemoryRouter initialEntries={["/dashboard"]}>
         <Routes>
@@ -31,11 +34,16 @@ describe("PrivateRoute Component", () => {
         </Routes>
       </MemoryRouter>
     );
+    
+    // Assert: Check if the Outlet element is rendered
     expect(await findByText("Outlet Element")).toBeInTheDocument();
   });
 
   it("renders Spinner component", async () => {
+    // Arrange: Mock axios.get to resolve with a successful response
     axios.get.mockResolvedValueOnce({ data: { ok: false } });
+    
+    // Act: Render the PrivateRoute component wrapped in MemoryRouter and Routes
     const { findByText } = render(
       <MemoryRouter initialEntries={["/dashboard"]}>
         <Routes>
@@ -45,11 +53,16 @@ describe("PrivateRoute Component", () => {
         </Routes>
       </MemoryRouter>
     );
+    
+    // Assert: Check if the Spinner element is rendered
     expect(await findByText(/redirecting to you in/i)).toBeInTheDocument();
   });
 
   it("renders Spinner when auth.token is falsy", async () => {
+    // Arrange: Set mockAuthValue to have a falsy token
     mockAuthValue = { token: false };
+    
+    // Act: Render the PrivateRoute component wrapped in MemoryRouter and Routes
     const { findByText } = render(
       <MemoryRouter initialEntries={["/dashboard"]}>
         <Routes>
@@ -59,6 +72,8 @@ describe("PrivateRoute Component", () => {
         </Routes>
       </MemoryRouter>
     );
+    
+    // Assert: Check if the Spinner element is rendered and axios.get is not called
     expect(await findByText(/redirecting to you in/i)).toBeInTheDocument();
     expect(axios.get).not.toHaveBeenCalled();
   });

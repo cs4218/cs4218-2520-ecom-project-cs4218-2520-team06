@@ -28,29 +28,37 @@ describe("CreateCategory Component", () => {
   });
 
   it("renders correctly", async () => {
+    // Arrange: Mock empty categories response
     axios.get.mockResolvedValueOnce({
       data: { category: [], success: true },
     });
+    
+    // Act: Render the CreateCategory component
     const { getByText } = render(<CreateCategory />);
 
     await waitFor(() => expect(axios.get).toHaveBeenCalled());
 
+    // Assert: Verify expected elements are rendered
     expect(getByText("AdminMenu")).toBeInTheDocument();
     expect(getByText("Manage Category")).toBeInTheDocument();
   });
 
   it("fetches and displays categories on mount", async () => {
+    // Arrange: Mock categories API response
     axios.get.mockResolvedValueOnce({
       data: { category: mockCategories, success: true },
     });
 
+    // Act: Render the CreateCategory component
     const { findByText } = render(<CreateCategory />);
 
+    // Assert: Verify categories are displayed
     expect(await findByText("Category 1")).toBeInTheDocument();
     expect(await findByText("Category 2")).toBeInTheDocument();
   });
 
   it("creates a new category successfully", async () => {
+    // Arrange: Mock initial categories and successful creation
     const newCategory = { _id: "cat-3", name: "Category 3" };
     axios.get.mockResolvedValueOnce({
       data: { category: mockCategories, success: true },
@@ -62,15 +70,18 @@ describe("CreateCategory Component", () => {
     });
     axios.post.mockResolvedValueOnce({ data: { success: true } });
 
+    // Act: Render the CreateCategory component, fill form, and submit
     const { getByPlaceholderText, getAllByRole, findByText } = render(
       <CreateCategory />
     );
     const input = getByPlaceholderText("Enter new category");
     fireEvent.change(input, { target: { value: "Category 3" } });
+    
     // Get the first submit button (main form)
     const submitButtons = getAllByRole("button", { name: /submit/i });
     fireEvent.click(submitButtons[0]);
 
+    // Assert: Verify success toast and new category is displayed
     await waitFor(() =>
       expect(toast.success).toHaveBeenCalledWith("Category 3 is created")
     );
@@ -78,6 +89,7 @@ describe("CreateCategory Component", () => {
   });
 
   it("updates an existing category successfully", async () => {
+    // Arrange: Mock initial categories and successful update
     axios.get.mockResolvedValueOnce({
       data: { category: mockCategories, success: true },
     });
@@ -89,9 +101,8 @@ describe("CreateCategory Component", () => {
     });
     axios.put.mockResolvedValueOnce({ data: { success: true } });
 
-    const { getByRole, findByText } = render(<CreateCategory />);
-    
-    // Wait for category to appear, then find its row
+    // Act: Render the CreateCategory component and attempt to update a category
+    const { findByText } = render(<CreateCategory />);
     const categoryCell = await findByText("Category 1");
     const row = categoryCell.closest("tr");
     
@@ -106,6 +117,7 @@ describe("CreateCategory Component", () => {
     const submitButtons = document.querySelectorAll('button[type="submit"]');
     fireEvent.click(submitButtons[1]);
 
+    // Assert: Verify success toast and updated category is displayed
     await waitFor(() =>
       expect(toast.success).toHaveBeenCalledWith(
         "Updated Category 1 is updated"
@@ -115,6 +127,7 @@ describe("CreateCategory Component", () => {
   });
 
   it("deletes a category successfully", async () => {
+    // Arrange: Mock initial categories and successful deletion
     axios.get.mockResolvedValueOnce({
       data: { category: mockCategories, success: true },
     });
@@ -125,9 +138,8 @@ describe("CreateCategory Component", () => {
     });
     axios.delete.mockResolvedValueOnce({ data: { success: true } });
 
+    // Act: Render the CreateCategory component and attempt to delete a category
     const { findByText, queryByText } = render(<CreateCategory />);
-    
-    // Wait for category to appear, then find its row
     const categoryCell = await findByText("Category 1");
     const row = categoryCell.closest("tr");
     
@@ -135,6 +147,7 @@ describe("CreateCategory Component", () => {
     const deleteButton = within(row).getByRole("button", { name: /delete/i });
     fireEvent.click(deleteButton);
 
+    // Assert: Verify success toast and category is removed
     await waitFor(() =>
       expect(toast.success).toHaveBeenCalledWith("Category is deleted")
     );
@@ -144,25 +157,32 @@ describe("CreateCategory Component", () => {
   });
 
   it("does not display any categories when fetching returns success false", async () => {
+    // Arrange: Mock API response with success false
     axios.get.mockResolvedValueOnce({
       data: { category: [], success: false },
     });
 
+    // Act: Render the CreateCategory component
     const { queryByText } = render(<CreateCategory />);
 
     // Wait for the async effect to complete
     await waitFor(() => expect(axios.get).toHaveBeenCalled());
+    
+    // Assert: Verify no categories are displayed
     expect(queryByText("Category 1")).not.toBeInTheDocument();
     expect(queryByText("Category 2")).not.toBeInTheDocument();
   });
 
   it("logs error when fetching categories fails", async () => {
+    // Arrange: Mock API error and spy on console.log
     const error = new Error("Fetch failed");
     axios.get.mockRejectedValueOnce(error);
     const consoleSpy = jest.spyOn(console, "log").mockImplementation(() => {});
 
+    // Act: Render the CreateCategory component
     render(<CreateCategory />);
 
+    // Assert: Verify error was logged and error toast was shown
     await waitFor(() => expect(consoleSpy).toHaveBeenCalledWith(error));
     expect(toast.error).toHaveBeenCalledWith(
       "Something went wrong in getting all categories"
@@ -170,25 +190,29 @@ describe("CreateCategory Component", () => {
   });
 
   it("shows error toast when creating category returns success false", async () => {
+    // Arrange: Mock categories fetch and failed creation
     axios.get.mockResolvedValueOnce({
       data: { category: mockCategories, success: true },
     });
     axios.post.mockResolvedValueOnce({
       data: { message: "Create category error", success: false },
     });
-
+    
+    // Act: Render the CreateCategory component and attempt to create a category and submit the form
     const { getByPlaceholderText, getAllByRole } = render(<CreateCategory />);
     const input = getByPlaceholderText("Enter new category");
     fireEvent.change(input, { target: { value: "New Category" } });
     const submitButtons = getAllByRole("button", { name: /submit/i });
     fireEvent.click(submitButtons[0]);
 
+    // Assert: Verify error toast was shown
     await waitFor(() =>
       expect(toast.error).toHaveBeenCalledWith("Create category error")
     );
   });
 
   it("logs error when creating category fails", async () => {
+    // Arrange: Mock categories fetch, failed creation, and spy on console.log
     const error = new Error("Create failed");
     axios.get.mockResolvedValueOnce({
       data: { category: mockCategories, success: true },
@@ -196,12 +220,14 @@ describe("CreateCategory Component", () => {
     axios.post.mockRejectedValueOnce(error);
     const consoleSpy = jest.spyOn(console, "log").mockImplementation(() => {});
 
+    // Act: Render the CreateCategory component and attempt to create a category and submit the form
     const { getByPlaceholderText, getAllByRole } = render(<CreateCategory />);
     const input = getByPlaceholderText("Enter new category");
     fireEvent.change(input, { target: { value: "New Category" } });
     const submitButtons = getAllByRole("button", { name: /submit/i });
     fireEvent.click(submitButtons[0]);
 
+    // Assert: Verify error was logged and error toast was shown
     await waitFor(() => expect(consoleSpy).toHaveBeenCalledWith(error));
     expect(toast.error).toHaveBeenCalledWith(
       "Something went wrong in input form"
@@ -209,6 +235,7 @@ describe("CreateCategory Component", () => {
   });
 
   it("shows error toast when updating category returns success false", async () => {
+    // Arrange: Mock categories fetch and failed update
     axios.get.mockResolvedValueOnce({
       data: { category: mockCategories, success: true },
     });
@@ -217,9 +244,8 @@ describe("CreateCategory Component", () => {
       data: { message: "Update category error", success: false },
     });
 
+    // Act: Render the CreateCategory component and attempt to update a category
     const { findByText } = render(<CreateCategory />);
-
-    // Wait for category to appear, then find its row
     const categoryCell = await findByText("Category 1");
     const row = categoryCell.closest("tr");
     
@@ -234,21 +260,22 @@ describe("CreateCategory Component", () => {
     const submitButtons = document.querySelectorAll('button[type="submit"]');
     fireEvent.click(submitButtons[1]);
 
+    // Assert: Verify error toast was shown
     await waitFor(() =>
       expect(toast.error).toHaveBeenCalledWith("Update category error")
     );
   });
 
   it("shows error toast when updating category fails", async () => {
+    // Arrange: Mock categories fetch and failed update
     const error = new Error("Update failed");
     axios.get.mockResolvedValueOnce({
       data: { category: mockCategories, success: true },
     });
     axios.put.mockRejectedValueOnce(error);
 
+    // Act: Render the CreateCategory component and attempt to update a category
     const { findByText } = render(<CreateCategory />);
-
-    // Wait for category to appear, then find its row
     const categoryCell = await findByText("Category 1");
     const row = categoryCell.closest("tr");
     
@@ -263,6 +290,7 @@ describe("CreateCategory Component", () => {
     const submitButtons = document.querySelectorAll('button[type="submit"]');
     fireEvent.click(submitButtons[1]);
 
+    // Assert: Verify error toast was shown
     await waitFor(() =>
       expect(toast.error).toHaveBeenCalledWith(
         "Something went wrong in updating category"
@@ -271,6 +299,7 @@ describe("CreateCategory Component", () => {
   });
 
   it("shows error toast when deleting category returns success false", async () => {
+    // Arrange: Mock categories fetch and failed deletion
     axios.get.mockResolvedValueOnce({
       data: { category: mockCategories, success: true },
     });
@@ -278,9 +307,8 @@ describe("CreateCategory Component", () => {
       data: { message: "Delete category error", success: false },
     });
 
+    // Act: Render the CreateCategory component and attempt to delete a category
     const { findByText } = render(<CreateCategory />);
-    
-    // Wait for category to appear, then find its row
     const categoryCell = await findByText("Category 1");
     const row = categoryCell.closest("tr");
     
@@ -288,21 +316,22 @@ describe("CreateCategory Component", () => {
     const deleteButton = within(row).getByRole("button", { name: /delete/i });
     fireEvent.click(deleteButton);
 
+    // Assert: Verify error toast was shown
     await waitFor(() =>
       expect(toast.error).toHaveBeenCalledWith("Delete category error")
     );
   });
 
   it("show error toast when deleting category fails", async () => {
+    // Arrange: Mock categories fetch and failed deletion
     const error = new Error("Delete failed");
     axios.get.mockResolvedValueOnce({
       data: { category: mockCategories, success: true },
     });
     axios.delete.mockRejectedValueOnce(error);
 
+    // Act: Render the CreateCategory component and attempt to delete a category
     const { findByText } = render(<CreateCategory />);
-    
-    // Wait for category to appear, then find its row
     const categoryCell = await findByText("Category 1");
     const row = categoryCell.closest("tr");
     
@@ -310,6 +339,7 @@ describe("CreateCategory Component", () => {
     const deleteButton = within(row).getByRole("button", { name: /delete/i });
     fireEvent.click(deleteButton);
 
+    // Assert: Verify error toast was shown
     await waitFor(() =>
       expect(toast.error).toHaveBeenCalledWith(
         "Something went wrong in deleting category"
@@ -318,13 +348,13 @@ describe("CreateCategory Component", () => {
   });
 
   it("closes the modal when cancel button is clicked", async () => {
+    // Arrange: Mock categories fetch
     axios.get.mockResolvedValueOnce({
       data: { category: mockCategories, success: true },
     });
 
+    // Act: Render the CreateCategory component and attempt to update a category
     const { findByText, getByLabelText, queryByLabelText } = render(<CreateCategory />);
-
-    // Wait for category to appear, then find its row
     const categoryCell = await findByText("Category 1");
     const row = categoryCell.closest("tr");
     
@@ -340,6 +370,7 @@ describe("CreateCategory Component", () => {
     const closeButton = getByLabelText("Close");
     fireEvent.click(closeButton);
 
+    // Assert: Verify modal is closed (close button hidden or removed)
     await waitFor(() => {
       const closeBtn = queryByLabelText("Close");
       if (closeBtn) {

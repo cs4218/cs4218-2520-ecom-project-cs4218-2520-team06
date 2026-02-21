@@ -22,6 +22,7 @@ describe("Products Component", () => {
   });
 
   it("renders products correctly", async () => {
+    // Arrange: Set up mock products data and API response
     const mockProducts = [
       {
         _id: "prod-1",
@@ -38,9 +39,9 @@ describe("Products Component", () => {
         slug: "product-b",
       },
     ];
-
     axios.get.mockResolvedValueOnce({ data: { products: mockProducts } });
 
+    // Act: Render the Products component
     let renderResult;
     await act(async () => {
       renderResult = render(
@@ -50,8 +51,8 @@ describe("Products Component", () => {
       );
     });
 
+    // Assert: Verify all products are displayed with correct links
     const { findByText, getByText } = renderResult;
-
     for (const product of mockProducts) {
       expect(await findByText(product.name)).toBeInTheDocument();
       expect(await findByText(product.description)).toBeInTheDocument();
@@ -63,10 +64,12 @@ describe("Products Component", () => {
   });
 
   it("handles API errors gracefully", async () => {
+    // Arrange: Set up API to reject with an error and spy on console.log
     const error = new Error("API Error");
     axios.get.mockRejectedValueOnce(error);
     const consoleSpy = jest.spyOn(console, "log").mockImplementation(() => {});
 
+    // Act: Render the Products component
     await act(async () => {
       render(
         <MemoryRouter>
@@ -75,6 +78,7 @@ describe("Products Component", () => {
       );
     });
 
+    // Assert: Verify error was logged and error toast was shown
     await waitFor(() => expect(consoleSpy).toHaveBeenCalledWith(error));
     expect(toast.error).toHaveBeenCalledWith("Something Went Wrong");
   });

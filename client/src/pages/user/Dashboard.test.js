@@ -27,34 +27,43 @@ jest.mock("../../context/auth", () => ({
 
 describe("Dashboard Component", () => {
   it("renders user information correctly", () => {
+    // Arrange: Mock user data is set up in the useAuth hook at the top
+    // Act: Render the Dashboard component
     const { getByText } = render(
       <MemoryRouter>
         <Dashboard />
       </MemoryRouter>
     );
 
+    // Assert: Verify user information is displayed
     expect(getByText("John Doe")).toBeInTheDocument();
     expect(getByText("john.doe@example.com")).toBeInTheDocument();
     expect(getByText("123 Main St")).toBeInTheDocument();
   });
 
   it("renders the Layout component with correct title", () => {
+    // Arrange: Mock user data is set up in the useAuth hook at the top
+    // Act: Render the Dashboard component
     const { getByText } = render(
       <MemoryRouter>
         <Dashboard />
       </MemoryRouter>
     );
 
+    // Assert: Verify Layout component renders with correct title
     expect(getByText("Dashboard - Ecommerce App")).toBeInTheDocument();
   });
 
   it("renders the UserMenu component", () => {
+    // Arrange: Mock user data is set up in the useAuth hook at the top
+    // Act: Render the Dashboard component
     const { getByText } = render(
       <MemoryRouter>
         <Dashboard />
       </MemoryRouter>
     );
 
+    // Assert: Verify UserMenu component is rendered
     expect(getByText("Profile")).toBeInTheDocument();
   });
 });
