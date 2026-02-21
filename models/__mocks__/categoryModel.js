@@ -1,3 +1,4 @@
+// Gallen Ong, A0252614L
 const categoryModel = jest.fn(function (doc = {}) {
   Object.assign(this, doc);
 });

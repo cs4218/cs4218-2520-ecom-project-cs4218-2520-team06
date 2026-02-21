@@ -35,6 +35,7 @@ jest.mock("braintree", () => ({
   },
 }));
 
+// Gallen Ong, A0252614L
 // Create Product Tests
 describe("createProductController", () => {
   beforeEach(() => {
@@ -216,6 +217,7 @@ describe("createProductController", () => {
   });
 });
 
+// Gallen Ong, A0252614L
 // Update Product Test
 describe("updateProductController", () => {
   beforeEach(() => {
@@ -433,6 +435,7 @@ describe("updateProductController", () => {
   });
 });
 
+// Gallen Ong, A0252614L
 // Delete Product Test
 describe("deleteProductController", () => {
   beforeEach(() => {
