@@ -27,17 +27,96 @@ jest.mock("react-router-dom", () => ({
 delete window.location;
 window.location = { reload: jest.fn() };
 
-// Mock Layout component
-jest.mock("../components/Layout", () => {
-  return function MockLayout({ children, title }) {
-    return (
-      <div data-testid="layout">
-        <div data-testid="layout-title">{title}</div>
-        {children}
-      </div>
-    );
-  };
-});
+jest.mock("../components/Layout.js", () => ({ children, title }) => (
+  <div>
+    <h1>{title}</h1>
+    {children}
+  </div>
+));
+
+const mockCategories = [
+  { _id: "1", name: "Category 1" },
+  { _id: "2", name: "Category 2" },
+];
+
+const mockProducts = [
+  {
+    _id: "p1",
+    name: "Product 1",
+    price: 100,
+    description: "Desc 1",
+    slug: "p1",
+  },
+  {
+    _id: "p2",
+    name: "Product 2",
+    price: 200,
+    description: "Desc 2",
+    slug: "p2",
+  },
+];
+
+const mockProductsPage1 = [mockProducts[0]];
+const mockProductsPage2 = [mockProducts[1]];
+
+const mockFilteredProducts = [
+  {
+    _id: "p1",
+    name: "Filtered Product",
+    price: 150,
+    description: "Filtered Desc",
+  },
+];
+
+const mockPriceFilteredProducts = [
+  {
+    _id: "p2",
+    name: "Price Filtered Product",
+    price: 250,
+    description: "Price Filtered Desc",
+  },
+];
+
+const setupAxiosMock = ({
+  categories = [],
+  products = [],
+  total = 0,
+  pageProducts = null,
+  rejectGet = false,
+  rejectLoadMore = false,
+  postHandler = null,
+  rejectPost = false,
+} = {}) => {
+  axios.get.mockImplementation((url) => {
+    if (rejectGet) return Promise.reject(new Error("API Error"));
+
+    if (url === "/api/v1/category/get-category") {
+      return Promise.resolve({ data: { success: true, category: categories } });
+    }
+    if (url === "/api/v1/product/product-count") {
+      return Promise.resolve({ data: { total } });
+    }
+    if (url.startsWith("/api/v1/product/product-list/")) {
+      const page = url.split("/").pop();
+      if (rejectLoadMore && page !== "1") {
+        return Promise.reject(new Error("Load More Error"));
+      }
+      if (pageProducts && pageProducts[page] !== undefined) {
+        return Promise.resolve({ data: { products: pageProducts[page] } });
+      }
+      return Promise.resolve({ data: { products } });
+    }
+    return Promise.resolve({ data: {} });
+  });
+
+  axios.post.mockImplementation((url, params) => {
+    if (url === "/api/v1/product/product-filters") {
+      if (rejectPost) return Promise.reject(new Error("Filter API Error"));
+      if (postHandler) return postHandler(params);
+    }
+    return Promise.resolve({ data: {} });
+  });
+};
 
 describe("HomePage", () => {
   beforeEach(() => {
@@ -50,22 +129,7 @@ describe("HomePage", () => {
 
   describe("HomePage Component", () => {
     test("should render categories fetched from API", async () => {
-      const mockCategories = [
-        { _id: "1", name: "Category 1" },
-        { _id: "2", name: "Category 2" },
-      ];
-
-      axios.get.mockImplementation((url) => {
-        if (url === "/api/v1/category/get-category") {
-          return Promise.resolve({
-            data: { success: true, category: mockCategories },
-          });
-        }
-        if (url === "/api/v1/product/product-count") {
-          return Promise.resolve({ data: { total: 0 } });
-        }
-        return Promise.resolve({ data: {} });
-      });
+      setupAxiosMock({ categories: mockCategories });
 
       render(
         <Router>
@@ -81,23 +145,7 @@ describe("HomePage", () => {
     });
 
     test("should render products fetched from API", async () => {
-      const mockProducts = [
-        { _id: "p1", name: "Product 1", price: 100, description: "Desc 1" },
-        { _id: "p2", name: "Product 2", price: 200, description: "Desc 2" },
-      ];
-
-      axios.get.mockImplementation((url) => {
-        if (url === "/api/v1/category/get-category") {
-          return Promise.resolve({ data: { success: true, category: [] } });
-        }
-        if (url === "/api/v1/product/product-count") {
-          return Promise.resolve({ data: { total: mockProducts.length } });
-        }
-        if (url.startsWith("/api/v1/product/product-list/")) {
-          return Promise.resolve({ data: { products: mockProducts } });
-        }
-        return Promise.resolve({ data: {} });
-      });
+      setupAxiosMock({ products: mockProducts, total: mockProducts.length });
 
       render(
         <Router>
@@ -113,27 +161,9 @@ describe("HomePage", () => {
     });
 
     test("should get more products on page change", async () => {
-      const mockProductsPage1 = [
-        { _id: "p1", name: "Product 1", price: 100, description: "Desc 1" },
-      ];
-      const mockProductsPage2 = [
-        { _id: "p2", name: "Product 2", price: 200, description: "Desc 2" },
-      ];
-
-      axios.get.mockImplementation((url) => {
-        if (url === "/api/v1/category/get-category") {
-          return Promise.resolve({ data: { success: true, category: [] } });
-        }
-        if (url === "/api/v1/product/product-count") {
-          return Promise.resolve({ data: { total: 2 } });
-        }
-        if (url === "/api/v1/product/product-list/1") {
-          return Promise.resolve({ data: { products: mockProductsPage1 } });
-        }
-        if (url === "/api/v1/product/product-list/2") {
-          return Promise.resolve({ data: { products: mockProductsPage2 } });
-        }
-        return Promise.resolve({ data: {} });
+      setupAxiosMock({
+        total: 2,
+        pageProducts: { 1: mockProductsPage1, 2: mockProductsPage2 },
       });
 
       render(
@@ -142,20 +172,17 @@ describe("HomePage", () => {
         </Router>
       );
 
-      // Wait for first page products
       await waitFor(() => {
         mockProductsPage1.forEach((prod) => {
           expect(screen.getByText(prod.name)).toBeInTheDocument();
         });
       });
 
-      // Simulate clicking "Next" button to load second page
       const nextButton = screen.getByText("Load more");
       act(() => {
         nextButton.click();
       });
 
-      // Wait for second page products
       await waitFor(() => {
         mockProductsPage2.forEach((prod) => {
           expect(screen.getByText(prod.name)).toBeInTheDocument();
@@ -166,25 +193,10 @@ describe("HomePage", () => {
 
   describe("HomePage Interactions", () => {
     test("should add product to cart on 'ADD TO CART' button click", async () => {
-      const mockProducts = [
-        { _id: "p1", name: "Product 1", price: 100, description: "Desc 1" },
-      ];
       const mockSetCart = jest.fn();
-
       useCart.mockReturnValue([[], mockSetCart]);
 
-      axios.get.mockImplementation((url) => {
-        if (url === "/api/v1/category/get-category") {
-          return Promise.resolve({ data: { success: true, category: [] } });
-        }
-        if (url === "/api/v1/product/product-count") {
-          return Promise.resolve({ data: { total: mockProducts.length } });
-        }
-        if (url.startsWith("/api/v1/product/product-list/")) {
-          return Promise.resolve({ data: { products: mockProducts } });
-        }
-        return Promise.resolve({ data: {} });
-      });
+      setupAxiosMock({ products: mockProducts.slice(0, 1), total: 1 });
 
       render(
         <Router>
@@ -204,28 +216,7 @@ describe("HomePage", () => {
     });
 
     test("should navigate to product details on 'MORE DETAILS' button click", async () => {
-      const mockProducts = [
-        {
-          _id: "p1",
-          name: "Product 1",
-          price: 100,
-          description: "Desc 1",
-          slug: "p1",
-        },
-      ];
-
-      axios.get.mockImplementation((url) => {
-        if (url === "/api/v1/category/get-category") {
-          return Promise.resolve({ data: { success: true, category: [] } });
-        }
-        if (url === "/api/v1/product/product-count") {
-          return Promise.resolve({ data: { total: mockProducts.length } });
-        }
-        if (url.startsWith("/api/v1/product/product-list/")) {
-          return Promise.resolve({ data: { products: mockProducts } });
-        }
-        return Promise.resolve({ data: {} });
-      });
+      setupAxiosMock({ products: mockProducts.slice(0, 1), total: 1 });
 
       render(
         <Router>
@@ -242,41 +233,16 @@ describe("HomePage", () => {
 
     describe("Filter Products", () => {
       test("should filter products based on category selection", async () => {
-        const mockCategories = [
-          { _id: "1", name: "Category 1" },
-          { _id: "2", name: "Category 2" },
-        ];
-        const mockFilteredProducts = [
-          {
-            _id: "p1",
-            name: "Filtered Product",
-            price: 150,
-            description: "Filtered Desc",
-          },
-        ];
-
-        axios.get.mockImplementation((url) => {
-          if (url === "/api/v1/category/get-category") {
-            return Promise.resolve({
-              data: { success: true, category: mockCategories },
-            });
-          }
-          if (url === "/api/v1/product/product-count") {
-            return Promise.resolve({ data: { total: 0 } });
-          }
-          return Promise.resolve({ data: {} });
-        });
-
-        axios.post.mockImplementation((url, params) => {
-          if (url === "/api/v1/product/product-filters") {
+        setupAxiosMock({
+          categories: mockCategories,
+          postHandler: (params) => {
             if (params.checked.includes("1")) {
               return Promise.resolve({
                 data: { products: mockFilteredProducts },
               });
             }
             return Promise.resolve({ data: { products: [] } });
-          }
-          return Promise.resolve({ data: {} });
+          },
         });
 
         render(
@@ -284,21 +250,16 @@ describe("HomePage", () => {
             <HomePage />
           </Router>
         );
-
-        // Wait for categories to load
         await waitFor(() => {
           mockCategories.forEach((cat) => {
             expect(screen.getByText(cat.name)).toBeInTheDocument();
           });
         });
-
-        // Simulate selecting a category checkbox
         const categoryCheckbox = screen.getByLabelText("Category 1");
         act(() => {
           categoryCheckbox.click();
         });
 
-        // Wait for filtered products to load
         await waitFor(() => {
           mockFilteredProducts.forEach((prod) => {
             expect(screen.getByText(prod.name)).toBeInTheDocument();
@@ -307,38 +268,16 @@ describe("HomePage", () => {
       });
 
       test("should filter products based on price range selection", async () => {
-        const mockCategories = [{ _id: "1", name: "Category 1" }];
-        const mockFilteredProducts = [
-          {
-            _id: "p2",
-            name: "Price Filtered Product",
-            price: 250,
-            description: "Price Filtered Desc",
-          },
-        ];
-
-        axios.get.mockImplementation((url) => {
-          if (url === "/api/v1/category/get-category") {
-            return Promise.resolve({
-              data: { success: true, category: mockCategories },
-            });
-          }
-          if (url === "/api/v1/product/product-count") {
-            return Promise.resolve({ data: { total: 0 } });
-          }
-          return Promise.resolve({ data: {} });
-        });
-
-        axios.post.mockImplementation((url, params) => {
-          if (url === "/api/v1/product/product-filters") {
+        setupAxiosMock({
+          categories: mockCategories.slice(0, 1),
+          postHandler: (params) => {
             if (params.radio[0] === 100 && params.radio[1] === 9999) {
               return Promise.resolve({
-                data: { products: mockFilteredProducts },
+                data: { products: mockPriceFilteredProducts },
               });
             }
             return Promise.resolve({ data: { products: [] } });
-          }
-          return Promise.resolve({ data: {} });
+          },
         });
 
         render(
@@ -347,47 +286,26 @@ describe("HomePage", () => {
           </Router>
         );
 
-        // Wait for categories to load
         await waitFor(() => {
-          mockCategories.forEach((cat) => {
-            expect(screen.getByText(cat.name)).toBeInTheDocument();
-          });
+          expect(screen.getByText("Category 1")).toBeInTheDocument();
         });
-
-        // Simulate selecting a price range radio button
         const priceRadio = screen.getByLabelText("$100 or more");
-
         act(() => {
           priceRadio.click();
         });
 
-        // Wait for filtered products to load
         await waitFor(() => {
-          mockFilteredProducts.forEach((prod) => {
+          mockPriceFilteredProducts.forEach((prod) => {
             expect(screen.getByText(prod.name)).toBeInTheDocument();
           });
         });
       });
 
       test("should reset filters when 'RESET FILTERS' button is clicked", async () => {
-        const mockCategories = [{ _id: "1", name: "Category 1" }];
-        const mockAllProducts = [
-          { _id: "p1", name: "Product 1", price: 100, description: "Desc 1" },
-        ];
-
-        axios.get.mockImplementation((url) => {
-          if (url === "/api/v1/category/get-category") {
-            return Promise.resolve({
-              data: { success: true, category: mockCategories },
-            });
-          }
-          if (url === "/api/v1/product/product-count") {
-            return Promise.resolve({ data: { total: mockAllProducts.length } });
-          }
-          if (url.startsWith("/api/v1/product/product-list/")) {
-            return Promise.resolve({ data: { products: mockAllProducts } });
-          }
-          return Promise.resolve({ data: {} });
+        setupAxiosMock({
+          categories: mockCategories.slice(0, 1),
+          products: mockProductsPage1,
+          total: mockProductsPage1.length,
         });
 
         render(
@@ -395,23 +313,18 @@ describe("HomePage", () => {
             <HomePage />
           </Router>
         );
-
-        // Wait for all products to load
         await waitFor(() => {
-          mockAllProducts.forEach((prod) => {
+          mockProductsPage1.forEach((prod) => {
             expect(screen.getByText(prod.name)).toBeInTheDocument();
           });
         });
-
-        // Simulate clicking the "RESET FILTERS" button
         const resetButton = screen.getByText("RESET FILTERS");
         act(() => {
           resetButton.click();
         });
 
-        // Wait for all products to reload
         await waitFor(() => {
-          mockAllProducts.forEach((prod) => {
+          mockProductsPage1.forEach((prod) => {
             expect(screen.getByText(prod.name)).toBeInTheDocument();
           });
         });
@@ -419,27 +332,10 @@ describe("HomePage", () => {
     });
 
     test("should remove category filter when checkbox is unchecked", async () => {
-      const mockCategories = [
-        { _id: "1", name: "Category 1" },
-        { _id: "2", name: "Category 2" },
-      ];
-      const mockAllProducts = [
-        { _id: "p1", name: "Product 1", price: 100, description: "Desc 1" },
-      ];
-
-      axios.get.mockImplementation((url) => {
-        if (url === "/api/v1/category/get-category") {
-          return Promise.resolve({
-            data: { success: true, category: mockCategories },
-          });
-        }
-        if (url === "/api/v1/product/product-count") {
-          return Promise.resolve({ data: { total: mockAllProducts.length } });
-        }
-        if (url.startsWith("/api/v1/product/product-list/")) {
-          return Promise.resolve({ data: { products: mockAllProducts } });
-        }
-        return Promise.resolve({ data: {} });
+      setupAxiosMock({
+        categories: mockCategories,
+        products: mockProductsPage1,
+        total: mockProductsPage1.length,
       });
 
       render(
@@ -447,15 +343,12 @@ describe("HomePage", () => {
           <HomePage />
         </Router>
       );
-
-      // Wait for categories to load
       await waitFor(() => {
         mockCategories.forEach((cat) => {
           expect(screen.getByText(cat.name)).toBeInTheDocument();
         });
       });
 
-      // Simulate selecting and then unselecting a category checkbox
       const categoryCheckbox = screen.getByLabelText("Category 1");
       act(() => {
         categoryCheckbox.click();
@@ -464,9 +357,8 @@ describe("HomePage", () => {
         categoryCheckbox.click();
       });
 
-      // Wait for all products to reload
       await waitFor(() => {
-        mockAllProducts.forEach((prod) => {
+        mockProductsPage1.forEach((prod) => {
           expect(screen.getByText(prod.name)).toBeInTheDocument();
         });
       });
@@ -475,11 +367,7 @@ describe("HomePage", () => {
 
   describe("HomePage Errors", () => {
     test("should handle API errors gracefully", async () => {
-      const error = new Error("API Error");
-      axios.get.mockImplementation((url) => {
-        return Promise.reject(error);
-      });
-
+      setupAxiosMock({ rejectGet: true });
       const consoleSpy = jest.spyOn(console, "log").mockImplementation();
 
       render(
@@ -488,33 +376,19 @@ describe("HomePage", () => {
         </Router>
       );
 
-      // Since errors are logged to console, we can check that no products or categories are rendered
       await waitFor(() => {
-        expect(consoleSpy).toHaveBeenCalledWith(error);
+        expect(consoleSpy).toHaveBeenCalledWith(
+          expect.objectContaining({ message: "API Error" })
+        );
       });
     });
 
     test("should handle load more errors gracefully", async () => {
-      const mockProducts = [
-        { _id: "p1", name: "Product 1", price: 100, description: "Desc 1" },
-      ];
-
-      axios.get.mockImplementation((url) => {
-        if (url === "/api/v1/category/get-category") {
-          return Promise.resolve({ data: { success: true, category: [] } });
-        }
-        if (url === "/api/v1/product/product-count") {
-          return Promise.resolve({ data: { total: 2 } });
-        }
-        if (url === "/api/v1/product/product-list/1") {
-          return Promise.resolve({ data: { products: mockProducts } });
-        }
-        if (url === "/api/v1/product/product-list/2") {
-          return Promise.reject(new Error("Load More Error"));
-        }
-        return Promise.resolve({ data: {} });
+      setupAxiosMock({
+        total: 2,
+        pageProducts: { 1: mockProductsPage1 },
+        rejectLoadMore: true,
       });
-
       const consoleSpy = jest.spyOn(console, "log").mockImplementation();
 
       render(
@@ -522,21 +396,16 @@ describe("HomePage", () => {
           <HomePage />
         </Router>
       );
-
-      // Wait for first page products
       await waitFor(() => {
-        mockProducts.forEach((prod) => {
+        mockProductsPage1.forEach((prod) => {
           expect(screen.getByText(prod.name)).toBeInTheDocument();
         });
       });
-
-      // Simulate clicking "Next" button to load second page
       const nextButton = screen.getByText("Load more");
       act(() => {
         nextButton.click();
       });
 
-      // Check that error was logged
       await waitFor(() => {
         expect(consoleSpy).toHaveBeenCalledWith(
           expect.objectContaining({ message: "Load More Error" })
@@ -545,27 +414,7 @@ describe("HomePage", () => {
     });
 
     test("should handle filter API errors gracefully", async () => {
-      const mockCategories = [
-        { _id: "1", name: "Category 1" },
-        { _id: "2", name: "Category 2" },
-      ];
-
-      axios.get.mockImplementation((url) => {
-        if (url === "/api/v1/category/get-category") {
-          return Promise.resolve({
-            data: { success: true, category: mockCategories },
-          });
-        }
-        if (url === "/api/v1/product/product-count") {
-          return Promise.resolve({ data: { total: 0 } });
-        }
-        return Promise.resolve({ data: {} });
-      });
-
-      axios.post.mockImplementation((url) => {
-        return Promise.reject(new Error("Filter API Error"));
-      });
-
+      setupAxiosMock({ categories: mockCategories, rejectPost: true });
       const consoleSpy = jest.spyOn(console, "log").mockImplementation();
 
       render(
@@ -573,21 +422,16 @@ describe("HomePage", () => {
           <HomePage />
         </Router>
       );
-
-      // Wait for categories to load
       await waitFor(() => {
         mockCategories.forEach((cat) => {
           expect(screen.getByText(cat.name)).toBeInTheDocument();
         });
       });
-
-      // Simulate selecting a category checkbox
       const categoryCheckbox = screen.getByLabelText("Category 1");
       act(() => {
         categoryCheckbox.click();
       });
 
-      // Check that error was logged
       await waitFor(() => {
         expect(consoleSpy).toHaveBeenCalledWith(
           expect.objectContaining({ message: "Filter API Error" })

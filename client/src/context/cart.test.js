@@ -17,8 +17,7 @@ describe("useCart Hook", () => {
   test("should initialize from localStorage", async () => {
     localStorage.setItem("cart", JSON.stringify(mockCart));
     let results = {};
-
-    const TestComponent = () => {
+    const FakeComponent = () => {
       const [cart] = useCart();
       results.cart = cart;
       return null;
@@ -26,7 +25,7 @@ describe("useCart Hook", () => {
 
     render(
       <CartProvider>
-        <TestComponent />
+        <FakeComponent />
       </CartProvider>
     );
 
@@ -36,13 +35,12 @@ describe("useCart Hook", () => {
   });
 
   test("should update state on setCart", async () => {
-    const mockItems = [mockCart[0]];
+    const singleItem = [mockCart[0]];
     let results = {};
-
-    const TestComponent = () => {
+    const FakeComponent = () => {
       const [cart, setCart] = useCart();
       React.useEffect(() => {
-        setCart(mockItems);
+        setCart(singleItem);
       }, [setCart]);
       results.cart = cart;
       return null;
@@ -50,12 +48,12 @@ describe("useCart Hook", () => {
 
     render(
       <CartProvider>
-        <TestComponent />
+        <FakeComponent />
       </CartProvider>
     );
 
     await waitFor(() => {
-      expect(results.cart).toEqual(mockItems);
+      expect(results.cart).toEqual(singleItem);
     });
   });
 });

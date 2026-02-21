@@ -16,27 +16,32 @@ jest.mock("../components/Layout.js", () => ({ children, title }) => (
   </div>
 ));
 
+const setMockCategories = (categories) => {
+  axios.get.mockImplementation((url) => {
+    if (url === "/api/v1/category/get-category") {
+      return Promise.resolve({
+        data: {
+          success: true,
+          category: categories,
+        },
+      });
+    }
+    return Promise.reject(new Error("Unknown API endpoint"));
+  });
+};
+
+const mockCategories = [
+  { _id: "1", name: "Electronics", slug: "electronics" },
+  { _id: "2", name: "Books", slug: "books" },
+];
+
 describe("Categories Page", () => {
   afterEach(() => {
     jest.clearAllMocks();
   });
 
   it("should render without crashing", async () => {
-    const mockCategories = [
-      { _id: "1", name: "Electronics", slug: "electronics" },
-      { _id: "2", name: "Books", slug: "books" },
-    ];
-
-    axios.get.mockImplementation((url) => {
-      if (url === "/api/v1/category/get-category") {
-        return Promise.resolve({
-          data: {
-            success: true,
-            category: mockCategories,
-          },
-        });
-      }
-    });
+    setMockCategories(mockCategories);
 
     render(
       <Router>
@@ -44,27 +49,11 @@ describe("Categories Page", () => {
       </Router>
     );
 
-    await waitFor(() => {
-      expect(screen.getByText("All Categories")).toBeInTheDocument();
-    });
+    expect(screen.getByText("All Categories")).toBeInTheDocument();
   });
 
   it("should show all categories", async () => {
-    const mockCategories = [
-      { _id: "1", name: "Electronics", slug: "electronics" },
-      { _id: "2", name: "Books", slug: "books" },
-    ];
-
-    axios.get.mockImplementation((url) => {
-      if (url === "/api/v1/category/get-category") {
-        return Promise.resolve({
-          data: {
-            success: true,
-            category: mockCategories,
-          },
-        });
-      }
-    });
+    setMockCategories(mockCategories);
 
     render(
       <Router>

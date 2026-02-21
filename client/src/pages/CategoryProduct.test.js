@@ -28,17 +28,23 @@ jest.mock("react-router-dom", () => ({
 delete window.location;
 window.location = { reload: jest.fn() };
 
-// Mock Layout component
-jest.mock("../components/Layout", () => {
-  return function MockLayout({ children, title }) {
-    return (
-      <div data-testid="layout">
-        <div data-testid="layout-title">{title}</div>
-        {children}
-      </div>
-    );
-  };
-});
+jest.mock("../components/Layout.js", () => ({ children, title }) => (
+  <div>
+    <h1>{title}</h1>
+    {children}
+  </div>
+));
+
+const setMockProducts = (products, categories = []) => {
+  axios.get.mockImplementation((url) => {
+    if (url === `/api/v1/product/product-category/test-category`) {
+      return Promise.resolve({
+        data: { products, category: categories },
+      });
+    }
+    return Promise.reject(new Error("Unknown API endpoint"));
+  });
+};
 
 describe("CategoryProduct", () => {
   beforeEach(() => {
@@ -59,15 +65,7 @@ describe("CategoryProduct", () => {
         { _id: "c1", name: "test-category" },
         { _id: "c2", name: "Category 2" },
       ];
-
-      axios.get.mockImplementation((url) => {
-        if (url === `/api/v1/product/product-category/test-category`) {
-          return Promise.resolve({
-            data: { products: mockProducts, category: mockCategories },
-          });
-        }
-        return Promise.resolve({ data: {} });
-      });
+      setMockProducts(mockProducts, mockCategories);
 
       render(
         <Router>
@@ -85,20 +83,12 @@ describe("CategoryProduct", () => {
 
   describe("CategoryProduct Interactions", () => {
     test("should add product to cart on 'ADD TO CART' button click", async () => {
+      const mockSetCart = jest.fn();
+      useCart.mockReturnValue([[], mockSetCart]);
       const mockProducts = [
         { _id: "p1", name: "Product 1", price: 100, description: "Desc 1" },
       ];
-      axios.get.mockImplementation((url) => {
-        if (url === `/api/v1/product/product-category/test-category`) {
-          return Promise.resolve({
-            data: { products: mockProducts, category: [] },
-          });
-        }
-        return Promise.resolve({ data: {} });
-      });
-
-      const mockSetCart = jest.fn();
-      useCart.mockReturnValue([[], mockSetCart]);
+      setMockProducts(mockProducts);
 
       render(
         <Router>
@@ -127,14 +117,7 @@ describe("CategoryProduct", () => {
           slug: "p1",
         },
       ];
-      axios.get.mockImplementation((url) => {
-        if (url === `/api/v1/product/product-category/test-category`) {
-          return Promise.resolve({
-            data: { products: mockProducts, category: [] },
-          });
-        }
-        return Promise.resolve({ data: {} });
-      });
+      setMockProducts(mockProducts);
 
       render(
         <Router>

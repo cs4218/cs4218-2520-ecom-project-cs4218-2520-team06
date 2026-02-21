@@ -1,20 +1,15 @@
 // Hans Delano, A0273456X
 import React from "react";
 import "@testing-library/jest-dom";
-import {
-  render,
-  screen,
-  waitFor,
-  fireEvent,
-  act,
-} from "@testing-library/react";
+import { render, screen, waitFor, act } from "@testing-library/react";
 import { BrowserRouter as Router } from "react-router-dom";
 import { CartProvider } from "../context/cart";
 import { useAuth } from "../context/auth";
 import axios from "axios";
 import CartPage from "./CartPage";
 
-const localStorageMock = (() => {
+// Fake localStorage implementation for testing
+const localStorageFake = (() => {
   let store = {};
   return {
     getItem: jest.fn((key) => store[key] || null),
@@ -29,8 +24,7 @@ const localStorageMock = (() => {
     }),
   };
 })();
-
-Object.defineProperty(window, "localStorage", { value: localStorageMock });
+Object.defineProperty(window, "localStorage", { value: localStorageFake });
 
 jest.mock("axios", () => ({
   get: jest.fn((url) => {
@@ -46,33 +40,24 @@ jest.mock("../context/auth.js", () => ({
   useAuth: jest.fn(),
 }));
 
-jest.mock("react-hot-toast", () => ({
-  success: jest.fn(),
-}));
-
-jest.mock("../components/Layout", () => {
-  return function MockLayout({ children, title }) {
-    return (
-      <div data-testid="layout">
-        <div data-testid="layout-title">{title}</div>
-        {children}
-      </div>
-    );
-  };
-});
+jest.mock("../components/Layout.js", () => ({ children, title }) => (
+  <div>
+    <h1>{title}</h1>
+    {children}
+  </div>
+));
 
 const mockRequestPaymentMethod = jest
   .fn()
   .mockResolvedValue({ nonce: "mock-nonce" });
 
-// Button to mock Braintree DropIn loading and instance creation
 jest.mock("braintree-web-drop-in-react", () => {
   return function MockDropIn({ onInstance }) {
     return (
       <div data-testid="mock-dropin">
         Braintree UI
+        {/* Button to simulate instance creation:  */}
         <button
-          data-testid="braintree-init-btn"
           onClick={() => {
             if (onInstance) {
               onInstance({ requestPaymentMethod: mockRequestPaymentMethod });
@@ -85,13 +70,23 @@ jest.mock("braintree-web-drop-in-react", () => {
     );
   };
 });
+const loadFakeBraintree = async () => {
+  await waitFor(async () => {
+    const dropInElement = await screen.findByTestId("mock-dropin");
+    expect(dropInElement).toBeInTheDocument();
+  });
+  // Simulate loading of Braintree and instance creation
+  const loadInstance = await screen.findByText(/Simulate Braintree Load/);
+  await act(async () => {
+    loadInstance.click();
+  });
+};
 
 const mockNavigate = jest.fn();
 jest.mock("react-router-dom", () => ({
   ...jest.requireActual("react-router-dom"),
   useNavigate: jest.fn(() => mockNavigate),
 }));
-
 delete window.location;
 window.location = { reload: jest.fn() };
 
@@ -101,6 +96,8 @@ const mockCart = [
 ];
 
 const renderCartPage = async () => {
+  // wrap render in act because there is an async useEffect in CartPage that we need to wait for
+  // eslint-disable-next-line testing-library/no-unnecessary-act
   return await act(async () => {
     render(
       <Router>
@@ -127,12 +124,13 @@ describe("CartPage", () => {
 
   afterEach(() => {
     jest.clearAllMocks();
-    localStorage.clear();
+    localStorageFake.clear();
   });
 
   describe("CartPage Component", () => {
     test("should renders cart items and total price", async () => {
       setMockCart();
+
       await renderCartPage();
 
       expect(screen.getByText("Product 1")).toBeInTheDocument();
@@ -143,6 +141,7 @@ describe("CartPage", () => {
     test("should let guest users see login prompt", async () => {
       setMockCart();
       setMockAuth(); // Sets to null
+
       await renderCartPage();
 
       expect(screen.getByText(/Please Login to checkout/)).toBeInTheDocument();
@@ -151,6 +150,7 @@ describe("CartPage", () => {
     test("should let logged in users without address to see address prompt", async () => {
       setMockCart();
       setMockAuth({ name: "Test User", address: null }, "mock-token");
+
       await renderCartPage();
 
       expect(screen.getByText(/Update Address/)).toBeInTheDocument();
@@ -162,6 +162,7 @@ describe("CartPage", () => {
     test("should let logged in users with address see current address", async () => {
       setMockCart();
       setMockAuth({ name: "Test User", address: "123 Test St" }, "mock-token");
+
       await renderCartPage();
 
       expect(screen.getByText("Current Address")).toBeInTheDocument();
@@ -187,7 +188,6 @@ describe("CartPage", () => {
       await waitFor(() => {
         expect(consoleSpy).toHaveBeenCalledWith(error);
       });
-
       localeSpy.mockRestore();
       consoleSpy.mockRestore();
     });
@@ -201,9 +201,10 @@ describe("CartPage", () => {
       const consoleSpy = jest.spyOn(console, "log").mockImplementation();
 
       await renderCartPage();
-
       const deleteButtons = screen.getAllByText("Remove");
-      fireEvent.click(deleteButtons[0]);
+      await act(async () => {
+        deleteButtons[0].click();
+      });
 
       await waitFor(() => {
         expect(consoleSpy).toHaveBeenCalledWith(error);
@@ -230,8 +231,9 @@ describe("CartPage", () => {
 
       const deleteButtons = screen.getAllByText("Remove");
       expect(deleteButtons).toHaveLength(2);
-
-      fireEvent.click(deleteButtons[0]);
+      await act(async () => {
+        deleteButtons[0].click();
+      });
 
       expect(screen.queryByText("Product 1")).not.toBeInTheDocument();
       expect(screen.getByText("Product 2")).toBeInTheDocument();
@@ -244,7 +246,9 @@ describe("CartPage", () => {
       await renderCartPage();
 
       const checkoutButton = screen.getByText(/Please Login to checkout/);
-      fireEvent.click(checkoutButton);
+      await act(async () => {
+        checkoutButton.click();
+      });
 
       expect(mockNavigate).toHaveBeenCalledWith("/login", { state: "/cart" });
     });
@@ -255,7 +259,9 @@ describe("CartPage", () => {
       await renderCartPage();
 
       const updateAddressBtn = screen.getByText(/Update Address/);
-      fireEvent.click(updateAddressBtn);
+      await act(async () => {
+        updateAddressBtn.click();
+      });
 
       expect(mockNavigate).toHaveBeenCalledWith("/dashboard/user/profile");
     });
@@ -266,7 +272,9 @@ describe("CartPage", () => {
       await renderCartPage();
 
       const checkoutButton = screen.getByText(/Update Address/);
-      fireEvent.click(checkoutButton);
+      await act(async () => {
+        checkoutButton.click();
+      });
 
       expect(mockNavigate).toHaveBeenCalledWith("/dashboard/user/profile");
     });
@@ -280,23 +288,17 @@ describe("CartPage", () => {
       const consoleSpy = jest.spyOn(console, "log").mockImplementation();
 
       await renderCartPage();
-
-      await waitFor(async () => {
-        const dropInElement = await screen.findByTestId("mock-dropin");
-
-        expect(dropInElement).toBeInTheDocument();
-      });
-
-      // Simulate payment handling
-      const loadInstance = await screen.findByText(/Simulate Braintree Load/);
-      fireEvent.click(loadInstance);
-
+      await loadFakeBraintree();
       const makePayment = await screen.findByText(/Make Payment/);
-      fireEvent.click(makePayment);
-
-      await waitFor(() => {
-        expect(mockNavigate).toHaveBeenCalledWith("/dashboard/user/orders");
+      await act(async () => {
+        makePayment.click();
       });
+
+      expect(mockNavigate).toHaveBeenCalledWith("/dashboard/user/orders");
+      expect(axios.post).toHaveBeenCalledWith(
+        "/api/v1/product/braintree/payment",
+        { cart: mockCart, nonce: "mock-nonce" }
+      );
 
       consoleSpy.mockRestore();
     });
@@ -309,19 +311,11 @@ describe("CartPage", () => {
       const consoleSpy = jest.spyOn(console, "log").mockImplementation();
 
       await renderCartPage();
-
-      await waitFor(async () => {
-        const dropInElement = await screen.findByTestId("mock-dropin");
-
-        expect(dropInElement).toBeInTheDocument();
-      });
-
-      // Simulate payment handling
-      const loadInstance = await screen.findByText(/Simulate Braintree Load/);
-      fireEvent.click(loadInstance);
-
+      await loadFakeBraintree();
       const makePayment = await screen.findByText(/Make Payment/);
-      fireEvent.click(makePayment);
+      await act(async () => {
+        makePayment.click();
+      });
 
       await waitFor(() => {
         expect(consoleSpy).toHaveBeenCalledWith(error);
