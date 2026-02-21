@@ -57,7 +57,7 @@ describe("createProductController", () => {
     quantity: 10,
   });
 
-  it("returns error when name is missing", async () => {
+  it("returns 200 but success false when name is missing", async () => {
     // Arrange: Set up request with product data but no name
     const req = { fields: { ...testProduct }, files: {} };
     const res = makeRes();
@@ -67,13 +67,14 @@ describe("createProductController", () => {
     await createProductController(req, res);
 
     // Assert: Verify error response
-    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.status).toHaveBeenCalledWith(200);
     expect(res.send).toHaveBeenCalledWith({
-      error: "Name is Required",
+      success: false,
+      message: "Name is Required",
     });
   });
 
-  it("returns error when description is missing", async () => {
+  it("returns 200 but success false when description is missing", async () => {
     // Arrange: Set up request with product data but no description
     const req = { fields: { ...testProduct }, files: {} };
     const res = makeRes();
@@ -83,13 +84,14 @@ describe("createProductController", () => {
     await createProductController(req, res);
 
     // Assert: Verify error response
-    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.status).toHaveBeenCalledWith(200);
     expect(res.send).toHaveBeenCalledWith({
-      error: "Description is Required",
+      success: false,
+      message: "Description is Required",
     });
   });
 
-  it("returns error when price is missing", async () => {
+  it("returns 200 but success false when price is missing", async () => {
     // Arrange: Set up request with product data but no price
     const req = { fields: { ...testProduct }, files: {} };
     const res = makeRes();
@@ -99,13 +101,14 @@ describe("createProductController", () => {
     await createProductController(req, res);
 
     // Assert: Verify error response
-    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.status).toHaveBeenCalledWith(200);
     expect(res.send).toHaveBeenCalledWith({
-      error: "Price is Required",
+      success: false,
+      message: "Price is Required",
     });
   });
 
-  it("returns error when category is missing", async () => {
+  it("returns 200 but success false when category is missing", async () => {
     // Arrange: Set up request with product data but no category
     const req = { fields: { ...testProduct }, files: {} };
     const res = makeRes();
@@ -115,13 +118,14 @@ describe("createProductController", () => {
     await createProductController(req, res);
 
     // Assert: Verify error response
-    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.status).toHaveBeenCalledWith(200);
     expect(res.send).toHaveBeenCalledWith({
-      error: "Category is Required",
+      success: false,
+      message: "Category is Required",
     });
   });
 
-  it("returns error when quantity is missing", async () => {
+  it("returns 200 but success false when quantity is missing", async () => {
     // Arrange: Set up request with product data but no quantity
     const req = { fields: { ...testProduct }, files: {} };
     const res = makeRes();
@@ -131,13 +135,14 @@ describe("createProductController", () => {
     await createProductController(req, res);
 
     // Assert: Verify error response
-    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.status).toHaveBeenCalledWith(200);
     expect(res.send).toHaveBeenCalledWith({
-      error: "Quantity is Required",
+      success: false,
+      message: "Quantity is Required",
     });
   });
 
-  it("returns error when photo is given but size is too big", async () => {
+  it("returns 200 but success false when photo is given but size is too big", async () => {
     // Arrange: Set up request with product data and oversized photo
     const req = {
       fields: { ...testProduct },
@@ -149,9 +154,10 @@ describe("createProductController", () => {
     await createProductController(req, res);
 
     // Assert: Verify error response
-    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.status).toHaveBeenCalledWith(200);
     expect(res.send).toHaveBeenCalledWith({
-      error: "photo is Required and should be less then 1mb",
+      success: false,
+      message: "photo is Required and should be less then 1mb",
     });
   });
 
@@ -269,7 +275,7 @@ describe("updateProductController", () => {
     quantity: 10,
   });
 
-  it("returns error when name is missing", async () => {
+  it("returns 200 but success false when name is missing", async () => {
     // Arrange: Set up request with product data but no name
     const req = { fields: { ...testProduct }, files: {} };
     const res = makeRes();
@@ -279,13 +285,14 @@ describe("updateProductController", () => {
     await updateProductController(req, res);
 
     // Assert: Verify error response
-    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.status).toHaveBeenCalledWith(200);
     expect(res.send).toHaveBeenCalledWith({
-      error: "Name is Required",
+      success: false,
+      message: "Name is Required",
     });
   });
 
-  it("returns error when description is missing", async () => {
+  it("returns 200 but success false when description is missing", async () => {
     // Arrange: Set up request with product data but no description
     const req = { fields: { ...testProduct }, files: {} };
     const res = makeRes();
@@ -295,13 +302,14 @@ describe("updateProductController", () => {
     await updateProductController(req, res);
 
     // Assert: Verify error response
-    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.status).toHaveBeenCalledWith(200);
     expect(res.send).toHaveBeenCalledWith({
-      error: "Description is Required",
+      success: false,
+      message: "Description is Required",
     });
   });
 
-  it("returns error when price is missing", async () => {
+  it("returns 200 but success false when price is missing", async () => {
     // Arrange: Set up request with product data but no price
     const req = { fields: { ...testProduct }, files: {} };
     const res = makeRes();
@@ -311,13 +319,14 @@ describe("updateProductController", () => {
     await updateProductController(req, res);
 
     // Assert: Verify error response
-    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.status).toHaveBeenCalledWith(200);
     expect(res.send).toHaveBeenCalledWith({
-      error: "Price is Required",
+      success: false,
+      message: "Price is Required",
     });
   });
 
-  it("returns error when category is missing", async () => {
+  it("returns 200 but success false when category is missing", async () => {
     // Arrange: Set up request with product data but no category
     const req = { fields: { ...testProduct }, files: {} };
     const res = makeRes();
@@ -327,13 +336,14 @@ describe("updateProductController", () => {
     await updateProductController(req, res);
 
     // Assert: Verify error response
-    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.status).toHaveBeenCalledWith(200);
     expect(res.send).toHaveBeenCalledWith({
-      error: "Category is Required",
+      success: false,
+      message: "Category is Required",
     });
   });
 
-  it("returns error when quantity is missing", async () => {
+  it("returns 200 but success false when quantity is missing", async () => {
     // Arrange: Set up request with product data but no quantity
     const req = { fields: { ...testProduct }, files: {} };
     const res = makeRes();
@@ -343,13 +353,14 @@ describe("updateProductController", () => {
     await updateProductController(req, res);
 
     // Assert: Verify error response
-    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.status).toHaveBeenCalledWith(200);
     expect(res.send).toHaveBeenCalledWith({
-      error: "Quantity is Required",
+      success: false,
+      message: "Quantity is Required",
     });
   });
 
-  it("returns error when photo is given but size is too big", async () => {
+  it("returns 200 but success false when photo is given but size is too big", async () => {
     // Arrange: Set up request with product data and oversized photo
     const req = {
       fields: { ...testProduct },
@@ -361,9 +372,10 @@ describe("updateProductController", () => {
     await updateProductController(req, res);
 
     // Assert: Verify error response
-    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.status).toHaveBeenCalledWith(200);
     expect(res.send).toHaveBeenCalledWith({
-      error: "photo is Required and should be less then 1mb",
+      success: false,
+      message: "photo is Required and should be less then 1mb",
     });
   });
 

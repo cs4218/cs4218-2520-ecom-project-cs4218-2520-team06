@@ -10,15 +10,15 @@ const { Option } = Select;
 
 const AdminOrders = () => {
   const [status, setStatus] = useState([
-    "Not Process",
+    "Not Processed",
     "Processing",
     "Shipped",
-    "deliverd",
-    "cancel",
+    "Delivered",
+    "Cancelled",
   ]);
-  const [changeStatus, setCHangeStatus] = useState("");
+  const [changeStatus, setChangeStatus] = useState("");
   const [orders, setOrders] = useState([]);
-  const [auth, setAuth] = useAuth();
+  const [auth] = useAuth();
   const getOrders = async () => {
     try {
       const { data } = await axios.get("/api/v1/auth/all-orders");
@@ -40,8 +40,10 @@ const AdminOrders = () => {
       getOrders();
     } catch (error) {
       console.log(error);
+      toast.error("Something went wrong in updating order status");
     }
   };
+  
   return (
     <Layout title={"All Orders Data"}>
       <div className="row dashboard">
@@ -69,7 +71,7 @@ const AdminOrders = () => {
                       <td>{i + 1}</td>
                       <td>
                         <Select
-                          bordered={false}
+                          variant="borderless"
                           onChange={(value) => handleChange(o._id, value)}
                           defaultValue={o?.status}
                         >
@@ -81,7 +83,7 @@ const AdminOrders = () => {
                         </Select>
                       </td>
                       <td>{o?.buyer?.name}</td>
-                      <td>{moment(o?.createAt).fromNow()}</td>
+                      <td>{moment(o?.createdAt).fromNow()}</td>
                       <td>{o?.payment.success ? "Success" : "Failed"}</td>
                       <td>{o?.products?.length}</td>
                     </tr>
@@ -102,7 +104,7 @@ const AdminOrders = () => {
                       <div className="col-md-8">
                         <p>{p.name}</p>
                         <p>{p.description.substring(0, 30)}</p>
-                        <p>Price : {p.price}</p>
+                        <p>Price: {p.price}</p>
                       </div>
                     </div>
                   ))}

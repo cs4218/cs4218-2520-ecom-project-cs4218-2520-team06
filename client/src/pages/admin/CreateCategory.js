@@ -21,6 +21,7 @@ const CreateCategory = () => {
       if (data?.success) {
         toast.success(`${name} is created`);
         getAllCategory();
+        setName("");
       } else {
         toast.error(data.message);
       }
@@ -71,6 +72,11 @@ const CreateCategory = () => {
   //delete category
   const handleDelete = async (pId) => {
     try {
+      const confirmed = window.confirm(
+        "Are you sure you want to delete this category?"
+      );
+      if (!confirmed) return;
+      
       const { data } = await axios.delete(
         `/api/v1/category/delete-category/${pId}`
       );
@@ -139,7 +145,11 @@ const CreateCategory = () => {
               </table>
             </div>
             <Modal
-              onCancel={() => setVisible(false)}
+              onCancel={() => {
+                setVisible(false);
+                setSelected(null);
+                setUpdatedName("");
+              }}
               footer={null}
               open={visible}
             >

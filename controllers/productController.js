@@ -22,22 +22,22 @@ export const createProductController = async (req, res) => {
     const { name, description, price, category, quantity, shipping } =
       req.fields;
     const { photo } = req.files;
-    //alidation
+    // Validation
     switch (true) {
       case !name:
-        return res.status(500).send({ error: "Name is Required" });
+        return res.status(200).send({ success: false, message: "Name is Required" });
       case !description:
-        return res.status(500).send({ error: "Description is Required" });
+        return res.status(200).send({ success: false, message: "Description is Required" });
       case !price:
-        return res.status(500).send({ error: "Price is Required" });
+        return res.status(200).send({ success: false, message: "Price is Required" });
       case !category:
-        return res.status(500).send({ error: "Category is Required" });
+        return res.status(200).send({ success: false, message: "Category is Required" });
       case !quantity:
-        return res.status(500).send({ error: "Quantity is Required" });
+        return res.status(200).send({ success: false, message: "Quantity is Required" });
       case photo && photo.size > 1000000:
         return res
-          .status(500)
-          .send({ error: "photo is Required and should be less then 1mb" });
+          .status(200)
+          .send({ success: false, message: "photo is Required and should be less then 1mb" });
     }
 
     const products = new productModel({ ...req.fields, slug: slugify(name) });
@@ -160,22 +160,22 @@ export const updateProductController = async (req, res) => {
     const { name, description, price, category, quantity, shipping } =
       req.fields;
     const { photo } = req.files;
-    //alidation
+    // Validation
     switch (true) {
       case !name:
-        return res.status(500).send({ error: "Name is Required" });
+        return res.status(200).send({ success: false, message: "Name is Required" });
       case !description:
-        return res.status(500).send({ error: "Description is Required" });
+        return res.status(200).send({ success: false, message: "Description is Required" });
       case !price:
-        return res.status(500).send({ error: "Price is Required" });
+        return res.status(200).send({ success: false, message: "Price is Required" });
       case !category:
-        return res.status(500).send({ error: "Category is Required" });
+        return res.status(200).send({ success: false, message: "Category is Required" });
       case !quantity:
-        return res.status(500).send({ error: "Quantity is Required" });
+        return res.status(200).send({ success: false, message: "Quantity is Required" });
       case photo && photo.size > 1000000:
         return res
-          .status(500)
-          .send({ error: "photo is Required and should be less then 1mb" });
+          .status(200)
+          .send({ success: false, message: "photo is Required and should be less then 1mb" });
     }
 
     const products = await productModel.findByIdAndUpdate(

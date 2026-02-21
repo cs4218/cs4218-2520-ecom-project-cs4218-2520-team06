@@ -24,7 +24,7 @@ describe("createCategoryController", () => {
     jest.restoreAllMocks();
   });
   
-  it("returns 401 if name is missing", async () => {
+  it("returns 200 but success false if name is missing", async () => {
     // Arrange: Set up request with no name in body
     const req = { body: {} };
     const res = makeRes();
@@ -33,14 +33,14 @@ describe("createCategoryController", () => {
     await createCategoryController(req, res);
 
     // Assert: Verify 401 response and no database operations
-    expect(res.status).toHaveBeenCalledWith(401);
-    expect(res.send).toHaveBeenCalledWith({ message: "Name is required" });
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.send).toHaveBeenCalledWith({ success: false, message: "Name is required" });
     expect(slugify).not.toHaveBeenCalled();
     expect(categoryModel.findOne).not.toHaveBeenCalled();
     expect(categoryModel.prototype.save).not.toHaveBeenCalled();
   });
 
-  it("returns 200 if category already exists", async () => {
+  it("returns 200 but success false if category already exists", async () => {
     // Arrange: Set up request and mock existing category
     const req = { body: { name: "Electronics" } };
     const res = makeRes();
@@ -56,7 +56,7 @@ describe("createCategoryController", () => {
     expect(categoryModel.findOne).toHaveBeenCalledWith({ name: "Electronics" });
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.send).toHaveBeenCalledWith({
-      success: true,
+      success: false,
       message: "Category Already Exists",
     });
     expect(categoryModel.prototype.save).not.toHaveBeenCalled();
@@ -115,6 +115,23 @@ describe("updateCategoryController", () => {
 
   afterEach(() => {
     jest.restoreAllMocks();
+  });
+  
+  it("returns 200 but success false if name is missing", async () => {
+    // Arrange: Set up request with category ID and empty name
+    const req = {
+      body: { name: "" },
+      params: { id: "testId" },
+    };
+    const res = makeRes();
+    
+    // Act: Call updateCategoryController
+    await updateCategoryController(req, res);
+    
+    // Assert: Verify 200 response and no database operations
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.send).toHaveBeenCalledWith({ success: false, message: "Name is required" });
+    expect(categoryModel.findByIdAndUpdate).not.toHaveBeenCalled();
   });
   
   it("returns 200 when category is updated successfully", async () => {
