@@ -990,7 +990,7 @@ describe("productFiltersController", () => {
   });
 
   // Kok Bo Chang, A0273542E
-  test("returns 400 when error is thrown", async () => {
+  test("returns 500 when error is thrown", async () => {
     // Arrange
     const req = { body: { checked: [], radio: [] } };
     const res = makeRes();
@@ -1007,7 +1007,7 @@ describe("productFiltersController", () => {
     expect(consoleSpy).toHaveBeenCalledTimes(1);
     expect(consoleSpy).toHaveBeenCalledWith(err);
 
-    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.status).toHaveBeenCalledWith(500);
     expect(res.send).toHaveBeenCalledWith({
       success: false,
       message: "Error While Filtering Products",
@@ -1051,7 +1051,7 @@ describe("productCountController", () => {
   });
 
   // Kok Bo Chang, A0273542E
-  test("returns 400 when error is thrown", async () => {
+  test("returns 500 when error is thrown", async () => {
     // Arrange
     const res = makeRes();
 
@@ -1069,7 +1069,7 @@ describe("productCountController", () => {
     expect(consoleSpy).toHaveBeenCalledTimes(1);
     expect(consoleSpy).toHaveBeenCalledWith(err);
 
-    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.status).toHaveBeenCalledWith(500);
     expect(res.send).toHaveBeenCalledWith({
       success: false,
       message: "Error in product count",
@@ -1159,7 +1159,7 @@ describe("productListController", () => {
   });
 
   // Kok Bo Chang, A0273542E
-  test("returns 400 when error is thrown", async () => {
+  test("returns 500 when error is thrown", async () => {
     // Arrange
     const req = { params: { page: 2 }};
     const res = makeRes();
@@ -1183,7 +1183,7 @@ describe("productListController", () => {
     expect(consoleSpy).toHaveBeenCalledTimes(1);
     expect(consoleSpy).toHaveBeenCalledWith(err);
 
-    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.status).toHaveBeenCalledWith(500);
     expect(res.send).toHaveBeenCalledWith({
       success: false,
       message: "Error in per page control",
@@ -1232,7 +1232,7 @@ describe("searchProductController", () => {
   });
 
   // Kok Bo Chang, A0273542E
-  test("returns 400 when error is thrown", async () => {
+  test("returns 500 when error is thrown", async () => {
     // Arrange
     const req = { params: { keyword: "keyword" }};
     const res = makeRes();
@@ -1253,7 +1253,7 @@ describe("searchProductController", () => {
     expect(consoleSpy).toHaveBeenCalledTimes(1);
     expect(consoleSpy).toHaveBeenCalledWith(err);
 
-    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.status).toHaveBeenCalledWith(500);
     expect(res.send).toHaveBeenCalledWith({
       success: false,
       message: "Error In Search Product API",
@@ -1312,7 +1312,7 @@ describe("relatedProductController", () => {
   });
 
   // Kok Bo Chang, A0273542E
-  test("returns 400 when error is thrown", async () => {
+  test("returns 500 when error is thrown", async () => {
     // Arrange
     const req = { 
       params: { 
@@ -1340,7 +1340,7 @@ describe("relatedProductController", () => {
     expect(consoleSpy).toHaveBeenCalledTimes(1);
     expect(consoleSpy).toHaveBeenCalledWith(err);
 
-    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.status).toHaveBeenCalledWith(500);
     expect(res.send).toHaveBeenCalledWith({
       success: false,
       message: "Error while getting related products",
@@ -1399,7 +1399,7 @@ describe("productCategoryController", () => {
   });
 
   // Kok Bo Chang, A0273542E
-  test("returns 400 when error is thrown", async () => {
+  test("returns 500 when error is thrown", async () => {
     // Arrange
     const req = { 
       params: { 
@@ -1435,7 +1435,7 @@ describe("productCategoryController", () => {
     expect(consoleSpy).toHaveBeenCalledTimes(1);
     expect(consoleSpy).toHaveBeenCalledWith(err);
 
-    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.status).toHaveBeenCalledWith(500);
     expect(res.send).toHaveBeenCalledWith({
       success: false,
       message: "Error while getting products",
