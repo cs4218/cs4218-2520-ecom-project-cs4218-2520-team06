@@ -144,3 +144,96 @@ To begin unit testing with Jest in your project, follow these steps:
      ```bash
      npm run test
      ```
+## Workload Distribution
+The distribution of testing workload for this project follows closely with the suggested testing scope.
+### Gabriel Chang
+#### Client-Related Files
+- context/auth.js
+- pages/Auth/Register.js
+- pages/Auth/Login.js
+- components/AdminMenu.js
+- pages/admin/AdminDashboard.js
+#### Server-Related Files
+- helpers/authHelper.js
+- middlewares/authMiddleware.js
+- controllers/authController.js
+    1. registerController
+    2. loginController
+    3. forgotPasswordController
+    4. testController
+### Gallen Ong
+#### Client-Related Files
+- components/Form/CategoryForm.js
+- pages/admin/CreateCategory.js
+- pages/admin/CreateProduct.js
+- pages/admin/UpdateProduct.js
+- pages/admin/AdminOrders.js
+- pages/admin/Products.js
+- components/Routes/Private.js
+- components/UserMenu.js
+- pages/user/Dashboard.js
+#### Server-Related Files
+- controllers/categoryController.js
+    1. createCategoryController
+    2. updateCategoryController
+    3. deleteCategoryController
+- controllers/productController.js
+    1. createProductController
+    2. deleteProductController
+    3. updateProductController
+- models/userModel.js
+### Jabez Tho
+#### Client-Related Files
+- pages/user/Orders.js
+- pages/user/Profile.js
+- pages/admin/Users.js
+- components/Form/SearchInput.js
+- context/search.js
+- pages/Search.js
+#### Server-Related Files
+- controllers/authController.js
+    1. updateProfileController
+    2. getOrdersController
+    3. getAllOrdersController
+    4. orderStatusController
+- models/orderModel.js
+### Kok Bo Chang
+#### Client-Related Files
+- pages/ProductDetails.js
+- pages/Contact.js
+- pages/Policy.js
+- components/Footer.js
+- components/Header.js
+- components/Layout.js
+- components/Spinner.js
+- pages/About.js
+- pages/PageNotFound.js
+#### Server-Related Files
+- controllers/productController.js
+    1. getProductController
+    2. getSingleProductController
+    3. productPhotoController
+    4. productFiltersController
+    5. productCountController
+    6. productListController
+    7. searchProductController
+    8. relatedProductController
+    9. productCategoryController
+- models/productModel.js
+- config/db.js
+### Hans Delano
+#### Client-Related Files
+- pages/CategoryProduct.js
+- pages/Homepage.js
+- context/cart.js
+- pages/CartPage.js
+- hooks/useCategory.js
+- pages/Categories.js
+#### Server-Related Files
+- controllers/categoryController.js
+    1. categoryControlller
+    2. singleCategoryController
+- models/categoryModel.js
+- controllers/productController.js
+    1. braintreeTokenController
+    2. brainTreePaymentController
