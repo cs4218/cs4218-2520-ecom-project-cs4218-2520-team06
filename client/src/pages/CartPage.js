@@ -157,7 +157,7 @@ const CartPage = () => {
               )}
               <div className="mt-2">
                 {!clientToken || !auth?.token || !cart?.length ? (
-                  clientToken + ", " + auth?.token + ", " + cart?.length
+                  ""
                 ) : (
                   <>
                     <DropIn
