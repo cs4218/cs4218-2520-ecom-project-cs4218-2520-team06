@@ -173,6 +173,7 @@ The distribution of testing workload for this project follows closely with the s
 - components/UserMenu.js
 - pages/user/Dashboard.js
 #### Server-Related Files
+- models/categoryModel.js
 - controllers/categoryController.js
     1. createCategoryController
     2. updateCategoryController
@@ -230,10 +231,6 @@ The distribution of testing workload for this project follows closely with the s
 - hooks/useCategory.js
 - pages/Categories.js
 #### Server-Related Files
-- controllers/categoryController.js
-    1. categoryControlller
-    2. singleCategoryController
-- models/categoryModel.js
 - controllers/productController.js
     1. braintreeTokenController
     2. brainTreePaymentController
