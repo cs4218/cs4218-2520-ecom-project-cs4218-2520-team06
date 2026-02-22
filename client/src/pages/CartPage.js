@@ -15,8 +15,27 @@ const CartPage = () => {
   const [cart, setCart] = useCart();
   const clientToken = useToken(auth?.token);
   const [instance, setInstance] = useState("");
+  const [isValidCard, setIsValidCard] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (instance) {
+      instance.on("paymentMethodRequestable", (event) => {
+        setIsValidCard(true);
+      });
+      instance.on("noPaymentMethodRequestable", (event) => {
+        setIsValidCard(false);
+      });
+
+      return () => {
+        if (instance) {
+          instance.off("paymentMethodRequestable");
+          instance.off("noPaymentMethodRequestable");
+        }
+      };
+    }
+  });
 
   //total price
   const totalPrice = () => {
@@ -51,10 +70,13 @@ const CartPage = () => {
     try {
       setLoading(true);
       const { nonce } = await instance.requestPaymentMethod();
-      const { data } = await axios.post("/api/v1/product/braintree/payment", {
-        nonce,
-        cart,
-      });
+      const { success } = await axios.post(
+        "/api/v1/product/braintree/payment",
+        {
+          nonce,
+          cart,
+        }
+      );
       setLoading(false);
       localStorage.removeItem("cart");
       setCart([]);
@@ -62,6 +84,10 @@ const CartPage = () => {
       toast.success("Payment Completed Successfully ");
     } catch (error) {
       console.log(error);
+      toast.error(error.response.data.message || "Payment Failed");
+      if (instance) {
+        instance.clearSelectedPaymentMethod();
+      }
       setLoading(false);
     }
   };
@@ -173,7 +199,12 @@ const CartPage = () => {
                     <button
                       className="btn btn-primary"
                       onClick={handlePayment}
-                      disabled={loading || !instance || !auth?.user?.address}
+                      disabled={
+                        loading ||
+                        !instance ||
+                        !auth?.user?.address ||
+                        !isValidCard
+                      }
                     >
                       {loading ? "Processing ...." : "Make Payment"}
                     </button>

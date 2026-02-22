@@ -12,6 +12,7 @@ import {
   relatedProductController,
   productCategoryController,
   braintreeTokenController,
+  brainTreePaymentController,
 } from "../controllers/productController.js";
 import categoryModel from "../models/categoryModel.js";
 import productModel from "../models/productModel.js";
@@ -19,21 +20,33 @@ import slugify from "slugify";
 import fs from "fs";
 import braintree, { BraintreeGateway, Environment } from "braintree";
 import { makeRes } from "../helpers/utils.test.js";
+import orderModel from "../models/orderModel.js";
 
 // Mocks
-jest.mock("../models/categoryModel.js");
 jest.mock("../models/productModel.js");
+jest.mock("../models/categoryModel.js");
+jest.mock('../models/orderModel', () => {
+  return jest.fn().mockImplementation(() => ({
+    save: jest.fn().mockResolvedValue(true)
+  }));
+});
 jest.mock("slugify", () => jest.fn());
 jest.mock("fs", () => ({ readFileSync: jest.fn() }));
-jest.mock("braintree", () => ({
-  __esModule: true,
-  default: {
-    BraintreeGateway: function () {
-      return {};
-    },
-    Environment: { Sandbox: {} },
-  },
-}));
+jest.mock('braintree', () => {
+  const mockSaleFn = jest.fn();
+  const mockGenerateFn = jest.fn();
+  return {
+    Environment: { Sandbox: 'Sandbox' },
+    BraintreeGateway: jest.fn().mockImplementation(() => ({
+      transaction: { sale: mockSaleFn },
+      clientToken: { generate: mockGenerateFn }
+    })),
+    _mockSale: mockSaleFn, 
+    _mockGenerate: mockGenerateFn
+  };
+});
+const mockSale = braintree._mockSale;
+const mockGenerate = braintree._mockGenerate;
 
 // Gallen Ong, A0252614L
 // Create Product Tests
@@ -1441,5 +1454,170 @@ describe("productCategoryController", () => {
       message: "Error while getting products",
       error: err,
     });
+  });
+});
+
+// Hans Delano, A0273456X
+describe("productPaymentController", () => {
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  })
+
+  const dummyReq = {
+      body: {
+        nonce: "testNonce",
+        cart: [
+          {
+            _id: "1",
+            name: "Product A",
+            price: 100,
+            category: { _id: "c1", name: "Cat" },
+            quantity: 2,
+          },
+          {
+            _id: "2",
+            name: "Product B",
+            price: 200,
+            category: { _id: "c2", name: "Cat2" },
+            quantity: 5,
+          }
+        ],
+      },
+      user:{
+        _id: "mockUserId",
+      }
+    };
+
+  // Hans Delano, A0273456X
+  test("returns 200 when nonce is successfully generated", async () => {
+    // Arrange
+    const res = makeRes();
+    mockGenerate.mockImplementation((payload, callback) => {
+      callback(null, "mockNonceToken");
+    });
+
+    // Act
+    await braintreeTokenController(null, res);
+
+    // Assert
+    expect(mockGenerate).toHaveBeenCalledTimes(1);
+    expect(res.status).toHaveBeenCalledWith(200);
+  });
+
+  test("returns 500 when error is thrown during nonce generation", async () => {
+    // Arrange
+    const res = makeRes();
+    const err = new Error("generate nonce error");
+    mockGenerate.mockImplementation((payload, callback) => {
+      callback(err, null);
+    });
+    
+    // Act
+    await braintreeTokenController(null, res);
+
+    // Assert
+    expect(mockGenerate).toHaveBeenCalledTimes(1);
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.send).toHaveBeenCalledWith(
+      expect.objectContaining({
+        success:false,
+      })
+    );
+  });
+
+  // Hans Delano, A0273456X
+  test("returns 200 when payment is successful", async () => {
+    // Arrange
+    const req = dummyReq;
+    const res = makeRes();
+    mockSale.mockImplementation((payload, callback) => {
+      callback(null, { 
+        success: true, 
+        transaction: { 
+          id: "testTransactionId" 
+        } 
+      });
+    });
+
+    // Act
+    await brainTreePaymentController(req, res);
+
+    // Assert
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.send).toHaveBeenCalledWith({ 
+      success: true, 
+      transactionId: "testTransactionId" 
+    });
+  });
+  
+  // Hans Delano, A0273456X
+  test("returns 500 when transaction fails", async () => {
+    // Arrange
+    const req = dummyReq;
+    const res = makeRes();
+    mockSale.mockImplementation((payload, callback) => {
+      callback(null, { 
+        success: false,
+        message: "Payment failed",
+        transaction: { 
+          id: "testTransactionId", 
+        } 
+      });
+    });
+
+    // Act
+    await brainTreePaymentController(req, res);
+
+    // Assert
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.send).toHaveBeenCalledWith({ 
+        success: false, 
+        message: "Payment failed"
+      });
+  });
+
+  // Hans Delano, A0273456X
+  test("returns 500 when error is thrown during payment processing", async () => {
+    // Arrange
+    const req = dummyReq;
+    const res = makeRes();
+    const err = new Error("External Error");
+    mockSale.mockImplementation((payload, callback) => {
+      throw err;
+    });
+
+    // Act
+    await brainTreePaymentController(req, res);
+
+    // Assert
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.send).toHaveBeenCalledWith(
+      expect.objectContaining({
+        success:false,
+      })
+    );
+  });
+
+  // Hans Delano, A0273456X
+  test("returns 500 when error is thrown during nonce creation", async () => {
+    // Arrange
+    const req = dummyReq;
+    const res = makeRes();
+    const err = new Error("External Error");
+    mockGenerate.mockImplementation((payload, callback) => {
+      throw err;
+    });
+
+    // Act
+    await braintreeTokenController(null, res);
+
+    // Assert
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.send).toHaveBeenCalledWith(
+      expect.objectContaining({
+        success:false,
+      })
+    );
   });
 });

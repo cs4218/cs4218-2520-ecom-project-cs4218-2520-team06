@@ -6,6 +6,7 @@ import { BrowserRouter as Router } from "react-router-dom";
 import { CartProvider } from "../context/cart";
 import { useAuth } from "../context/auth";
 import axios from "axios";
+import toast from "react-hot-toast";
 import CartPage from "./CartPage";
 
 // Fake localStorage implementation for testing
@@ -47,10 +48,19 @@ jest.mock("../components/Layout.js", () => ({ children, title }) => (
   </div>
 ));
 
+jest.mock("react-hot-toast", () => ({
+  __esModule: true,
+  default: {
+    error: jest.fn(),
+    success: jest.fn(),
+  },
+}));
+
 const mockRequestPaymentMethod = jest
   .fn()
   .mockResolvedValue({ nonce: "mock-nonce" });
 
+const braintreeEventHandlers = {};
 jest.mock("braintree-web-drop-in-react", () => {
   return function MockDropIn({ onInstance }) {
     return (
@@ -60,7 +70,14 @@ jest.mock("braintree-web-drop-in-react", () => {
         <button
           onClick={() => {
             if (onInstance) {
-              onInstance({ requestPaymentMethod: mockRequestPaymentMethod });
+              onInstance({
+                requestPaymentMethod: mockRequestPaymentMethod,
+                clearSelectedPaymentMethod: jest.fn(),
+                on: jest.fn((event, callback) => {
+                  braintreeEventHandlers[event] = callback;
+                }),
+                off: jest.fn(),
+              });
             }
           }}
         >
@@ -79,6 +96,10 @@ const loadFakeBraintree = async () => {
   const loadInstance = await screen.findByText(/Simulate Braintree Load/);
   await act(async () => {
     loadInstance.click();
+  });
+
+  act(() => {
+    braintreeEventHandlers["paymentMethodRequestable"]();
   });
 };
 
@@ -285,7 +306,6 @@ describe("CartPage", () => {
       setMockCart();
       setMockAuth({ name: "Test User", address: "123 Test St" }, "mock-token");
       axios.post.mockResolvedValue({ data: { success: true } });
-      const consoleSpy = jest.spyOn(console, "log").mockImplementation();
 
       await renderCartPage();
       await loadFakeBraintree();
@@ -299,16 +319,13 @@ describe("CartPage", () => {
         "/api/v1/product/braintree/payment",
         { cart: mockCart, nonce: "mock-nonce" }
       );
-
-      consoleSpy.mockRestore();
     });
 
     test("should handle payment failure", async () => {
       setMockCart();
       setMockAuth({ name: "Test User", address: "123 Test St" }, "mock-token");
-      const error = new Error("Payment Failed");
+      const error = { response: { data: { message: "Payment Failed" } } };
       axios.post.mockRejectedValueOnce(error);
-      const consoleSpy = jest.spyOn(console, "log").mockImplementation();
 
       await renderCartPage();
       await loadFakeBraintree();
@@ -317,11 +334,30 @@ describe("CartPage", () => {
         makePayment.click();
       });
 
-      await waitFor(() => {
-        expect(consoleSpy).toHaveBeenCalledWith(error);
+      expect(toast.error).toHaveBeenCalledTimes(1);
+    });
+
+    test("should disable payment button when card is invalid", async () => {
+      setMockCart();
+      setMockAuth({ name: "Test User", address: "123 Test St" }, "mock-token");
+
+      await renderCartPage();
+      await loadFakeBraintree();
+
+      // Simulate card becoming valid
+      act(() => {
+        braintreeEventHandlers["paymentMethodRequestable"]();
       });
 
-      consoleSpy.mockRestore();
+      const makePayment = await screen.findByText(/Make Payment/);
+      expect(makePayment).toBeEnabled();
+
+      // Simulate card becoming invalid
+      act(() => {
+        braintreeEventHandlers["noPaymentMethodRequestable"]();
+      });
+
+      expect(makePayment).toBeDisabled();
     });
   });
 });

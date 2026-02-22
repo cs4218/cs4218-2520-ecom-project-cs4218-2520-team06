@@ -25,19 +25,30 @@ export const createProductController = async (req, res) => {
     // Validation
     switch (true) {
       case !name:
-        return res.status(200).send({ success: false, message: "Name is Required" });
-      case !description:
-        return res.status(200).send({ success: false, message: "Description is Required" });
-      case !price:
-        return res.status(200).send({ success: false, message: "Price is Required" });
-      case !category:
-        return res.status(200).send({ success: false, message: "Category is Required" });
-      case !quantity:
-        return res.status(200).send({ success: false, message: "Quantity is Required" });
-      case photo && photo.size > 1000000:
         return res
           .status(200)
-          .send({ success: false, message: "photo is Required and should be less then 1mb" });
+          .send({ success: false, message: "Name is Required" });
+      case !description:
+        return res
+          .status(200)
+          .send({ success: false, message: "Description is Required" });
+      case !price:
+        return res
+          .status(200)
+          .send({ success: false, message: "Price is Required" });
+      case !category:
+        return res
+          .status(200)
+          .send({ success: false, message: "Category is Required" });
+      case !quantity:
+        return res
+          .status(200)
+          .send({ success: false, message: "Quantity is Required" });
+      case photo && photo.size > 1000000:
+        return res.status(200).send({
+          success: false,
+          message: "photo is Required and should be less then 1mb",
+        });
     }
 
     const products = new productModel({ ...req.fields, slug: slugify(name) });
@@ -110,9 +121,7 @@ export const getSingleProductController = async (req, res) => {
 // get photo
 export const productPhotoController = async (req, res) => {
   try {
-    const product = await productModel
-      .findById(req.params.pid)
-      .select("photo");
+    const product = await productModel.findById(req.params.pid).select("photo");
 
     if (!product || !product.photo || !product.photo.data) {
       return res.status(404).send({
@@ -163,19 +172,30 @@ export const updateProductController = async (req, res) => {
     // Validation
     switch (true) {
       case !name:
-        return res.status(200).send({ success: false, message: "Name is Required" });
-      case !description:
-        return res.status(200).send({ success: false, message: "Description is Required" });
-      case !price:
-        return res.status(200).send({ success: false, message: "Price is Required" });
-      case !category:
-        return res.status(200).send({ success: false, message: "Category is Required" });
-      case !quantity:
-        return res.status(200).send({ success: false, message: "Quantity is Required" });
-      case photo && photo.size > 1000000:
         return res
           .status(200)
-          .send({ success: false, message: "photo is Required and should be less then 1mb" });
+          .send({ success: false, message: "Name is Required" });
+      case !description:
+        return res
+          .status(200)
+          .send({ success: false, message: "Description is Required" });
+      case !price:
+        return res
+          .status(200)
+          .send({ success: false, message: "Price is Required" });
+      case !category:
+        return res
+          .status(200)
+          .send({ success: false, message: "Category is Required" });
+      case !quantity:
+        return res
+          .status(200)
+          .send({ success: false, message: "Quantity is Required" });
+      case photo && photo.size > 1000000:
+        return res.status(200).send({
+          success: false,
+          message: "photo is Required and should be less then 1mb",
+        });
     }
 
     const products = await productModel.findByIdAndUpdate(
@@ -343,13 +363,22 @@ export const braintreeTokenController = async (req, res) => {
   try {
     gateway.clientToken.generate({}, function (err, response) {
       if (err) {
-        res.status(500).send(err);
+        res.status(500).send({
+          success: false,
+          message: "Error in generating token",
+        });
       } else {
-        res.send(response);
+        res.status(200).send({
+          success: true,
+          clientToken: response.clientToken,
+        });
       }
     });
   } catch (error) {
-    console.log(error);
+    res.status(500).send({
+      success: false,
+      message: "Payment channel is offline, try again later",
+    });
   }
 };
 
@@ -370,19 +399,24 @@ export const brainTreePaymentController = async (req, res) => {
         },
       },
       function (error, result) {
-        if (result) {
+        if (result.success) {
           const order = new orderModel({
             products: cart,
             payment: result,
             buyer: req.user._id,
           }).save();
-          res.json({ ok: true });
+          res
+            .status(200)
+            .send({ success: true, transactionId: result.transaction.id });
         } else {
-          res.status(500).send(error);
+          res.status(500).send({ success: false, message: result.message });
         }
       }
     );
   } catch (error) {
-    console.log(error);
+    res.status(500).send({
+      success: false,
+      message: "Payment channel is offline, try again later",
+    });
   }
 };
