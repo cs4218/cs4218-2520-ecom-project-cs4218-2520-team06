@@ -61,7 +61,7 @@ export const createProductController = async (req, res) => {
   }
 };
 
-//get all products
+// get all products
 export const getProductController = async (req, res) => {
   try {
     const products = await productModel
@@ -136,7 +136,7 @@ export const productPhotoController = async (req, res) => {
   }
 };
 
-//delete controller
+// delete controller
 export const deleteProductController = async (req, res) => {
   try {
     await productModel.findByIdAndDelete(req.params.pid).select("-photo");
@@ -154,7 +154,7 @@ export const deleteProductController = async (req, res) => {
   }
 };
 
-//upate producta
+// update products
 export const updateProductController = async (req, res) => {
   try {
     const { name, description, price, category, quantity, shipping } =
@@ -203,7 +203,7 @@ export const updateProductController = async (req, res) => {
   }
 };
 
-// filters
+// filter products
 export const productFiltersController = async (req, res) => {
   try {
     const { checked, radio } = req.body;
