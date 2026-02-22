@@ -137,6 +137,7 @@ describe("CreateCategory Component", () => {
       data: { category: [mockCategories[1]], success: true },
     });
     axios.delete.mockResolvedValueOnce({ data: { success: true } });
+    const confirmSpy = jest.spyOn(window, "confirm").mockReturnValue(true);
 
     // Act: Render the CreateCategory component and attempt to delete a category
     const { findByText, queryByText } = render(<CreateCategory />);
@@ -154,6 +155,7 @@ describe("CreateCategory Component", () => {
     await waitFor(() =>
       expect(queryByText("Category 1")).not.toBeInTheDocument()
     );
+    expect(confirmSpy).toHaveBeenCalled();
   });
 
   it("does not display any categories when fetching returns success false", async () => {
@@ -297,6 +299,27 @@ describe("CreateCategory Component", () => {
       )
     );
   });
+  
+  it("returns when delete is not confirmed", async () => {
+    // Arrange: Mock categories fetch and spy on window.confirm
+    axios.get.mockResolvedValueOnce({
+      data: { category: mockCategories, success: true },
+    });
+    const confirmSpy = jest.spyOn(window, "confirm").mockReturnValue(false);
+    
+    // Act: Render the CreateCategory component and attempt to delete a category
+    const { findByText } = render(<CreateCategory />);
+    const categoryCell = await findByText("Category 1");
+    const row = categoryCell.closest("tr");
+    
+    // Click delete button within that row
+    const deleteButton = within(row).getByRole("button", { name: /delete/i });
+    fireEvent.click(deleteButton);
+    
+    // Assert: Verify window.confirm was called and no API call was made
+    expect(confirmSpy).toHaveBeenCalled();
+    expect(axios.delete).not.toHaveBeenCalled();
+  });
 
   it("shows error toast when deleting category returns success false", async () => {
     // Arrange: Mock categories fetch and failed deletion
@@ -306,6 +329,7 @@ describe("CreateCategory Component", () => {
     axios.delete.mockResolvedValueOnce({
       data: { message: "Delete category error", success: false },
     });
+    const confirmSpy = jest.spyOn(window, "confirm").mockReturnValue(true);
 
     // Act: Render the CreateCategory component and attempt to delete a category
     const { findByText } = render(<CreateCategory />);
@@ -320,6 +344,7 @@ describe("CreateCategory Component", () => {
     await waitFor(() =>
       expect(toast.error).toHaveBeenCalledWith("Delete category error")
     );
+    expect(confirmSpy).toHaveBeenCalled()
   });
 
   it("show error toast when deleting category fails", async () => {
@@ -329,6 +354,7 @@ describe("CreateCategory Component", () => {
       data: { category: mockCategories, success: true },
     });
     axios.delete.mockRejectedValueOnce(error);
+    jest.spyOn(window, "confirm").mockReturnValue(true);
 
     // Act: Render the CreateCategory component and attempt to delete a category
     const { findByText } = render(<CreateCategory />);
