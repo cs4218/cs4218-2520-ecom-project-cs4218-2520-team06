@@ -39,6 +39,9 @@ The distribution of testing workload for this project follows closely with the s
     1. createProductController
     2. deleteProductController
     3. updateProductController
+- models/categoryModel.js
+- models/orderModel.js
+- models/productModel.js
 - models/userModel.js
 ### Jabez Tho
 #### Client-Related Files
@@ -54,7 +57,6 @@ The distribution of testing workload for this project follows closely with the s
     2. getOrdersController
     3. getAllOrdersController
     4. orderStatusController
-- models/orderModel.js
 ### Kok Bo Chang
 #### Client-Related Files
 - pages/ProductDetails.js
@@ -77,7 +79,6 @@ The distribution of testing workload for this project follows closely with the s
     7. searchProductController
     8. relatedProductController
     9. productCategoryController
-- models/productModel.js
 - config/db.js
 ### Hans Delano
 #### Client-Related Files
