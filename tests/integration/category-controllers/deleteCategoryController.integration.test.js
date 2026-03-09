@@ -69,29 +69,25 @@ describe("deleteCategoryController Integration Tests", () => {
 
   describe("on successful category deletion", () => {
     it("should delete an existing category", async () => {
-      // Arrange: Create a category to delete
       const category = await categoryModel.create({
         name: "Category to Delete",
         slug: "category-to-delete",
       });
 
-      // Act: Send DELETE request to delete category
       const response = await request(app)
         .delete(`${deleteCategoryApiUrl}/${category._id}`)
         .set("Authorization", adminToken);
 
-      // Assert: Verify successful deletion response
       expect(response.status).toBe(200);
       expect(response.body.success).toBe(true);
       expect(response.body.message).toBe("Category Deleted Successfully");
 
-      // Verify database integration: Check category no longer exists in database
+      // Category should be removed from database
       const deletedCategory = await categoryModel.findById(category._id);
       expect(deletedCategory).toBeNull();
     });
 
     it("should delete category by ID regardless of other data", async () => {
-      // Arrange: Create multiple categories
       const category1 = await categoryModel.create({
         name: "Category 1",
         slug: "category-1",
@@ -105,16 +101,14 @@ describe("deleteCategoryController Integration Tests", () => {
         slug: "category-3",
       });
 
-      // Act: Delete only category2
       const response = await request(app)
         .delete(`${deleteCategoryApiUrl}/${category2._id}`)
         .set("Authorization", adminToken);
 
-      // Assert: Verify only category2 is deleted
       expect(response.status).toBe(200);
       expect(response.body.success).toBe(true);
 
-      // Verify other categories still exist
+      // Only target category should be deleted
       const remaining1 = await categoryModel.findById(category1._id);
       const remaining2 = await categoryModel.findById(category2._id);
       const remaining3 = await categoryModel.findById(category3._id);
@@ -123,20 +117,17 @@ describe("deleteCategoryController Integration Tests", () => {
       expect(remaining2).toBeNull();
       expect(remaining3).not.toBeNull();
 
-      // Cleanup
       await categoryModel.deleteMany({});
     });
 
     it("should handle deletion of non-existent category gracefully", async () => {
-      // Arrange: Use a valid but non-existent MongoDB ID
       const fakeId = new mongoose.Types.ObjectId();
 
-      // Act: Try to delete non-existent category
       const response = await request(app)
         .delete(`${deleteCategoryApiUrl}/${fakeId}`)
         .set("Authorization", adminToken);
 
-      // Assert: Should return 200 with success (MongoDB doesn't error on delete of non-existent)
+      // Deletion of non-existent document succeeds (idempotent)
       expect(response.status).toBe(200);
       expect(response.body.success).toBe(true);
       expect(response.body.message).toBe("Category Deleted Successfully");
@@ -145,46 +136,39 @@ describe("deleteCategoryController Integration Tests", () => {
 
   describe("authentication and authorization", () => {
     it("should fail when no token is provided", async () => {
-      // Arrange: Create a category to delete
       const category = await categoryModel.create({
         name: "Test Category",
         slug: "test-category",
       });
 
-      // Act: Send DELETE request without authorization header
       const response = await request(app)
         .delete(`${deleteCategoryApiUrl}/${category._id}`);
 
-      // Assert: Verify unauthorized response
       expect(response.status).not.toBe(200);
 
-      // Verify category still exists (deletion should have failed)
+      // Category should remain in database
       const stillExists = await categoryModel.findById(category._id);
       expect(stillExists).not.toBeNull();
     });
 
     it("should fail when invalid token is provided", async () => {
-      // Arrange: Create a category to delete
       const category = await categoryModel.create({
         name: "Test Category",
         slug: "test-category",
       });
 
-      // Act: Send DELETE request with invalid token
       const response = await request(app)
         .delete(`${deleteCategoryApiUrl}/${category._id}`)
         .set("Authorization", "invalid-token");
 
-      // Assert: Verify unauthorized response
       expect(response.status).not.toBe(200);
 
-      // Verify category still exists
+      // Category should remain in database
       const stillExists = await categoryModel.findById(category._id);
       expect(stillExists).not.toBeNull();
     });
 
     it("should fail when non-admin user tries to delete category", async () => {
-      // Arrange: Create regular non-admin user
       const hashedPassword = await hashPassword("user123");
       const regularUser = await userModel.create({
         name: "Regular User",
@@ -193,35 +177,30 @@ describe("deleteCategoryController Integration Tests", () => {
         phone: "9876543210",
         address: { street: "456 User St" },
         answer: "test answer",
-        role: 0, // Regular user role
+        role: 0,
       });
 
-      // Generate token for regular user
       const userToken = JWT.sign({ _id: regularUser._id }, process.env.JWT_SECRET, {
         expiresIn: "1d",
       });
 
-      // Create a category to attempt deletion
       const category = await categoryModel.create({
         name: "Protected Category",
         slug: "protected-category",
       });
 
-      // Act: Attempt to delete category with regular user token
       const response = await request(app)
         .delete(`${deleteCategoryApiUrl}/${category._id}`)
         .set("Authorization", userToken);
 
-      // Assert: Verify authorization error
       expect(response.status).toBe(401);
       expect(response.body.success).toBe(false);
       expect(response.body.message).toBe("Unauthorized Access");
 
-      // Verify category still exists (deletion should have failed)
+      // Category should remain in database
       const stillExists = await categoryModel.findById(category._id);
       expect(stillExists).not.toBeNull();
 
-      // Cleanup
       try {
         await userModel.findByIdAndDelete(regularUser._id);
         await categoryModel.findByIdAndDelete(category._id);

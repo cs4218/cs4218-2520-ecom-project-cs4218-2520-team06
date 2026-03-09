@@ -78,13 +78,11 @@ describe("createCategoryController Integration Tests", () => {
 
   describe("on successful creation of a category", () => {
     it("should create a new category when valid data is provided", async () => {
-      // Act: Send POST request to create category
       const response = await request(app)
         .post(createCategoryApiUrl)
         .set("Authorization", adminToken)
         .send({ name: "Electronics" });
 
-      // Assert: Verify successful creation response
       expect(response.status).toBe(201);
       expect(response.body.success).toBe(true);
       expect(response.body.message).toBe("new category created");
@@ -92,7 +90,7 @@ describe("createCategoryController Integration Tests", () => {
       expect(response.body.category.name).toBe("Electronics");
       expect(response.body.category.slug).toBe("electronics");
 
-      // Verify database integration: Check category exists in database
+      // Verify category persisted to database
       const savedCategory = await categoryModel.findOne({ name: "Electronics" });
       expect(savedCategory).not.toBeNull();
       expect(savedCategory.name).toBe("Electronics");
@@ -100,40 +98,35 @@ describe("createCategoryController Integration Tests", () => {
     });
 
     it("should create categories with special characters in name", async () => {
-      // Act: Create category with special characters
       const response = await request(app)
         .post(createCategoryApiUrl)
         .set("Authorization", adminToken)
         .send({ name: "Home & Garden" });
 
-      // Assert: Verify successful creation and proper slug generation
       expect(response.status).toBe(201);
       expect(response.body.success).toBe(true);
       expect(response.body.category.name).toBe("Home & Garden");
 
-      // Verify database integration
+      // Verify special characters stored correctly in database
       const savedCategory = await categoryModel.findOne({ name: "Home & Garden" });
       expect(savedCategory).not.toBeNull();
     });
 
     it("should create multiple unique categories sequentially", async () => {
-      // Arrange: Create first category
       await request(app)
         .post(createCategoryApiUrl)
         .set("Authorization", adminToken)
         .send({ name: "Electronics" });
 
-      // Act: Create second category
       const response = await request(app)
         .post(createCategoryApiUrl)
         .set("Authorization", adminToken)
         .send({ name: "Books" });
 
-      // Assert: Verify both categories exist
       expect(response.status).toBe(201);
       expect(response.body.success).toBe(true);
       
-      // Verify database integration: Both categories should exist
+      // Both categories should be in database
       const categoryCount = await categoryModel.countDocuments();
       expect(categoryCount).toBe(2);
     });
@@ -141,54 +134,47 @@ describe("createCategoryController Integration Tests", () => {
 
   describe("validation errors", () => {
     it("should return error when name is missing", async () => {
-      // Act: Send request without name
       const response = await request(app)
         .post(createCategoryApiUrl)
         .set("Authorization", adminToken)
         .send({});
 
-      // Assert: Verify validation error response
       expect(response.status).toBe(200);
       expect(response.body.success).toBe(false);
       expect(response.body.message).toBe("Name is required");
 
-      // Verify database integration: No category should be created
+      // Request should be rejected without creating a category
       const categoryCount = await categoryModel.countDocuments();
       expect(categoryCount).toBe(0);
     });
 
     it("should return error when name is empty string", async () => {
-      // Act: Send request with empty name
       const response = await request(app)
         .post(createCategoryApiUrl)
         .set("Authorization", adminToken)
         .send({ name: "" });
 
-      // Assert: Verify validation error
       expect(response.status).toBe(200);
       expect(response.body.success).toBe(false);
       expect(response.body.message).toBe("Name is required");
     });
 
     it("should return error when category already exists", async () => {
-      // Arrange: Create initial category in database
       await categoryModel.create({
         name: "Electronics",
         slug: "electronics",
       });
 
-      // Act: Attempt to create duplicate category
       const response = await request(app)
         .post(createCategoryApiUrl)
         .set("Authorization", adminToken)
         .send({ name: "Electronics" });
 
-      // Assert: Verify duplicate error response
       expect(response.status).toBe(200);
       expect(response.body.success).toBe(false);
       expect(response.body.message).toBe("Category Already Exists");
 
-      // Verify database integration: Only one category should exist
+      // Duplicate should not be created
       const categoryCount = await categoryModel.countDocuments({ name: "Electronics" });
       expect(categoryCount).toBe(1);
     });
@@ -196,28 +182,23 @@ describe("createCategoryController Integration Tests", () => {
 
   describe("authentication and authorization", () => {
     it("should fail when no token is provided", async () => {
-      // Act: Send request without authorization header
       const response = await request(app)
         .post(createCategoryApiUrl)
         .send({ name: "Electronics" });
 
-      // Assert: Verify request fails (middleware blocks without token)
       expect(response.status).not.toBe(201);
     });
 
     it("should fail when invalid token is provided", async () => {
-      // Act: Send request with invalid token
       const response = await request(app)
         .post(createCategoryApiUrl)
         .set("Authorization", "invalid-token")
         .send({ name: "Electronics" });
 
-      // Assert: Verify unauthorized response
       expect(response.status).not.toBe(201);
     });
 
     it("should fail when non-admin user tries to create category", async () => {
-      // Arrange: Create regular non-admin user
       const hashedPassword = await hashPassword("user123");
       const regularUser = await userModel.create({
         name: "Regular User",
@@ -226,26 +207,22 @@ describe("createCategoryController Integration Tests", () => {
         phone: "9876543210",
         address: { street: "456 User St" },
         answer: "test answer",
-        role: 0, // Regular user role
+        role: 0,
       });
 
-      // Generate token for regular user
       const userToken = JWT.sign({ _id: regularUser._id }, process.env.JWT_SECRET, {
         expiresIn: "1d",
       });
 
-      // Act: Attempt to create category with regular user token
       const response = await request(app)
         .post(createCategoryApiUrl)
         .set("Authorization", userToken)
         .send({ name: "Electronics" });
 
-      // Assert: Verify authorization error (isAdmin middleware should block)
       expect(response.status).toBe(401);
       expect(response.body.success).toBe(false);
       expect(response.body.message).toBe("Unauthorized Access");
 
-      // Cleanup: Remove regular user
       try {
         await userModel.findByIdAndDelete(regularUser._id);
       } catch (error) {
