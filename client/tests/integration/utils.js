@@ -1,4 +1,5 @@
 import axios from "axios";
+import { registerController } from "../../../controllers/authController";
 
 export const setupAxiosMock = ({
   categories = [],
@@ -32,11 +33,35 @@ export const setupAxiosMock = ({
     return Promise.resolve({ data: {} });
   });
 
-  axios.post.mockImplementation((url, params) => {
+  axios.post.mockImplementation((url, payload) => {
     if (url === "/api/v1/product/product-filters") {
       if (rejectPost) return Promise.reject(new Error("Filter API Error"));
-      if (postHandler) return postHandler(params);
+      if (postHandler) return postHandler(payload);
+    }
+    if (url === "/api/v1/auth/register") {
+      return createMockController(registerController)(url, payload);
     }
     return Promise.resolve({ data: {} });
   });
+};
+
+export const createMockController = (handlerCallback) => {
+  return async (url, payload) => {
+    const req = { body: payload };
+    let responseBody;
+    let statusCode = 200;
+    const res = {
+      status: jest.fn().mockImplementation((code) => {
+        statusCode = code;
+        return res;
+      }),
+      send: jest.fn().mockImplementation((body) => {
+        responseBody = body;
+      }),
+    };
+
+    await handlerCallback(req, res);
+
+    return { status: statusCode, data: responseBody };
+  };
 };
