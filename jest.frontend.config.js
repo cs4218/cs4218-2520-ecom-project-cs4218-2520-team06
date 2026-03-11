@@ -20,7 +20,10 @@ export default {
   transformIgnorePatterns: ["/node_modules/(?!(styleMock\\.js)$)"],
 
   // only run these tests
-  testMatch: ["<rootDir>/client/src/**/*.test.js"],
+  testMatch: [
+    "<rootDir>/client/src/**/*.test.js",
+    "<rootDir>/client/tests/**/*.test.js",
+  ],
 
   testPathIgnorePatterns: ["<rootDir>/client/src/_site/"],
 
@@ -36,5 +39,6 @@ export default {
   //     functions: 100,
   //   },
   // },
+  setupFiles: ["<rootDir>/client/tests/integration/setupIntegration.js"],
   setupFilesAfterEnv: ["<rootDir>/client/src/setupTests.js"],
 };
