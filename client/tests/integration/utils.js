@@ -7,6 +7,7 @@ import {
 export const setupAxiosMock = ({
   categories = [],
   products = [],
+  categoryProducts = {},
   total = 0,
   pageProducts = null,
   rejectGet = false,
@@ -23,6 +24,16 @@ export const setupAxiosMock = ({
     if (url === "/api/v1/product/product-count") {
       return Promise.resolve({ data: { total } });
     }
+    if (url.startsWith("/api/v1/product/product-category/")) {
+      const slug = url.split("/").pop();
+      return Promise.resolve({
+        data: {
+          products: categoryProducts[slug],
+          category: categories,
+        },
+      });
+    }
+
     if (url.startsWith("/api/v1/product/product-list/")) {
       const page = url.split("/").pop();
       if (rejectLoadMore && page !== "1") {

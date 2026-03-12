@@ -221,7 +221,6 @@ describe("HomePage", () => {
     await waitFor(() => {
       expect(screen.getByText("Product 1")).toBeInTheDocument();
     });
-
     // Simulate add to cart
     await act(async () => {
       screen.getAllByText("ADD TO CART")[0].click();
