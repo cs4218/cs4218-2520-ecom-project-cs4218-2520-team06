@@ -1,5 +1,8 @@
 import axios from "axios";
-import { registerController } from "../../../controllers/authController";
+import {
+  loginController,
+  registerController,
+} from "../../../controllers/authController";
 
 export const setupAxiosMock = ({
   categories = [],
@@ -40,6 +43,9 @@ export const setupAxiosMock = ({
     }
     if (url === "/api/v1/auth/register") {
       return createMockController(registerController)(url, payload);
+    }
+    if (url === "/api/v1/auth/login") {
+      return createMockController(loginController)(url, payload);
     }
     return Promise.resolve({ data: {} });
   });
