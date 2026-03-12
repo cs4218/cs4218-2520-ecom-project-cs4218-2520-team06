@@ -1,5 +1,6 @@
 import axios from "axios";
 import {
+  forgotPasswordController,
   loginController,
   registerController,
 } from "../../../controllers/authController";
@@ -57,6 +58,9 @@ export const setupAxiosMock = ({
     }
     if (url === "/api/v1/auth/login") {
       return createMockController(loginController)(url, payload);
+    }
+    if (url === "/api/v1/auth/forgot-password") {
+      return createMockController(forgotPasswordController)(url, payload);
     }
     return Promise.resolve({ data: {} });
   });
