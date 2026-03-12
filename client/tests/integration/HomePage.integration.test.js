@@ -10,6 +10,8 @@ import { SearchProvider } from "../../src/context/search";
 import { setupAxiosMock } from "./utils";
 
 jest.mock("axios");
+jest.mock("../../../models/userModel.js");
+jest.mock("../../../models/orderModel.js");
 
 // Helper component to expose cart state for test assertions
 const CartReader = () => {
