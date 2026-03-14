@@ -174,12 +174,16 @@ export const updateProfileController = async (req, res) => {
       return res.json({ error: "Passsword is required and 6 character long" });
     }
     const hashedPassword = password ? await hashPassword(password) : undefined;
-    const updatedUser = await userModel.findByIdAndUpdate(req.user._id, {
-      name: name === "" ? name : name || user.name,
-      password: hashedPassword || user.password,
-      phone: phone === "" ? phone : phone || user.phone,
-      address: address === "" ? address : address || user.address,
-    });
+    const updatedUser = await userModel.findByIdAndUpdate(
+      req.user._id,
+      {
+        name: name === "" ? name : name || user.name,
+        password: hashedPassword || user.password,
+        phone: phone === "" ? phone : phone || user.phone,
+        address: address === "" ? address : address || user.address,
+      },
+      { new: true }
+    );
     res.status(200).send({
       success: true,
       message: "Profile Updated SUccessfully",

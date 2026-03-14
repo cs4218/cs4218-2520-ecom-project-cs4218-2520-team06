@@ -648,7 +648,8 @@ describe("updateProfileController", () => {
       {
         ...existingUser,
         name: "New Name",
-      }
+      },
+      { new: true }
     );
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.send).toHaveBeenCalledWith(
@@ -680,7 +681,8 @@ describe("updateProfileController", () => {
       expect.objectContaining({
         ...existingUser,
         password: "hashedPassword",
-      })
+      }),
+      { new: true }
     );
   });
 
@@ -708,7 +710,8 @@ describe("updateProfileController", () => {
         name: "New Name",
         phone: "2222222222",
         address: "New Address",
-      }
+      },
+      { new: true }
     );
   });
 
@@ -754,7 +757,8 @@ describe("updateProfileController", () => {
         password: "hashedPassword",
         phone: "",
         address: "",
-      }
+      },
+      { new: true }
     );
     expect(res.status).toHaveBeenCalledWith(200);
   });
