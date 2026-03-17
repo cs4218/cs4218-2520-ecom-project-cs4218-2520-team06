@@ -31,51 +31,52 @@ const SearchStateSeeder = ({ keyword = "", results = [] }) => {
   return null;
 };
 
-const withProviders = (ui) => (
-  <AuthProvider>
-    <SearchProvider>{ui}</SearchProvider>
-  </AuthProvider>
-);
-
 const renderInputFlow = () =>
   render(
-    withProviders(
-      <MemoryRouter initialEntries={["/"]}>
-        <Routes>
-          <Route path="/" element={<SearchEntry />} />
-          <Route path="/search" element={<div>Search destination</div>} />
-        </Routes>
-      </MemoryRouter>
-    )
+    <AuthProvider>
+      <SearchProvider>
+        <MemoryRouter initialEntries={["/"]}>
+          <Routes>
+            <Route path="/" element={<SearchEntry />} />
+            <Route path="/search" element={<div>Search destination</div>} />
+          </Routes>
+        </MemoryRouter>
+      </SearchProvider>
+    </AuthProvider>
   );
 
 const renderSearchPageWithSeededState = ({ keyword = "", results = [] }) =>
   render(
-    withProviders(
-      <MemoryRouter initialEntries={["/search"]}>
-        <SearchStateSeeder keyword={keyword} results={results} />
-        <Routes>
-          <Route path="/search" element={<Search />} />
-        </Routes>
-      </MemoryRouter>
-    )
+    <AuthProvider>
+      <SearchProvider>
+        <MemoryRouter initialEntries={["/search"]}>
+          <SearchStateSeeder keyword={keyword} results={results} />
+          <Routes>
+            <Route path="/search" element={<Search />} />
+          </Routes>
+        </MemoryRouter>
+      </SearchProvider>
+    </AuthProvider>
   );
 
 const renderFullFlow = () =>
   render(
-    withProviders(
-      <MemoryRouter initialEntries={["/"]}>
-        <Routes>
-          <Route path="/" element={<SearchEntry />} />
-          <Route path="/search" element={<Search />} />
-        </Routes>
-      </MemoryRouter>
-    )
+    <AuthProvider>
+      <SearchProvider>
+        <MemoryRouter initialEntries={["/"]}>
+          <Routes>
+            <Route path="/" element={<SearchEntry />} />
+            <Route path="/search" element={<Search />} />
+          </Routes>
+        </MemoryRouter>
+      </SearchProvider>
+    </AuthProvider>
   );
 
 describe("Search integration", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    // seed auth state
     localStorage.setItem(
       "auth",
       JSON.stringify({
@@ -93,7 +94,8 @@ describe("Search integration", () => {
   });
 
   it("should submit SearchInput to API request without auth", async () => {
-    localStorage.removeItem("auth");
+    // Clear auth state to test unauthenticated flow
+    localStorage.clear();
     axios.get.mockResolvedValueOnce({ data: [{ _id: "p1" }] });
 
     renderInputFlow();
