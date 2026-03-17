@@ -11,7 +11,7 @@ import connectDB from "../../../config/db";
 import userModel from "../../../models/userModel";
 
 describe("Register Tests", () => {
-  const registerTestUser = {
+  const user = {
     name: "testRegister",
     email: "testRegister@gmail.com",
     phone: "91234567",
@@ -27,12 +27,12 @@ describe("Register Tests", () => {
 
   beforeEach(async () => {
     // Ensure clean state before each test
-    await userModel.deleteOne({ email: registerTestUser.email });
+    await userModel.deleteOne({ email: user.email });
   });
 
   afterEach(async () => {
     // Clean up after each test
-    await userModel.deleteOne({ email: registerTestUser.email });
+    await userModel.deleteOne({ email: user.email });
   });
 
   test("Register with valid details", async ({ page }) => {
@@ -40,41 +40,74 @@ describe("Register Tests", () => {
     await page.getByRole("textbox", { name: "Enter Your Name" }).click();
     await page
       .getByRole("textbox", { name: "Enter Your Name" })
-      .fill(registerTestUser.name);
+      .fill(user.name);
     await page.getByRole("textbox", { name: "Enter Your Email" }).click();
     await page
       .getByRole("textbox", { name: "Enter Your Email" })
-      .fill(registerTestUser.email);
+      .fill(user.email);
     await page.getByRole("textbox", { name: "Enter Your Password" }).click();
     await page
       .getByRole("textbox", { name: "Enter Your Password" })
-      .fill(registerTestUser.password);
+      .fill(user.password);
     await page.getByRole("textbox", { name: "Enter Your Phone" }).click();
     await page
       .getByRole("textbox", { name: "Enter Your Phone" })
-      .fill(registerTestUser.phone);
+      .fill(user.phone);
     await page.getByRole("textbox", { name: "Enter Your Address" }).click();
     await page
       .getByRole("textbox", { name: "Enter Your Address" })
-      .fill(registerTestUser.address);
+      .fill(user.address);
     await page
       .getByRole("textbox", { name: "What is Your Favorite sports" })
       .click();
     await page
       .getByRole("textbox", { name: "What is Your Favorite sports" })
-      .fill(registerTestUser.answer);
+      .fill(user.answer);
     await page.getByRole("button", { name: "REGISTER" }).click();
-    await page.getByRole("textbox", { name: "Enter Your Email" }).click();
-    await page
-      .getByRole("textbox", { name: "Enter Your Email" })
-      .fill(registerTestUser.email);
-    await page.getByRole("textbox", { name: "Enter Your Password" }).click();
-    await page
-      .getByRole("textbox", { name: "Enter Your Password" })
-      .fill(registerTestUser.password);
-    await page.getByRole("button", { name: "LOGIN" }).click();
+
     await expect(page.getByRole("main")).toContainText(
       "Registered successfully, please login"
     );
+  });
+
+  test("Register with existing email", async ({ page }) => {
+    // First, create a user with the same email
+    await new userModel(user).save();
+
+    await page.goto("http://localhost:3000/register");
+    await page.getByRole("textbox", { name: "Enter Your Name" }).click();
+    await page
+      .getByRole("textbox", { name: "Enter Your Name" })
+      .fill(user.name);
+    await page.getByRole("textbox", { name: "Enter Your Email" }).click();
+    await page
+      .getByRole("textbox", { name: "Enter Your Email" })
+      .fill(user.email);
+    await page.getByRole("textbox", { name: "Enter Your Password" }).click();
+    await page
+      .getByRole("textbox", { name: "Enter Your Password" })
+      .fill(user.password);
+    await page.getByRole("textbox", { name: "Enter Your Phone" }).click();
+    await page
+      .getByRole("textbox", { name: "Enter Your Phone" })
+      .fill(user.phone);
+    await page.getByRole("textbox", { name: "Enter Your Address" }).click();
+    await page
+      .getByRole("textbox", { name: "Enter Your Address" })
+      .fill(user.address);
+    await page
+      .getByRole("textbox", { name: "What is Your Favorite sports" })
+      .click();
+    await page
+      .getByRole("textbox", { name: "What is Your Favorite sports" })
+      .fill(user.answer);
+    await page.getByRole("button", { name: "REGISTER" }).click();
+
+    await expect(
+      page
+        .locator("div")
+        .filter({ hasText: /^Already Register please login$/ })
+        .nth(2)
+    ).toBeVisible();
   });
 });
