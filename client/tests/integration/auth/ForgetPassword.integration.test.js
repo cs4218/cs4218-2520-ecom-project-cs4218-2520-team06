@@ -1,3 +1,4 @@
+// Gabriel Chang, A0276978Y
 import React from "react";
 import { render, fireEvent, waitFor, act } from "@testing-library/react";
 import ForgetPassword from "../../../src/pages/Auth/ForgetPassword.js";
