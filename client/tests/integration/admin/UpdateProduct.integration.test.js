@@ -94,7 +94,7 @@ describe("Product Update and Delete (Page Integration)", () => {
 			data: { success: true, category: mockCategories },
 		});
 		axios.delete.mockResolvedValueOnce({ data: { success: true } });
-		const promptSpy = jest.spyOn(window, "prompt").mockReturnValue("yes");
+		const confirmSpy = jest.spyOn(window, "confirm").mockReturnValue(true);
 
 		const { getByText, findByText } = renderPage();
 		await findByText((content, element) => content.includes("Update Product"));
@@ -102,11 +102,11 @@ describe("Product Update and Delete (Page Integration)", () => {
 		fireEvent.click(getByText("DELETE PRODUCT"));
 
 		await waitFor(() => {
-			expect(promptSpy).toHaveBeenCalled();
+			expect(confirmSpy).toHaveBeenCalled();
 			expect(axios.delete).toHaveBeenCalledTimes(1);
 		});
 
-		promptSpy.mockRestore();
+		confirmSpy.mockRestore();
 	});
 
 	it("respects user cancellation in product delete confirmation", async () => {
@@ -116,7 +116,7 @@ describe("Product Update and Delete (Page Integration)", () => {
 		axios.get.mockResolvedValueOnce({
 			data: { success: true, category: mockCategories },
 		});
-		const promptSpy = jest.spyOn(window, "prompt").mockReturnValue(null);
+		const confirmSpy = jest.spyOn(window, "confirm").mockReturnValue(null);
 
 		const { getByText, findByText } = renderPage();
 		await findByText((content, element) => content.includes("Update Product"));
@@ -124,11 +124,11 @@ describe("Product Update and Delete (Page Integration)", () => {
 		fireEvent.click(getByText("DELETE PRODUCT"));
 
 		await waitFor(() => {
-			expect(promptSpy).toHaveBeenCalled();
+			expect(confirmSpy).toHaveBeenCalled();
 		});
 
 		expect(axios.delete).not.toHaveBeenCalled();
 
-		promptSpy.mockRestore();
+		confirmSpy.mockRestore();
 	});
 });

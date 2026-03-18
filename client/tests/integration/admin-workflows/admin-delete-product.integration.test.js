@@ -108,7 +108,7 @@ describe("Admin Delete Product and Verify Workflow (Full-Stack)", () => {
 			return { data: { success: true, message: "Product deleted successfully" } };
 		});
 
-		const promptSpy = jest.spyOn(window, "prompt").mockReturnValue("yes");
+		const confirmSpy = jest.spyOn(window, "confirm").mockReturnValue(true);
 		const { getByText, getByPlaceholderText, getByRole, queryByText } = renderWithProviders();
 
 		await waitFor(() => {
@@ -119,7 +119,7 @@ describe("Admin Delete Product and Verify Workflow (Full-Stack)", () => {
 		fireEvent.click(getByText("DELETE PRODUCT"));
 
 		await waitFor(() => {
-			expect(promptSpy).toHaveBeenCalled();
+			expect(confirmSpy).toHaveBeenCalled();
 			expect(axios.delete).toHaveBeenCalledTimes(1);
 			expect(toast.success).toHaveBeenCalledWith("Product Deleted Successfully");
 		});
@@ -130,7 +130,7 @@ describe("Admin Delete Product and Verify Workflow (Full-Stack)", () => {
 			expect(queryByText("Product to Delete")).not.toBeInTheDocument();
 		});
 
-		promptSpy.mockRestore();
+		confirmSpy.mockRestore();
 	});
 
 	it("shows an error when deletion fails", async () => {
@@ -155,7 +155,7 @@ describe("Admin Delete Product and Verify Workflow (Full-Stack)", () => {
 			},
 		});
 
-		const promptSpy = jest.spyOn(window, "prompt").mockReturnValue("yes");
+		const confirmSpy = jest.spyOn(window, "confirm").mockReturnValue(true);
 		const { getByText, getByPlaceholderText } = renderWithProviders();
 
 		await waitFor(() => {
@@ -168,7 +168,7 @@ describe("Admin Delete Product and Verify Workflow (Full-Stack)", () => {
 			expect(toast.error).toHaveBeenCalledWith("Cannot delete product with pending orders");
 		});
 
-		promptSpy.mockRestore();
+		confirmSpy.mockRestore();
 	});
 
 	it("handles network errors during product deletion", async () => {
@@ -190,7 +190,7 @@ describe("Admin Delete Product and Verify Workflow (Full-Stack)", () => {
 
 		axios.delete.mockRejectedValueOnce(new Error("Network connection lost"));
 
-		const promptSpy = jest.spyOn(window, "prompt").mockReturnValue("yes");
+		const confirmSpy = jest.spyOn(window, "confirm").mockReturnValue(true);
 		const { getByText, getByPlaceholderText } = renderWithProviders();
 
 		await waitFor(() => {
@@ -203,7 +203,7 @@ describe("Admin Delete Product and Verify Workflow (Full-Stack)", () => {
 			expect(toast.error).toHaveBeenCalledWith("Something went wrong");
 		});
 
-		promptSpy.mockRestore();
+		confirmSpy.mockRestore();
 		logSpy.mockRestore();
 	});
 });
