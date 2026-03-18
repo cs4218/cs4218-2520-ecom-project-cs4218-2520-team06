@@ -77,4 +77,24 @@ describe("AdminRoute Component", () => {
     expect(await findByText(/redirecting to you in/i)).toBeInTheDocument();
     expect(axios.get).not.toHaveBeenCalled();
   });
+
+  it("renders Spinner when axios throws error (401 unauthorized)", async () => {
+    // Arrange: Mock axios.get to throw error (401 response)
+    axios.get.mockRejectedValueOnce(new Error("401 Unauthorized"));
+    
+    // Act: Render the AdminRoute component wrapped in MemoryRouter and Routes
+    const { findByText } = render(
+      <MemoryRouter initialEntries={["/dashboard"]}>
+        <Routes>
+          <Route path="/dashboard" element={<AdminRoute />}>
+            <Route index element={<div>Spinner Element</div>} />
+          </Route>
+        </Routes>
+      </MemoryRouter>
+    );
+    
+    // Assert: Check if the Spinner element is rendered (error caught and ok set to false)
+    expect(await findByText(/redirecting to you in/i)).toBeInTheDocument();
+    expect(axios.get).toHaveBeenCalledWith("/api/v1/auth/admin-auth");
+  });
 });
