@@ -191,7 +191,7 @@ describe("Login Component", () => {
 
     await waitFor(() => expect(axios.post).toHaveBeenCalled());
     expect(consoleLogSpy).toHaveBeenCalledWith(errorPayload);
-    expect(toast.error).toHaveBeenCalledWith("Something went wrong");
+    expect(toast.error).toHaveBeenCalledWith("Invalid credentials");
     expect(mockSetAuth).not.toHaveBeenCalled();
     expect(window.localStorage.setItem).not.toHaveBeenCalled();
     expect(mockNavigate).not.toHaveBeenCalled();
