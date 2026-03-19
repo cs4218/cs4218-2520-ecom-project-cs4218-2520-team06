@@ -49,3 +49,24 @@ export async function deleteUsersOrdersByEmail(email) {
     await client.close();
   }
 }
+
+export async function setUserAsAdmin(email) {
+  const client = createClient();
+
+  try {
+    await client.connect();
+    const users = client.db().collection("users");
+
+    const user = await users.findOneAndUpdate(
+      { email: email },
+      { $set: { role: 1 } }
+    );
+    if (!user) {
+      return false;
+    }
+
+    return true;
+  } finally {
+    await client.close();
+  }
+}
