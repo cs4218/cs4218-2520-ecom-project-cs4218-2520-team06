@@ -11,9 +11,12 @@ import connectDB from "../../../config/db";
 import userModel from "../../../models/userModel";
 
 describe("Register Tests", () => {
+  // Using a unique email to allow multiple parallel test runs without conflicts
+  const timestamp = Date.now();
+  const randomNum = Math.floor(Math.random() * 10000);
   const user = {
-    name: "testRegister",
-    email: "testRegister@gmail.com",
+    name: `testRegister${timestamp}`,
+    email: `testRegister${timestamp}${randomNum}@gmail.com`,
     phone: "91234567",
     address: "my address",
     password: "admin123",
