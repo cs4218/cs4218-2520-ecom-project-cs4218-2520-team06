@@ -1,5 +1,6 @@
 import { test, expect } from "@playwright/test";
 import type { APIRequestContext, Page } from "@playwright/test";
+import { deleteUserByEmail } from "../../../db-util";
 
 test.describe.configure({ mode: "serial" });
 const salt = Math.random().toString(36).substring(7);
@@ -127,6 +128,10 @@ test.beforeEach(async ({ request, page }) => {
     }
   }, authState);
   await page.goto("/dashboard/user");
+});
+
+test.afterAll(async () => {
+  await deleteUserByEmail(E2E_USER.email);
 });
 
 test("should update user profile", async ({ request, page }) => {
