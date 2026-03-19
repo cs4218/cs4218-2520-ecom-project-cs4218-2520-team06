@@ -199,6 +199,27 @@ export const updateProfileController = async (req, res) => {
   }
 };
 
+//all users
+export const getAllUsersController = async (req, res) => {
+  try {
+    const users = await userModel
+      .find({})
+      .select("name email phone address role createdAt updatedAt");
+
+    res.status(200).send({
+      success: true,
+      users,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({
+      success: false,
+      message: "Error while getting users",
+      error,
+    });
+  }
+};
+
 //orders
 export const getOrdersController = async (req, res) => {
   try {

@@ -3,6 +3,7 @@ import {
   testController,
   loginController,
   forgotPasswordController,
+  getAllUsersController,
   getOrdersController,
   getAllOrdersController,
   orderStatusController,
@@ -410,6 +411,68 @@ describe("forgotPasswordController", () => {
         message: expect.any(String),
       })
     );
+  });
+});
+
+// Jabez Tho, A0273312N
+describe("getAllUsersController", () => {
+  const res = makeRes();
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    userModel.find = jest.fn();
+  });
+
+  test("returns all users with selected fields", async () => {
+    const users = [
+      {
+        _id: "user1",
+        name: "Alice",
+        email: "alice@example.com",
+        phone: "11111111",
+        role: 0,
+      },
+      {
+        _id: "user2",
+        name: "Bob",
+        email: "bob@example.com",
+        phone: "22222222",
+        role: 1,
+      },
+    ];
+
+    const select = jest.fn().mockResolvedValue(users);
+    userModel.find.mockReturnValueOnce({ select });
+
+    await getAllUsersController({}, res);
+
+    expect(userModel.find).toHaveBeenCalledWith({});
+    expect(select).toHaveBeenCalledWith(
+      "name email phone address role createdAt updatedAt"
+    );
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.send).toHaveBeenCalledWith({
+      success: true,
+      users,
+    });
+  });
+
+  test("returns 500 when user query fails", async () => {
+    const err = new Error("DB failure");
+    userModel.find.mockImplementationOnce(() => {
+      throw err;
+    });
+    const consoleSpy = jest.spyOn(console, "log").mockImplementation(() => {});
+
+    await getAllUsersController({}, res);
+
+    expect(consoleSpy).toHaveBeenCalledWith(err);
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.send).toHaveBeenCalledWith({
+      success: false,
+      message: "Error while getting users",
+      error: err,
+    });
   });
 });
 

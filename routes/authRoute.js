@@ -5,6 +5,7 @@ import {
   testController,
   forgotPasswordController,
   updateProfileController,
+  getAllUsersController,
   getOrdersController,
   getAllOrdersController,
   orderStatusController,
@@ -41,6 +42,9 @@ router.put("/profile", requireSignIn, updateProfileController);
 
 //orders
 router.get("/orders", requireSignIn, getOrdersController);
+
+//all users
+router.get("/all-users", requireSignIn, isAdmin, getAllUsersController);
 
 //all orders
 router.get("/all-orders", requireSignIn, isAdmin, getAllOrdersController);
