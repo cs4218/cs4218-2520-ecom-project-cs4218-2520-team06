@@ -63,13 +63,12 @@ describe("Profile with provider contexts integration test", () => {
       if (url === "/api/v1/category/get-category") {
         return Promise.resolve({
           data: {
-            success: true,
-            category: [{ name: "Category One", slug: "category-one" }],
+            success: false,
           },
         });
       }
 
-      return Promise.resolve({ data: {} });
+      return Promise.resolve({});
     });
   });
 
