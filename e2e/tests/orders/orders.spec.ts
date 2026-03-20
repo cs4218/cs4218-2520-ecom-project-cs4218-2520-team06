@@ -7,7 +7,7 @@ test.describe.configure({ mode: "serial" });
 const salt = Math.random().toString(36).substring(7);
 
 const E2E_USER = {
-  name: "Admin Order Test User",
+  name: "Order Test User",
   address: "123 Test Street",
   password: "password123",
   phone: "1234567890",
