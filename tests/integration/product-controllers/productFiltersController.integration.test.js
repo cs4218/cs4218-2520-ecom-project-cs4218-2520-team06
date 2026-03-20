@@ -160,11 +160,15 @@ describe("productFiltersController Integration Tests", () => {
   });
 
   it("should return all products if no filters are applied", async () => {
+    // Empty Arrange
+
+    // Act
     const res = await sendJson({
       path: "/api/v1/product/product-filters",
       body: { checked: [], radio: [] },
     });
 
+    // Assert
     expect(res.status).toBe(200);
     expect(res.body.success).toBe(true);
     expect(res.body.products).toHaveLength(4);
