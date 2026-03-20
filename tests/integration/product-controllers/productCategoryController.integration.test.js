@@ -47,14 +47,11 @@ describe("productCategoryController Integration Tests", () => {
   });
 
   afterAll(async () => {
-    try {
-      await productModel.deleteMany({});
-      await categoryModel.deleteMany({});
-    } finally {
-      if (server) await new Promise((res, rej) => server.close(err => (err ? rej(err) : res())));
-      await mongoose.connection.close();
-      if (mongoServer) await mongoServer.stop();
-    }
+    await productModel.deleteMany({});
+    await categoryModel.deleteMany({});
+    if (server) await new Promise(res => server.close(res));
+    await mongoose.connection.close();
+    if (mongoServer) await mongoServer.stop();
   });
 
   beforeEach(async () => {

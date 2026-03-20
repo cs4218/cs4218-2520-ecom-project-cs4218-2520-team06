@@ -24,7 +24,7 @@ const sendJson = async ({ path }) => {
   };
 };
 
-describe("productCountController Integration Tests", () => {
+describe("productListController Integration Tests", () => {
   let category;
 
   beforeAll(async () => {
@@ -58,56 +58,60 @@ describe("productCountController Integration Tests", () => {
       slug: "electronics",
     });
 
-    await productModel.create([
-      { 
-        name: "Laptop",
-        slug: "laptop",
-        description: "desc",
-        price: 1000,
-        category: category._id,
-        quantity: 5
-      },
-      { 
-        name: "Mouse",
-        slug: "mouse",
-        description: "desc",
-        price: 50,
-        category: category._id,
-        quantity: 10
-      },
-      { 
-        name: "Keyboard",
-        slug: "keyboard",
-        description: "desc",
-        price: 120,
-        category: category._id,
-        quantity: 7
-      },
-    ]);
+    const products = Array.from({ length: 13 }, (_, i) => ({
+      name: `Product${i + 1}`,
+      slug: `product${i + 1}`,
+      description: "desc",
+      price: 100 + i,
+      category: category._id,
+      quantity: 5,
+    }));
+
+    // This will ensure products are inserted in a deterministic order
+    for (const product of products) {
+        await productModel.create(product);
+    }
   });
 
-  it("should return the correct total count of products", async () => {
+  it("should return paginated products with the default page being page 1", async () => {
     // Empty Arrange
 
     // Act
-    const res = await sendJson({ path: "/api/v1/product/product-count" });
-    
+    const res = await sendJson({ path: "/api/v1/product/product-list/1" });
+
     // Assert
     expect(res.status).toBe(200);
     expect(res.body.success).toBe(true);
-    expect(res.body.total).toBe(3);
+    expect(res.body.products).toHaveLength(6); // perPage = 6
+    // Products are sorted in descending order based on createdAt field
+    expect(res.body.products[0].name).toBe("Product13"); 
   });
 
-  it("should return 0 if no products exist", async () => {
-    // Arrange
-    await productModel.deleteMany({});
+  it("should return the correct products for page 2", async () => {
+    // Empty Arrange
 
     // Act
-    const res = await sendJson({ path: "/api/v1/product/product-count" });
+    const res = await sendJson({ path: "/api/v1/product/product-list/2" });
 
     // Assert
     expect(res.status).toBe(200);
     expect(res.body.success).toBe(true);
-    expect(res.body.total).toBe(0);
+    expect(res.body.products).toHaveLength(6); // perPage = 6
+    // Products are sorted in descending order based on createdAt field
+    expect(res.body.products[0].name).toBe("Product7");
+  });
+
+  it("should return the correct products for the last page being page 3", async () => {
+    // Empty Arrange
+
+    // Act
+    const res = await sendJson({ path: "/api/v1/product/product-list/3" });
+
+    // Assert
+    expect(res.status).toBe(200);
+    expect(res.body.success).toBe(true);
+    // There should not be enough products to fill the whole page
+    expect(res.body.products).toHaveLength(1); // perPage = 6
+    expect(res.body.products[0].name).toBe("Product1");
   });
 });

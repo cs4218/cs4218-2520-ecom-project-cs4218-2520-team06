@@ -45,18 +45,11 @@ describe("Product Retrieval Integration Tests", () => {
   });
 
   afterAll(async () => {
-    try {
-      await productModel.deleteMany({});
-      await categoryModel.deleteMany({});
-    } finally {
-      await new Promise((resolve, reject) => {
-        if (!server) return resolve();
-        server.close((err) => (err ? reject(err) : resolve()));
-      });
-
-      await mongoose.connection.close();
-      if (mongoServer) await mongoServer.stop();
-    }
+    await productModel.deleteMany({});
+    await categoryModel.deleteMany({});
+    if (server) await new Promise(res => server.close(res));
+    await mongoose.connection.close();
+    if (mongoServer) await mongoServer.stop();
   });
 
   beforeEach(async () => {
@@ -156,7 +149,7 @@ describe("Product Retrieval Integration Tests", () => {
 
     it("should return 404 if product has no photo", async () => {
       // Empty Arrange
-      
+
       // Act
       const res = await sendJson({
         path: `/api/v1/product/product-photo/${products[1]._id}`,
