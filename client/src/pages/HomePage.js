@@ -9,6 +9,9 @@ import Layout from "./../components/Layout";
 import "../styles/Homepages.css";
 import { AiOutlineReload } from "react-icons/ai";
 
+jest.mock("../../../models/userModel.js");
+jest.mock("../../../models/orderModel.js");
+
 const HomePage = () => {
   const navigate = useNavigate();
   const [cart, setCart] = useCart();
