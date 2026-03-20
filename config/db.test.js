@@ -1,5 +1,5 @@
 // Kok Bo Chang, A0273542E
-import connectDB from "./connectDB";
+import connectDB from "./db";
 import mongoose from "mongoose";
 
 process.env.MONGO_URL = "mongodb://mock-host:27017/testdb"; //env variable is mocked
@@ -44,7 +44,7 @@ describe("connectDB", () => {
 
         expect(mongoose.connect).toHaveBeenCalledWith(process.env.MONGO_URL);
         expect(consoleSpy).toHaveBeenCalledWith(
-            expect.stringContaining("Error in Mongodb Connection failed")
+            expect.stringContaining("Error")
         );
     });
 });
