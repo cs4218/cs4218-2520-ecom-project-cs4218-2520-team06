@@ -12,7 +12,7 @@
     "test:frontend": "node --experimental-vm-modules node_modules/jest/bin/jest.js --config jest.frontend.config.js",
     "test:backend": "node --experimental-vm-modules node_modules/jest/bin/jest.js --config jest.backend.config.js",
     "test": "npm run test:backend && npm run test:frontend",
-    "merge-coverage": "./node_modules/.bin/lcov-result-merger 'coverage/**/*.info' 'coverage/merged.info'",
+    "merge-coverage": "lcov-result-merger 'coverage/**/*.info' 'coverage/merged.info'",
     "test:sonar": "npm run test || cmd /c exit 0 && npm run merge-coverage && npm run sonarqube",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
