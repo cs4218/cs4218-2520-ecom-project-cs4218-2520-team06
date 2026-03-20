@@ -26,7 +26,7 @@ const sendJson = async ({ path }) => {
   };
 };
 
-describe("Product Retrieval Integration Tests", () => {
+describe("productPhotoController Integration Tests", () => {
   let category;
   let products;
 
@@ -85,79 +85,29 @@ describe("Product Retrieval Integration Tests", () => {
     ]);
   });
 
-  describe("Test for GET /get-product", () => {
-    it("should return all products without their respective photos", async () => {
-      // Empty Arrange
+  it("should return product photo as binary", async () => {
+    // Empty Arrange
 
-      // Act
-      const res = await sendJson({
-        path: "/api/v1/product/get-product",
-      });
-
-      // Assert
-      expect(res.status).toBe(200);
-      expect(res.body.products).toHaveLength(2);
-      for (const product of res.body.products) {
-        expect(product.photo).toBeUndefined();
-      }
+    // Act
+    const res = await sendJson({
+    path: `/api/v1/product/product-photo/${products[0]._id}`,
     });
+
+    // Assert
+    expect(res.status).toBe(200);
+    expect(res.raw.headers.get("content-type")).toBe("image/png");
   });
 
-  describe("Tests for GET /get-product/:slug", () => {
-    it("should return a single product by slug", async () => {
-      // Empty Arrange
+  it("should return 404 if product has no photo", async () => {
+    // Empty Arrange
 
-      // Act
-      const res = await sendJson({
-        path: `/api/v1/product/get-product/${products[0].slug}`,
-      });
-
-      // Assert
-      // Note: This test assumes slug uniqueness since the schema does not enforce it
-      expect(res.status).toBe(200);
-      expect(res.body.product.name).toBe("Gaming Laptop");
-      expect(res.body.product.photo).toBeUndefined();
+    // Act
+    const res = await sendJson({
+    path: `/api/v1/product/product-photo/${products[1]._id}`,
     });
-
-    it("should return null product for invalid slug", async () => {
-      // Empty Arrange
-
-      // Act
-      const res = await sendJson({
-        path: `/api/v1/product/get-product/invalid-slug`,
-      });
     
-      // Assert
-      expect(res.status).toBe(200);
-      expect(res.body.product).toBeNull();
-    });
-  });
-
-  describe("Tests for GET /product-photo/:pid", () => {
-    it("should return product photo as binary", async () => {
-      // Empty Arrange
-
-      // Act
-      const res = await sendJson({
-        path: `/api/v1/product/product-photo/${products[0]._id}`,
-      });
-
-      // Assert
-      expect(res.status).toBe(200);
-      expect(res.raw.headers.get("content-type")).toBe("image/png");
-    });
-
-    it("should return 404 if product has no photo", async () => {
-      // Empty Arrange
-
-      // Act
-      const res = await sendJson({
-        path: `/api/v1/product/product-photo/${products[1]._id}`,
-      });
-      
-      // Assert
-      expect(res.status).toBe(404);
-      expect(res.body.success).toBe(false);
-    });
+    // Assert
+    expect(res.status).toBe(404);
+    expect(res.body.success).toBe(false);
   });
 });
