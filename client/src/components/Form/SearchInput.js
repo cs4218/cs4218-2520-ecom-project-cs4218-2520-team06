@@ -10,7 +10,6 @@ const SearchInput = () => {
     e.preventDefault();
     if (!searchState.keyword.trim()) return;
     try {
-      //TODO: to implement backend search api?
       const { data } = await axios.get(
         `/api/v1/product/search/${searchState.keyword}`
       );

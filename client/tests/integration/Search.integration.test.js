@@ -15,12 +15,6 @@ jest.mock("../../src/components/Layout", () => {
   return ({ children }) => <div data-testid="search-layout">{children}</div>;
 });
 
-const SearchEntry = () => (
-  <div>
-    <SearchInput />
-  </div>
-);
-
 const SearchStateSeeder = ({ keyword = "", results = [] }) => {
   const [, setSearchState] = useSearch();
 
@@ -31,32 +25,30 @@ const SearchStateSeeder = ({ keyword = "", results = [] }) => {
   return null;
 };
 
-const renderInputFlow = () =>
+// No seeded state
+const renderBasicSetup = () =>
   render(
-    <AuthProvider>
-      <SearchProvider>
-        <MemoryRouter initialEntries={["/"]}>
-          <Routes>
-            <Route path="/" element={<SearchEntry />} />
-            <Route path="/search" element={<div>Search destination</div>} />
-          </Routes>
-        </MemoryRouter>
-      </SearchProvider>
-    </AuthProvider>
+    <SearchProvider>
+      <MemoryRouter initialEntries={["/"]}>
+        <Routes>
+          <Route path="/" element={<SearchInput />} />
+          <Route path="/search" element={<div>Search destination</div>} />
+        </Routes>
+      </MemoryRouter>
+    </SearchProvider>
   );
 
+// Testing just the populating of the search page
 const renderSearchPageWithSeededState = ({ keyword = "", results = [] }) =>
   render(
-    <AuthProvider>
-      <SearchProvider>
-        <MemoryRouter initialEntries={["/search"]}>
-          <SearchStateSeeder keyword={keyword} results={results} />
-          <Routes>
-            <Route path="/search" element={<Search />} />
-          </Routes>
-        </MemoryRouter>
-      </SearchProvider>
-    </AuthProvider>
+    <SearchProvider>
+      <MemoryRouter initialEntries={["/search"]}>
+        <SearchStateSeeder keyword={keyword} results={results} />
+        <Routes>
+          <Route path="/search" element={<Search />} />
+        </Routes>
+      </MemoryRouter>
+    </SearchProvider>
   );
 
 const renderFullFlow = () =>
@@ -65,7 +57,7 @@ const renderFullFlow = () =>
       <SearchProvider>
         <MemoryRouter initialEntries={["/"]}>
           <Routes>
-            <Route path="/" element={<SearchEntry />} />
+            <Route path="/" element={<SearchInput />} />
             <Route path="/search" element={<Search />} />
           </Routes>
         </MemoryRouter>
@@ -76,44 +68,12 @@ const renderFullFlow = () =>
 describe("Search integration", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    // seed auth state
-    localStorage.setItem(
-      "auth",
-      JSON.stringify({
-        user: {
-          _id: "u1",
-          name: "Authenticated User",
-          email: "auth@test.com",
-          phone: "1234567890",
-          address: "Address",
-          role: 0,
-        },
-        token: "auth-token",
-      })
-    );
   });
 
-  it("should submit SearchInput to API request without auth", async () => {
-    // Clear auth state to test unauthenticated flow
-    localStorage.clear();
-    axios.get.mockResolvedValueOnce({ data: [{ _id: "p1" }] });
-
-    renderInputFlow();
-
-    fireEvent.change(screen.getByLabelText("Search"), {
-      target: { value: "laptop" },
-    });
-    fireEvent.click(screen.getByRole("button", { name: /search/i }));
-
-    await waitFor(() => {
-      expect(axios.get).toHaveBeenCalledWith("/api/v1/product/search/laptop");
-    });
-  });
-
-  it("should submit SearchInput submit to API request and navigation with seeded auth", async () => {
+  it("should submit SearchInput submit to API request and navigation without auth", async () => {
     axios.get.mockResolvedValueOnce({ data: [{ _id: "p2" }] });
 
-    renderInputFlow();
+    renderBasicSetup();
 
     fireEvent.change(screen.getByLabelText("Search"), {
       target: { value: "keyboard" },
@@ -171,5 +131,98 @@ describe("Search integration", () => {
     await waitFor(() => {
       expect(screen.getByText("No Products Found")).toBeInTheDocument();
     });
+  });
+
+  it("should complete full flow from submit to rendered results", async () => {
+    axios.get.mockResolvedValueOnce({
+      data: [
+        {
+          _id: "p20",
+          name: "Full Flow Product",
+          description: "Test full flow rendering",
+          price: 99,
+        },
+      ],
+    });
+
+    renderFullFlow();
+
+    fireEvent.change(screen.getByLabelText("Search"), {
+      target: { value: "product" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: /search/i }));
+
+    await waitFor(() => {
+      expect(axios.get).toHaveBeenCalledWith("/api/v1/product/search/product");
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText("Full Flow Product")).toBeInTheDocument();
+    });
+  });
+
+  it("behaviour should be the same with or without auth", async () => {
+    // seed auth state
+    localStorage.setItem(
+      "auth",
+      JSON.stringify({
+        user: {
+          _id: "u1",
+          name: "Authenticated User",
+          email: "auth@test.com",
+          phone: "1234567890",
+          address: "Address",
+          role: 0,
+        },
+        token: "auth-token",
+      })
+    );
+
+    axios.get.mockResolvedValueOnce({
+      data: [
+        {
+          _id: "p20",
+          name: "Full Flow Product",
+          description: "Test full flow rendering",
+          price: 99,
+        },
+      ],
+    });
+
+    renderFullFlow();
+
+    fireEvent.change(screen.getByLabelText("Search"), {
+      target: { value: "product" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: /search/i }));
+
+    await waitFor(() => {
+      expect(axios.get).toHaveBeenCalledWith("/api/v1/product/search/product");
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText("Full Flow Product")).toBeInTheDocument();
+    });
+  });
+
+  it("should stay on search input when API request fails", async () => {
+    const consoleSpy = jest.spyOn(console, "log").mockImplementation(() => {});
+    axios.get.mockRejectedValueOnce(new Error("Network error"));
+
+    renderBasicSetup();
+
+    fireEvent.change(screen.getByLabelText("Search"), {
+      target: { value: "keyboard" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: /search/i }));
+
+    await waitFor(() => {
+      expect(axios.get).toHaveBeenCalledWith("/api/v1/product/search/keyboard");
+    });
+
+    expect(screen.queryByText("Search destination")).not.toBeInTheDocument();
+    expect(consoleSpy).toHaveBeenCalled();
+
+    consoleSpy.mockRestore();
   });
 });
