@@ -7,15 +7,21 @@ export default {
 
   // which test to run
   // testMatch: ["<rootDir>/controllers/*.test.js"],
-  testMatch: ["<rootDir>/tests/**/*.test.js"],
+  testMatch: [
+    "<rootDir>/config/**/*.test.js",
+    "<rootDir>/tests/**/*.test.js",
+  ],
 
-  // jest code coverage
+  // jest code coverager
   collectCoverage: true,
-  collectCoverageFrom: ["controllers/**", "helpers/**", "middlewares/**"],
-  // coverageThreshold: {
-  //   global: {
-  //     lines: 100,
-  //     functions: 100,
-  //   },
-  // },
+  coverageDirectory: "coverage/backend",
+  collectCoverageFrom: [
+    "config/**/*.js",
+    "controllers/**/*.js",
+    "models/**/*.js",
+    "helpers/**/*.js",
+    "middlewares/**/*.js",
+    "!**/*.test.js",
+    "!**/*.integration.test.js",
+  ],
 };
