@@ -23,15 +23,24 @@ export default {
   testMatch: [
     "<rootDir>/client/src/**/*.test.js",
     "<rootDir>/client/tests/**/*.test.js",
+    "<rootDir>/client/tests/**/*.integration.test.js",
   ],
 
-  testPathIgnorePatterns: ["<rootDir>/client/src/_site/"],
+  testPathIgnorePatterns: [
+    "<rootDir>/client/src/_site/"
+  ],
 
   // jest code coverage
   collectCoverage: true,
+  coverageDirectory: "coverage/frontend",
   collectCoverageFrom: [
+    "client/src/components/**/*.js",
+    "client/src/context/**/*.js",
+    "client/src/hooks/useCategory.js",
     "client/src/pages/**/*.js",
-    "!client/src/pages/**/*.test.js",
+    "!client/src/_site/**",
+    "!client/src/**/*.test.js",
+    "!client/tests/**/*.integration.test.js",
   ],
   // coverageThreshold: {
   //   global: {
