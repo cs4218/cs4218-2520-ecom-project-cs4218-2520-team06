@@ -1,3 +1,4 @@
+// Gabriel Chang, A0276978Y
 import {
   describe,
   test,
@@ -68,14 +69,14 @@ describe("Register-Login Tests", () => {
       .fill(user.answer);
     await page.getByRole("button", { name: "REGISTER" }).click();
     await page.waitForURL("**/login");
-    const emailInput = page.getByRole("textbox", { name: "Enter Your Email" });
-    const passwordInput = page.getByRole("textbox", {
-      name: "Enter Your Password",
-    });
-    await expect(emailInput).toBeVisible();
-    await expect(passwordInput).toBeVisible();
-    await emailInput.fill(user.email);
-    await passwordInput.fill(user.password);
+    await page
+      .getByRole("textbox", { name: "Enter Your Email" })
+      .fill(user.email);
+    await page
+      .getByRole("textbox", {
+        name: "Enter Your Password",
+      })
+      .fill(user.password);
     await page.getByRole("button", { name: "LOGIN" }).click();
 
     await expect(page.getByRole("main")).toContainText("🙏login successfully");

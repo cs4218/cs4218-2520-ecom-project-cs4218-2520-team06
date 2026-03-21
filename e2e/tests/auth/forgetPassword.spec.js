@@ -35,6 +35,8 @@ describe("Forget Password Tests", () => {
   test("Login Form redirects to Forget Password Form", async ({ page }) => {
     await page.goto("http://localhost:3000/login");
     await page.getByRole("button", { name: "Forgot Password" }).click();
+
+    await expect(page).toHaveURL("http://localhost:3000/forgot-password");
     await expect(page.getByRole("main")).toMatchAriaSnapshot(`
     - heading "FORGOT PASSWORD FORM" [level=4]
     - textbox "Enter Your Email"
