@@ -10,6 +10,8 @@ import { describe } from "node:test";
 import { setupAxiosMock } from "../../tests/integration/utils";
 
 jest.mock("axios");
+jest.mock("../../../models/userModel.js");
+jest.mock("../../../models/orderModel.js");
 
 jest.mock("../context/cart", () => ({
   useCart: jest.fn(),
