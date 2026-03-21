@@ -4,6 +4,9 @@ import { render, screen, waitFor, within } from "@testing-library/react";
 import { MemoryRouter, Routes, Route } from "react-router-dom";
 import ProductDetails from "../../src/pages/ProductDetails";
 import Layout from "../../src/components/Layout";
+import Footer from '../../src/components/Footer';
+import Header from '../../src/components/Header';
+import { Helmet } from "react-helmet";
 import axios from "axios";
 import userEvent from "@testing-library/user-event";
 import toast from "react-hot-toast";
@@ -12,15 +15,14 @@ import { CartProvider, useCart } from "../../src/context/cart";
 import { AuthProvider } from "../../src/context/auth";
 import { SearchProvider } from "../../src/context/search";
 
-jest.mock("react-hot-toast", () => ({
-  success: jest.fn(),
-}));
-
-jest.mock("../../src/components/Layout", () => ({ children }) => (
-  <div data-testid="layout">{children}</div>
-));
+jest.mock('react-helmet', () => ({ Helmet: ({ children }) => <>{children}</> }));
+jest.mock('react-hot-toast', () => ({ Toaster: () => <div />, success: jest.fn() }));
+jest.mock('../../src/components/Header', () => () => <div data-testid="header" />);
+jest.mock('../../src/components/Footer', () => () => <div data-testid="footer" />);
 
 jest.mock("axios");
+
+
 
 function escapeRegex(string) {
     return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); // escapes all regex special chars
@@ -117,6 +119,10 @@ describe("ProductDetails Integration Tests", () => {
         const descRegExp = new RegExp(rp.description, "i");
         expect(screen.getByText(descRegExp)).toBeInTheDocument();
       });
+      
+      // Check for Header and Footer
+      expect(screen.getByTestId("header")).toBeInTheDocument();
+      expect(screen.getByTestId("footer")).toBeInTheDocument();
     });
   });
 
