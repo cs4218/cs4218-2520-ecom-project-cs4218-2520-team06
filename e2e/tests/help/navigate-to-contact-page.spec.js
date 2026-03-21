@@ -1,60 +1,89 @@
 // Kok Bo Chang, A0273542E
 import { test, expect } from '@playwright/test';
 
+const user = {
+  name: "CS 4218 Test Account",
+  email: "cs4218@test.com",
+  password: "cs4218@test.com",
+};
+
+const dashboardSectionLinks = [
+  "Create Category",
+  "Create Product",
+  "Products",
+  "Orders",
+  "Users",
+];
+
+async function login(page) {
+  await page.getByRole("link", { name: /login/i }).click();
+
+  await page.getByRole("textbox", { name: /email/i }).fill(user.email);
+  await page.getByRole("textbox", { name: /password/i }).fill(user.password);
+
+  await page.getByRole("button", { name: /login/i }).click();
+
+  // wait for login to complete
+  await expect(page.getByText(user.name)).toBeVisible();
+}
+
+async function goToContactPageAndValidate(page) {
+  await page.getByRole("link", { name: /contact/i }).click();
+
+  await expect(
+    page.getByRole("heading", { name: /contact us/i })
+  ).toBeVisible();
+}
+
 test.beforeEach(async ({ page }) => {
-  await page.goto('http://localhost:3000/');
+  await page.goto('BASE_URL');
 })
 
 test('contact us page should be accessible from the home page when logged out', async ({ page }) => {
-  // Act
-  await page.getByRole('link', { name: 'Contact' }).click();
+  // Empty Arrange
+
+  // Empty Act
 
   // Assert
-  await expect(page.getByRole('heading', { name: 'CONTACT US' })).toBeVisible();
+  await goToContactPageAndValidate(page);
 });
 
 test('contact us page should be accessible from the home page when logged in', async ({ page }) => {
-  // Arrange
-  const user = {
-    email: "cs4218@test.com",
-    password: "cs4218@test.com",
-  }
+  // Empty Arrange
 
   // Act
-  await page.getByRole('link', { name: 'Login' }).click();
-  await page.getByRole('textbox', { name: 'Enter Your Email' }).fill(user.email);
-  await page.getByRole('textbox', { name: 'Enter Your Password' }).fill(user.password);
-  await page.getByRole('button', { name: 'LOGIN' }).click();
-
-  await page.getByRole('link', { name: 'Contact' }).click();
+  await login(page);
 
   // Assert
-  await expect(page.getByRole('heading', { name: 'CONTACT US' })).toBeVisible();
+  await goToContactPageAndValidate(page);
 });
 
 test('contact us page should be accessible from all sections in a dashboard when logged in', async ({ page }) => {
   // Arrange
-  const user = {
-    name: "CS 4218 Test Account",
-    email: "cs4218@test.com",
-    password: "cs4218@test.com",
+  await login(page);
+
+  // Act and Assert
+  for (const section of dashboardSectionLinks) {
+    // Open user dropdown menu
+    await page.getByRole("button", { name: user.name }).click();
+
+    // Wait for dropdown to render
+    const dashboardLink = page.getByRole("link", { name: /dashboard/i });
+    await expect(dashboardLink).toBeVisible();
+
+    // Go to dashboard
+    await dashboardLink.click();
+    await page.waitForURL(/dashboard/);
+
+    // Navigate to section
+    const sectionLink = page.getByRole("link", { name: section });
+    await expect(sectionLink).toBeVisible();
+    await sectionLink.click();
+
+    // Validate About page from this section
+    await goToContactPageAndValidate(page);
+
+    // Reset state for next iteration
+    await page.goBack();
   }
-  const dashboardSectionLinks = ['Create Category', 'Create Product', 'Products', 'Orders', 'Users'];
-
-  // Act
-  await page.getByRole('link', { name: 'Login' }).click();
-  await page.getByRole('textbox', { name: 'Enter Your Email' }).fill(user.email);
-  await page.getByRole('textbox', { name: 'Enter Your Password' }).fill(user.password);
-  await page.getByRole('button', { name: 'LOGIN' }).click();
-
-  for (const sectionLink of dashboardSectionLinks) {
-    await page.getByRole('button', { name: user.name }).click();
-    await page.getByRole('link', { name: 'Dashboard' }).click();
-    await page.getByRole('link', { name: sectionLink }).click();
-
-    await page.getByRole('link', { name: 'Contact' }).click();
-
-    // Assert
-    await expect(page.getByRole('heading', { name: 'CONTACT US' })).toBeVisible();
-  }  
 });
