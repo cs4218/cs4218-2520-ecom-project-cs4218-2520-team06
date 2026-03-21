@@ -53,7 +53,6 @@ test('privacy policy page should be accessible from the home page when logged ou
 test('privacy policy page should be accessible from the home page when logged in', async ({ page }) => {
   // Empty Arrange
   
-
   // Act
   await login(page)
 

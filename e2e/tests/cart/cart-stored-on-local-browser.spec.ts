@@ -2,6 +2,7 @@
 import { test, expect, Page } from '@playwright/test';
 
 const user = {
+  name: "CS 4218 Test Account",
   email: "cs4218@test.com",
   password: "cs4218@test.com",
 }
@@ -62,7 +63,7 @@ test('logging out should not affect existing items in cart', async ({ page }) =>
   await validateCartItems(page, itemNames);
 
   // Act (log out)
-  await page.getByRole('button', { name: 'CS 4218 Test Account' }).click();
+  await page.getByRole('button', { name: user.name }).click();
   await page.getByRole('link', { name: 'Logout' }).click();
   
   // Re-assert all cart values
