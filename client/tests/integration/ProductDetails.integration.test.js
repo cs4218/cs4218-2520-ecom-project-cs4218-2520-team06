@@ -22,8 +22,6 @@ jest.mock('../../src/components/Footer', () => () => <div data-testid="footer" /
 
 jest.mock("axios");
 
-
-
 function escapeRegex(string) {
     return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); // escapes all regex special chars
 }
