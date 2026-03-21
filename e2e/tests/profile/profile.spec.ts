@@ -1,6 +1,6 @@
 // Jabez Tho, A0273312N
 import { test, expect } from "@playwright/test";
-import type { APIRequestContext, Page } from "@playwright/test";
+import type { Page } from "@playwright/test";
 import { deleteUserByEmail } from "../../../db-util";
 
 test.describe.configure({ mode: "serial" });
@@ -15,7 +15,18 @@ const E2E_USER = {
   answer: "test",
 };
 
-let authState: { user: unknown; token: string } | null = null;
+async function uiLogin(page: import("@playwright/test").Page) {
+  await page.goto("/login");
+  await page
+    .getByRole("textbox", { name: "Enter Your Email" })
+    .fill(E2E_USER.email);
+  await page
+    .getByRole("textbox", { name: "Enter Your Password" })
+    .fill(E2E_USER.password);
+  await page.getByRole("button", { name: "LOGIN" }).click();
+  await page.waitForURL("**/");
+  await expect(page.getByRole("button", { name: E2E_USER.name })).toBeVisible();
+}
 
 async function fillProfileForm(
   page: Page,
@@ -46,21 +57,6 @@ async function fillProfileForm(
       .getByRole("textbox", { name: "Enter Your Password" })
       .fill(values.password);
   }
-}
-
-async function loginAsE2EUser(request: APIRequestContext) {
-  const loginResponse = await request.post(
-    "http://localhost:6060/api/v1/auth/login",
-    {
-      data: {
-        email: E2E_USER.email,
-        password: E2E_USER.password,
-      },
-    }
-  );
-
-  expect(loginResponse.ok()).toBeTruthy();
-  return loginResponse.json();
 }
 
 async function assertProfileFormValues(
@@ -115,19 +111,7 @@ test.beforeAll(async ({ request }) => {
 });
 
 test.beforeEach(async ({ request, page }) => {
-  const loginData = await loginAsE2EUser(request);
-
-  authState = {
-    user: loginData.user,
-    token: loginData.token,
-  };
-
-  await page.goto("/");
-  await page.evaluate((authState) => {
-    if (authState) {
-      window.localStorage.setItem("auth", JSON.stringify(authState));
-    }
-  }, authState);
+  await uiLogin(page);
   await page.goto("/dashboard/user");
 });
 
