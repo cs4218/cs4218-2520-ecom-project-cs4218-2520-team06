@@ -21,7 +21,7 @@ const validCardDetails = {
 
 const itemNames = ["NUS T-shirt", "Smartphone"];
 
-async function validateCartItems(page: Page, items: string[]) {
+async function validateCartItems(page, items) {
   // Check cart toast value
   await expect(page.locator('bdi')).toContainText(items.length.toString());
 
@@ -32,7 +32,7 @@ async function validateCartItems(page: Page, items: string[]) {
   }
 }
 
-async function login(page: Page) {
+async function login(page) {
   await page.getByRole("link", { name: /login/i }).click();
 
   await page.getByRole("textbox", { name: /email/i }).fill(user.email);
