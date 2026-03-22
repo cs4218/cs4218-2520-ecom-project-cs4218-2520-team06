@@ -6,7 +6,7 @@ export const createCategoryController = async (req, res) => {
     if (!name) {
       return res.status(200).send({
         success: false,
-        message: "Name is required"  
+        message: "Name is required",
       });
     }
     const existingCategory = await categoryModel.findOne({ name });
@@ -42,7 +42,7 @@ export const updateCategoryController = async (req, res) => {
     if (!name) {
       return res.status(200).send({
         success: false,
-        message: "Name is required"  
+        message: "Name is required",
       });
     }
     const { id } = req.params;
@@ -66,7 +66,7 @@ export const updateCategoryController = async (req, res) => {
   }
 };
 
-// get all cat
+// get all categories
 export const categoryController = async (req, res) => {
   try {
     const category = await categoryModel.find({});
@@ -85,13 +85,13 @@ export const categoryController = async (req, res) => {
   }
 };
 
-// single category
+// get single category
 export const singleCategoryController = async (req, res) => {
   try {
     const category = await categoryModel.findOne({ slug: req.params.slug });
     res.status(200).send({
       success: true,
-      message: "Get Single Category SUccessfully",
+      message: "Get Single Category Successfully",
       category,
     });
   } catch (error) {
