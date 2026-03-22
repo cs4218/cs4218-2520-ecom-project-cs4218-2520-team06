@@ -1,7 +1,8 @@
 // Jabez Tho, A0273312N
 import { test, expect } from "@playwright/test";
-import type { APIRequestContext, Page } from "@playwright/test";
+import type { Page } from "@playwright/test";
 import { deleteUserByEmail } from "../../../db-util";
+import { ensureNavbarExpanded } from "../utils/navbar";
 
 test.describe.configure({ mode: "serial" });
 const salt = Math.random().toString(36).substring(7);
@@ -15,7 +16,19 @@ const E2E_USER = {
   answer: "test",
 };
 
-let authState: { user: unknown; token: string } | null = null;
+async function uiLogin(page: import("@playwright/test").Page) {
+  await page.goto("/login");
+  await page
+    .getByRole("textbox", { name: "Enter Your Email" })
+    .fill(E2E_USER.email);
+  await page
+    .getByRole("textbox", { name: "Enter Your Password" })
+    .fill(E2E_USER.password);
+  await page.getByRole("button", { name: "LOGIN" }).click();
+  await page.waitForURL("**/");
+  await ensureNavbarExpanded(page);
+  await expect(page.getByRole("button", { name: E2E_USER.name })).toBeVisible();
+}
 
 async function fillProfileForm(
   page: Page,
@@ -46,21 +59,6 @@ async function fillProfileForm(
       .getByRole("textbox", { name: "Enter Your Password" })
       .fill(values.password);
   }
-}
-
-async function loginAsE2EUser(request: APIRequestContext) {
-  const loginResponse = await request.post(
-    "http://localhost:6060/api/v1/auth/login",
-    {
-      data: {
-        email: E2E_USER.email,
-        password: E2E_USER.password,
-      },
-    }
-  );
-
-  expect(loginResponse.ok()).toBeTruthy();
-  return loginResponse.json();
 }
 
 async function assertProfileFormValues(
@@ -115,19 +113,7 @@ test.beforeAll(async ({ request }) => {
 });
 
 test.beforeEach(async ({ request, page }) => {
-  const loginData = await loginAsE2EUser(request);
-
-  authState = {
-    user: loginData.user,
-    token: loginData.token,
-  };
-
-  await page.goto("/");
-  await page.evaluate((authState) => {
-    if (authState) {
-      window.localStorage.setItem("auth", JSON.stringify(authState));
-    }
-  }, authState);
+  await uiLogin(page);
   await page.goto("/dashboard/user");
 });
 
@@ -159,6 +145,7 @@ test("should update user profile", async ({ request, page }) => {
     phone: "0987654321",
     address: "456 Updated Street",
   });
+  await ensureNavbarExpanded(page);
   await expect(
     page.getByRole("button", { name: "Updated Name" })
   ).toBeVisible();
@@ -249,7 +236,7 @@ test("profile update persist after session clear", async ({ page }) => {
     email: E2E_USER.email,
     address: persistedProfile.address,
   });
-
+  await ensureNavbarExpanded(page);
   await expect(
     page.getByRole("button", { name: "Persisted Name" })
   ).toBeVisible();
@@ -297,5 +284,6 @@ test("profile update fails with short password and profile page shouldn't displa
     email: E2E_USER.email,
     address: E2E_USER.address,
   });
+  await ensureNavbarExpanded(page);
   await expect(page.getByRole("button", { name: E2E_USER.name })).toBeVisible();
 });

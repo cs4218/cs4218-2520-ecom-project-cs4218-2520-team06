@@ -1,7 +1,7 @@
 // Jabez Tho, A0273312N
 import { test, expect } from "@playwright/test";
-import type { APIRequestContext } from "@playwright/test";
 import { deleteUserByEmail } from "../../../db-util";
+import { ensureNavbarExpanded } from "../utils/navbar";
 
 const salt = Math.random().toString(36).substring(7);
 
@@ -14,21 +14,18 @@ const E2E_USER = {
   answer: "test",
 };
 
-let authState: { user: unknown; token: string } | null = null;
-
-async function loginAsE2EUser(request: APIRequestContext) {
-  const loginResponse = await request.post(
-    "http://localhost:6060/api/v1/auth/login",
-    {
-      data: {
-        email: E2E_USER.email,
-        password: E2E_USER.password,
-      },
-    }
-  );
-
-  expect(loginResponse.ok()).toBeTruthy();
-  return loginResponse.json();
+async function uiLogin(page: import("@playwright/test").Page) {
+  await page.goto("/login");
+  await page
+    .getByRole("textbox", { name: "Enter Your Email" })
+    .fill(E2E_USER.email);
+  await page
+    .getByRole("textbox", { name: "Enter Your Password" })
+    .fill(E2E_USER.password);
+  await page.getByRole("button", { name: "LOGIN" }).click();
+  await page.waitForURL("**/");
+  await ensureNavbarExpanded(page);
+  await expect(page.getByRole("button", { name: E2E_USER.name })).toBeVisible();
 }
 
 test.beforeAll(async ({ request }) => {
@@ -44,6 +41,7 @@ test.afterAll(async () => {
 
 test("search should work from landing page", async ({ page }) => {
   await page.goto("/");
+  await ensureNavbarExpanded(page);
   await page.getByPlaceholder("Search").fill("law");
   // db already pre-seeded with product
   await page.getByRole("button", { name: "Search", exact: true }).click();
@@ -58,6 +56,7 @@ test("search should work from landing page", async ({ page }) => {
 
 test("search should work from from any page", async ({ page }) => {
   await page.goto("/categories");
+  await ensureNavbarExpanded(page);
   await page.getByPlaceholder("Search").fill("law");
   await page.getByRole("button", { name: "Search", exact: true }).click();
 
@@ -72,6 +71,7 @@ test("search should work from from any page", async ({ page }) => {
 
 test("search should work even if it is multi word", async ({ page }) => {
   await page.goto("/");
+  await ensureNavbarExpanded(page);
   await page.getByPlaceholder("Search").fill("law of contract");
   await page.getByRole("button", { name: "Search", exact: true }).click();
   await expect(
@@ -84,6 +84,7 @@ test("search should work even if it is multi word", async ({ page }) => {
 
 test("search should work even if it is partial word", async ({ page }) => {
   await page.goto("/");
+  await ensureNavbarExpanded(page);
   await page.getByPlaceholder("Search").fill("ap");
   await page.getByRole("button", { name: "Search", exact: true }).click();
   await expect(
@@ -96,6 +97,7 @@ test("search should work even if it is partial word", async ({ page }) => {
 
 test("search should match description as well", async ({ page }) => {
   await page.goto("/");
+  await ensureNavbarExpanded(page);
   await page.getByPlaceholder("Search").fill("bestselling");
   await page.getByRole("button", { name: "Search", exact: true }).click();
   await expect(
@@ -109,6 +111,7 @@ test("search should match description as well", async ({ page }) => {
 
 test("search should show no results if no match", async ({ page }) => {
   await page.goto("/");
+  await ensureNavbarExpanded(page);
   await page.getByPlaceholder("Search").fill("no match");
   await page.getByRole("button", { name: "Search", exact: true }).click();
   await expect(
@@ -122,6 +125,7 @@ test("search should show no results if no match", async ({ page }) => {
 // This is broken but not fixed as we are instructed not to fix a broken e2e
 test.fixme("search should remains even after page reload", async ({ page }) => {
   await page.goto("/");
+  await ensureNavbarExpanded(page);
   await page.getByPlaceholder("Search").fill("law");
   await page.getByRole("button", { name: "Search", exact: true }).click();
   await expect(
@@ -141,22 +145,10 @@ test.fixme("search should remains even after page reload", async ({ page }) => {
 
 test("search should exhibit the same behaviour for a authenticated user", async ({
   page,
-  request,
 }) => {
-  const loginData = await loginAsE2EUser(request);
-
-  authState = {
-    user: loginData.user,
-    token: loginData.token,
-  };
-
+  await uiLogin(page);
   await page.goto("/dashboard/user/profile");
-  await page.evaluate((authState) => {
-    if (authState) {
-      window.localStorage.setItem("auth", JSON.stringify(authState));
-    }
-  }, authState);
-
+  await ensureNavbarExpanded(page);
   await page.getByPlaceholder("Search").fill("law");
   await page.getByRole("button", { name: "Search", exact: true }).click();
   await expect(

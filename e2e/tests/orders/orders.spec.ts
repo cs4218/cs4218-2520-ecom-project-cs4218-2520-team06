@@ -1,7 +1,7 @@
 // Jabez Tho, A0273312N
 import { test, expect } from "@playwright/test";
-import type { APIRequestContext } from "@playwright/test";
 import { deleteUserByEmail } from "../../../db-util";
+import { ensureNavbarExpanded } from "../utils/navbar";
 
 test.describe.configure({ mode: "serial" });
 const salt = Math.random().toString(36).substring(7);
@@ -15,21 +15,18 @@ const E2E_USER = {
   answer: "test",
 };
 
-let authState: { user: unknown; token: string } | null = null;
-
-async function loginAsE2EUser(request: APIRequestContext) {
-  const loginResponse = await request.post(
-    "http://localhost:6060/api/v1/auth/login",
-    {
-      data: {
-        email: E2E_USER.email,
-        password: E2E_USER.password,
-      },
-    }
-  );
-
-  expect(loginResponse.ok()).toBeTruthy();
-  return loginResponse.json();
+async function uiLogin(page: import("@playwright/test").Page) {
+  await page.goto("/login");
+  await page
+    .getByRole("textbox", { name: "Enter Your Email" })
+    .fill(E2E_USER.email);
+  await page
+    .getByRole("textbox", { name: "Enter Your Password" })
+    .fill(E2E_USER.password);
+  await page.getByRole("button", { name: "LOGIN" }).click();
+  await page.waitForURL("**/");
+  await ensureNavbarExpanded(page);
+  await expect(page.getByRole("button", { name: E2E_USER.name })).toBeVisible();
 }
 
 test.beforeAll(async ({ request }) => {
@@ -40,19 +37,7 @@ test.beforeAll(async ({ request }) => {
 });
 
 test.beforeEach(async ({ request, page }) => {
-  const loginData = await loginAsE2EUser(request);
-
-  authState = {
-    user: loginData.user,
-    token: loginData.token,
-  };
-
-  await page.goto("/");
-  await page.evaluate((authState) => {
-    if (authState) {
-      window.localStorage.setItem("auth", JSON.stringify(authState));
-    }
-  }, authState);
+  await uiLogin(page);
   await page.goto("/dashboard/orders");
 });
 
@@ -62,6 +47,7 @@ test.afterAll(async () => {
 
 test("should be navigable via ui from initial page", async ({ page }) => {
   await page.goto("/");
+  await ensureNavbarExpanded(page);
   await page.getByRole("button", { name: E2E_USER.name }).click();
   await page.getByRole("link", { name: "DASHBOARD" }).click();
   await page.getByRole("link", { name: "Orders" }).click();
