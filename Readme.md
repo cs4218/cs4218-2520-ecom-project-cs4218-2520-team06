@@ -3,24 +3,33 @@
 [CI Proof of run](https://github.com/cs4218/cs4218-2520-ecom-project-cs4218-2520-team06/actions/runs/22282272220/job/64454671417)
 
 ## Workload Distribution
+
 The distribution of testing workload for this project follows closely with the suggested testing scope.
+
 ### Gabriel Chang
+
 #### Client-Related Files
+
 - context/auth.js
 - pages/Auth/Register.js
 - pages/Auth/Login.js
 - components/AdminMenu.js
 - pages/admin/AdminDashboard.js
+
 #### Server-Related Files
+
 - helpers/authHelper.js
 - middlewares/authMiddleware.js
 - controllers/authController.js
-    1. registerController
-    2. loginController
-    3. forgotPasswordController
-    4. testController
+  1. registerController
+  2. loginController
+  3. forgotPasswordController
+  4. testController
+
 ### Gallen Ong
+
 #### Client-Related Files
+
 - components/Form/CategoryForm.js
 - pages/admin/CreateCategory.js
 - pages/admin/CreateProduct.js
@@ -30,36 +39,65 @@ The distribution of testing workload for this project follows closely with the s
 - components/Routes/Private.js
 - components/UserMenu.js
 - pages/user/Dashboard.js
+
 #### Server-Related Files
+
 - controllers/categoryController.js
-    1. createCategoryController
-    2. updateCategoryController
-    3. deleteCategoryController
+  1. createCategoryController
+  2. updateCategoryController
+  3. deleteCategoryController
 - controllers/productController.js
-    1. createProductController
-    2. deleteProductController
-    3. updateProductController
+  1. createProductController
+  2. deleteProductController
+  3. updateProductController
 - models/categoryModel.js
 - models/orderModel.js
 - models/productModel.js
 - models/userModel.js
+
 ### Jabez Tho
-#### Client-Related Files
+
+#### Unit Tests
+
+##### Client-Related Files
+
 - pages/user/Orders.js
 - pages/user/Profile.js
 - pages/admin/Users.js
 - components/Form/SearchInput.js
 - context/search.js
 - pages/Search.js
-#### Server-Related Files
+
+##### Server-Related Files
+
 - controllers/authController.js
-    1. updateProfileController
-    2. getOrdersController
-    3. getAllOrdersController
-    4. orderStatusController
+  1. updateProfileController
+  2. getOrdersController
+  3. getAllOrdersController
+  4. orderStatusController
+
+#### Integration Tests
+
+- getAllUsersController.integration.test.js
+- updateProfileController.integration.test.js
+- getAllOrdersController.integration.test.js
+- orderStatusController.integration.test.js
+- getOrdersController.integration.test.js
+- searchProductController.integration.test.js
+
+#### UI Tests (E2E)
+
+- e2e/tests/search/search.spec.ts
+- e2e/tests/profile/profile.spec.ts
+- e2e/tests/orders/orders.spec.ts
+- e2e/tests/admin/admin-user.spec.ts
+
 ### Kok Bo Chang
+
 #### Unit Tests
+
 ##### Client-Related Files
+
 - pages/ProductDetails.js
 - pages/Contact.js
 - pages/Policy.js
@@ -69,20 +107,25 @@ The distribution of testing workload for this project follows closely with the s
 - components/Spinner.js
 - pages/About.js
 - pages/PageNotFound.js
+
 ##### Server-Related Files
+
 - controllers/productController.js
-    1. getProductController
-    2. getSingleProductController
-    3. productPhotoController
-    4. productFiltersController
-    5. productCountController
-    6. productListController
-    7. searchProductController
-    8. relatedProductController
-    9. productCategoryController
+  1. getProductController
+  2. getSingleProductController
+  3. productPhotoController
+  4. productFiltersController
+  5. productCountController
+  6. productListController
+  7. searchProductController
+  8. relatedProductController
+  9. productCategoryController
 - config/db.js
+
 #### Integration Tests
+
 The following integration tests verify interactions between DB <-> Controller <-> API endpoint (Axios):
+
 - getProductController.integration.test.js
 - getSingleProductController.integration.test.js
 - productCategoryController.integration.test.js
@@ -93,26 +136,35 @@ The following integration tests verify interactions between DB <-> Controller <-
 - relatedProductController.integration.test.js
 
 The following integration tests verify interactions between Layout <-> ProductDetails, as well as Cart <-> ProductDetails:
+
 - ProductDetails.integration.test.js
+
 #### UI Tests (E2E)
+
 The following E2E tests verify user workflows:
+
 - navigate-to-about-page.spec.js
 - navigate-to-contact-page.spec.js
 - navigate-to-privacy-policy.spec.js
 - shopping-flow-spec.js
 - cart-stored-on-local-browser.spec.js
+
 ### Hans Delano
+
 #### Client-Related Files
+
 - pages/CategoryProduct.js
 - pages/Homepage.js
 - context/cart.js
 - pages/CartPage.js
 - hooks/useCategory.js
 - pages/Categories.js
+
 #### Server-Related Files
+
 - controllers/productController.js
-    1. braintreeTokenController
-    2. brainTreePaymentController
+  1. braintreeTokenController
+  2. brainTreePaymentController
 
 ## 1. Project Introduction
 
@@ -137,7 +189,6 @@ Virtual Vault is a full-stack MERN (MongoDB, Express.js, React.js, Node.js) e-co
 ### 1. Installing Node.js
 
 1. **Download and Install Node.js**:
-
    - Visit [nodejs.org](https://nodejs.org) to download and install Node.js.
 
 2. **Verify Installation**:
@@ -150,26 +201,21 @@ Virtual Vault is a full-stack MERN (MongoDB, Express.js, React.js, Node.js) e-co
 ### 2. MongoDB Setup
 
 1. **Download and Install MongoDB Compass**:
-
    - Visit [MongoDB Compass](https://www.mongodb.com/products/tools/compass) and download and install MongoDB Compass for your operating system.
 
 2. **Create a New Cluster**:
-
    - Sign up or log in to [MongoDB Atlas](https://www.mongodb.com/cloud/atlas/register).
    - After logging in, create a project and within that project deploy a free cluster.
 
 3. **Configure Database Access**:
-
    - Create a new user for your database (if not alredy done so) in MongoDB Atlas.
    - Navigate to "Database Access" under "Security" and create a new user with the appropriate permissions.
 
 4. **Whitelist IP Address**:
-
    - Go to "Network Access" under "Security" and whitelist your IP address to allow access from your machine.
    - For example, you could whitelist 0.0.0.0 to allow access from anywhere for ease of use.
 
 5. **Connect to the Database**:
-
    - In your cluster's page on MongoDB Atlas, click on "Connect" and choose "Compass".
    - Copy the connection string.
 
@@ -181,7 +227,6 @@ Virtual Vault is a full-stack MERN (MongoDB, Express.js, React.js, Node.js) e-co
 To download and use the MERN (MongoDB, Express.js, React.js, Node.js) app from GitHub, follow these general steps:
 
 1. **Clone the Repository**
-
    - Go to the GitHub repository of the MERN app.
    - Click on the "Code" button and copy the URL of the repository.
    - Open your terminal or command prompt.
@@ -192,7 +237,6 @@ To download and use the MERN (MongoDB, Express.js, React.js, Node.js) app from G
    - Navigate into the cloned directory.
 
 2. **Install Frontend and Backend Dependencies**
-
    - Run the following command in your project's root directory:
 
      ```
@@ -200,14 +244,12 @@ To download and use the MERN (MongoDB, Express.js, React.js, Node.js) app from G
      ```
 
 3. **Add database connection string to `.env`**
-
    - Add the connection string copied from MongoDB Atlas to the `.env` file inside the project directory (replace the necessary placeholders):
      ```env
      MONGO_URL = <connection string>
      ```
 
 4. **Adding sample data to database**
-
    - Download “Sample DB Schema” from Canvas and extract it.
    - In MongoDB Compass, create a database named `test` under your cluster.
    - Add four collections to this database: `categories`, `orders`, `products`, and `users`.
@@ -220,14 +262,14 @@ To download and use the MERN (MongoDB, Express.js, React.js, Node.js) app from G
 
 ## 5. Unit Testing with Jest
 
-Unit testing is a crucial aspect of software development aimed at verifying the functionality of individual units or components of a software application. It involves isolating these units and subjecting them to various test scenarios to ensure their correctness.  
+Unit testing is a crucial aspect of software development aimed at verifying the functionality of individual units or components of a software application. It involves isolating these units and subjecting them to various test scenarios to ensure their correctness.
 Jest is a popular JavaScript testing framework widely used for unit testing. It offers a simple and efficient way to write and execute tests in JavaScript projects.
 
 ### Getting Started with Jest
 
 To begin unit testing with Jest in your project, follow these steps:
 
-1. **Install Jest**:  
+1. **Install Jest**:
    Use your preferred package manager to install Jest. For instance, with npm:
 
    ```bash
@@ -235,13 +277,12 @@ To begin unit testing with Jest in your project, follow these steps:
 
    ```
 
-2. **Write Tests**  
+2. **Write Tests**
    Create test files for your components or units where you define test cases to evaluate their behaviour.
 
-3. **Run Tests**  
-   Execute your tests using Jest to ensure that your components meet the expected behaviour.  
+3. **Run Tests**
+   Execute your tests using Jest to ensure that your components meet the expected behaviour.
    You can run the tests by using the following command in the root of the directory:
-
    - **Frontend tests**
 
      ```bash
