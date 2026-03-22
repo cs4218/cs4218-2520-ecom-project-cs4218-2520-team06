@@ -214,6 +214,23 @@ The following E2E tests verify user workflows:
   1. braintreeTokenController
   2. brainTreePaymentController
 
+#### Integration Tests
+
+- CartPage.integration.test.js
+- Categories.integration.test.js
+- CategoryProduct.integration.test.js
+- HomePage.integration.test.js
+- categoryController.integration.test.js
+- singleCategoryController.integration.test.js
+
+#### UI Tests (E2E)
+
+- e2e/tests/cart/cart-checkout-fail.spec.ts
+- e2e/tests/cart/cart-checkout.spec.ts
+- e2e/tests/category/category-to-cart.spec.ts
+- e2e/tests/home/home-filter.spec.ts
+- e2e/tests/home/home-to-cart.spec.ts
+
 ## 1. Project Introduction
 
 Virtual Vault is a full-stack MERN (MongoDB, Express.js, React.js, Node.js) e-commerce website, offering seamless connectivity and user-friendly features. The platform provides a robust framework for online shopping. The website is designed to adapt to evolving business needs and can be efficiently extended.
