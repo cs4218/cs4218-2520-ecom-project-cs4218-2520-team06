@@ -23,7 +23,7 @@ describe("createCategoryController", () => {
   afterEach(() => {
     jest.restoreAllMocks();
   });
-  
+
   it("returns 200 but success false if name is missing", async () => {
     // Arrange: Set up request with no name in body
     const req = { body: {} };
@@ -34,7 +34,10 @@ describe("createCategoryController", () => {
 
     // Assert: Verify 401 response and no database operations
     expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.send).toHaveBeenCalledWith({ success: false, message: "Name is required" });
+    expect(res.send).toHaveBeenCalledWith({
+      success: false,
+      message: "Name is required",
+    });
     expect(slugify).not.toHaveBeenCalled();
     expect(categoryModel.findOne).not.toHaveBeenCalled();
     expect(categoryModel.prototype.save).not.toHaveBeenCalled();
@@ -116,7 +119,7 @@ describe("updateCategoryController", () => {
   afterEach(() => {
     jest.restoreAllMocks();
   });
-  
+
   it("returns 200 but success false if name is missing", async () => {
     // Arrange: Set up request with category ID and empty name
     const req = {
@@ -124,16 +127,19 @@ describe("updateCategoryController", () => {
       params: { id: "testId" },
     };
     const res = makeRes();
-    
+
     // Act: Call updateCategoryController
     await updateCategoryController(req, res);
-    
+
     // Assert: Verify 200 response and no database operations
     expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.send).toHaveBeenCalledWith({ success: false, message: "Name is required" });
+    expect(res.send).toHaveBeenCalledWith({
+      success: false,
+      message: "Name is required",
+    });
     expect(categoryModel.findByIdAndUpdate).not.toHaveBeenCalled();
   });
-  
+
   it("returns 200 when category is updated successfully", async () => {
     // Arrange: Set up request with category ID and new name
     const req = {
@@ -254,7 +260,7 @@ describe("singleCategoryController", () => {
   afterEach(() => {
     jest.restoreAllMocks();
   });
-  
+
   it("returns 200 when the specified category is retrieved successfully", async () => {
     // Arrange: Set up request with category slug and mock database return
     const req = { params: { slug: "book" } };
@@ -269,7 +275,7 @@ describe("singleCategoryController", () => {
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.send).toHaveBeenCalledWith({
       success: true,
-      message: "Get Single Category SUccessfully",
+      message: "Get Single Category Successfully",
       category: { name: "Book", slug: "book" },
     });
   });
@@ -305,7 +311,7 @@ describe("deleteCategoryController", () => {
   afterEach(() => {
     jest.restoreAllMocks();
   });
-  
+
   it("returns 200 when category successfully deleted", async () => {
     // Arrange: Set up request with category ID
     const req = { params: { id: "test" } };
