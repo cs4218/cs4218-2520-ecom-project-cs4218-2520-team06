@@ -100,6 +100,11 @@ test('user logs in, shops for items, checks out, and logs out', async ({ page })
   // User should be able to check out
   await validateCartItems(page, itemNames);
 
+  await Promise.all([
+    page.getByRole("link", { name: "Cart" }).click(),
+    page.waitForNavigation(),
+  ]);
+
   // Checkout and start payment process
   await expect(page.getByRole('button', { name: 'Paying with Card' })).toBeVisible();
   await page.getByRole("button", { name: "Paying with Card" }).click();
@@ -126,9 +131,7 @@ test('user logs in, shops for items, checks out, and logs out', async ({ page })
   await page.getByRole("button", { name: "Make Payment" }).click();
 
   // Ensure success screen shows the items that were bought
-  await expect(
-    page.getByRole("cell", { name: "Success" }).first()
-  ).toBeVisible();
+  await expect(page.getByRole("cell", { name: /success/i }).first()).toBeVisible();
 
   // Validate number of items in placed order
   for (const item of itemNames) {
