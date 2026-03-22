@@ -58,7 +58,8 @@ The distribution of testing workload for this project follows closely with the s
     3. getAllOrdersController
     4. orderStatusController
 ### Kok Bo Chang
-#### Client-Related Files
+#### Unit Tests
+##### Client-Related Files
 - pages/ProductDetails.js
 - pages/Contact.js
 - pages/Policy.js
@@ -68,7 +69,7 @@ The distribution of testing workload for this project follows closely with the s
 - components/Spinner.js
 - pages/About.js
 - pages/PageNotFound.js
-#### Server-Related Files
+##### Server-Related Files
 - controllers/productController.js
     1. getProductController
     2. getSingleProductController
@@ -80,6 +81,26 @@ The distribution of testing workload for this project follows closely with the s
     8. relatedProductController
     9. productCategoryController
 - config/db.js
+#### Integration Tests
+The following integration tests verify interactions between DB <-> Controller <-> API endpoint (Axios):
+- getProductController.integration.test.js
+- getSingleProductController.integration.test.js
+- productCategoryController.integration.test.js
+- productCountController.integration.test.js
+- productFiltersController.integration.test.js
+- productListController.integration.test.js
+- productPhotoController.integration.test.js
+- relatedProductController.integration.test.js
+
+The following integration tests verify interactions between Layout <-> ProductDetails, as well as Cart <-> ProductDetails:
+- ProductDetails.integration.test.js
+#### UI Tests (E2E)
+The following E2E tests verify user workflows:
+- navigate-to-about-page.spec.js
+- navigate-to-contact-page.spec.js
+- navigate-to-privacy-policy.spec.js
+- shopping-flow-spec.js
+- cart-stored-on-local-browser.spec.js
 ### Hans Delano
 #### Client-Related Files
 - pages/CategoryProduct.js
