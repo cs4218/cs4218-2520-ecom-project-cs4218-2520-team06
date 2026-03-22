@@ -26,6 +26,23 @@ The distribution of testing workload for this project follows closely with the s
   3. forgotPasswordController
   4. testController
 
+#### Integration Tests
+
+- AdminDashboard.integration.test.js
+- ForgetPassword.integration.test.js
+- Login.integration.test.js
+- Register.integration.test.js
+
+#### UI Tests
+
+- adminDashboard.spec.js
+- adminMenu.spec.js
+- forgotPassword-login.spec.js
+- forgetPassword.spec.js
+- login.spec.js
+- register.spec.js
+- register-login.spec.js
+
 ### Gallen Ong
 
 #### Client-Related Files
@@ -56,6 +73,7 @@ The distribution of testing workload for this project follows closely with the s
 - models/userModel.js
 
 ### Integration Tests (Frontend)
+
 - AdminOrders.integration.test.js
 - CreateCategory.integration.test.js
 - CreateProduct.integration.test.js
@@ -70,6 +88,7 @@ The distribution of testing workload for this project follows closely with the s
 - admin-update-orders.integration.test.js
 
 ### Integration Tests (Backend)
+
 - createCategoryController.integration.test.js
 - updateCategoryController.integration.test.js
 - deleteCategoryController.integration.test.js
@@ -78,6 +97,7 @@ The distribution of testing workload for this project follows closely with the s
 - deleteProductController.integration.test.js
 
 ### UI Tests (E2E)
+
 - admin-category.spec.js
 - admin-product.spec.js
 - admin-orders.spec.js
