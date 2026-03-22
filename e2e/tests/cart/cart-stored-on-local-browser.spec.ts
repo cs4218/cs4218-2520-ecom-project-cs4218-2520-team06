@@ -60,6 +60,7 @@ test('logging out should not affect existing items in cart', async ({ page }) =>
     .click();
   }
 
+  // Assert all cart values
   await validateCartItems(page, itemNames);
 
   // Act (log out)

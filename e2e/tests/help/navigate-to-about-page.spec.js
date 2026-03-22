@@ -42,17 +42,25 @@ test.beforeEach(async ({ page }) => {
 });
 
 test("About page accessible when logged out", async ({ page }) => {
+  // Empty Arrange
+
+  // Act and Assert
   await goToAboutPageAndValidate(page);
 });
 
 test("About page accessible when logged in", async ({ page }) => {
+  // Arrange
   await login(page);
+
+  // Act and Assert
   await goToAboutPageAndValidate(page);
 });
 
-test("About page accessible from all dashboard sections", async ({ page }) => {
+test("About page accessible from all dashboard sections when logged in", async ({ page }) => {
+  // Arrange
   await login(page);
 
+  // Act and Assert
   for (const section of dashboardSectionLinks) {
     // Open user dropdown menu
     await page.getByRole("button", { name: user.name }).click();

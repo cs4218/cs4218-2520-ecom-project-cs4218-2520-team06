@@ -70,6 +70,9 @@ test.afterEach(async () => {
 });
 
 test('user shops for items but cannot checkout because they are not logged in', async ({ page }) => {
+  // Empty Arrange
+
+  // Act and Assert
   // Add two items to cart
   for (const name of itemNames) {
     await page.locator(".card-body", { hasText: name })
@@ -83,8 +86,10 @@ test('user shops for items but cannot checkout because they are not logged in', 
 });
 
 test('user logs in, shops for items, checks out, and logs out', async ({ page }) => {
+  // Arrange
   await login(page);
 
+  // Act and Assert
   // Add two items to cart
   for (const name of itemNames) {
     await page.locator(".card-body", { hasText: name })
@@ -95,6 +100,7 @@ test('user logs in, shops for items, checks out, and logs out', async ({ page })
   // User should be able to check out
   await validateCartItems(page, itemNames);
 
+  // Checkout and start payment process
   await expect(page.getByRole('button', { name: 'Paying with Card' })).toBeVisible();
   await page.getByRole("button", { name: "Paying with Card" }).click();
 
@@ -104,13 +110,11 @@ test('user logs in, shops for items, checks out, and logs out', async ({ page })
     .contentFrame()
     .getByRole("textbox", { name: "Credit Card Number" })
     .fill(validCardDetails.number);
-
   await page
     .locator('iframe[name="braintree-hosted-field-expirationDate"]')
     .contentFrame()
     .getByRole("textbox", { name: "Expiration Date" })
     .fill(validCardDetails.expirationDate);
-
   await page
     .locator('iframe[name="braintree-hosted-field-cvv"]')
     .contentFrame()
@@ -126,6 +130,7 @@ test('user logs in, shops for items, checks out, and logs out', async ({ page })
     page.getByRole("cell", { name: "Success" }).first()
   ).toBeVisible();
 
+  // Validate number of items in placed order
   for (const item of itemNames) {
     await expect(page.getByText(item).first()).toBeVisible();
   }
@@ -136,9 +141,11 @@ test('user logs in, shops for items, checks out, and logs out', async ({ page })
 });
 
 test('user logs in, views more details of an item, buys both the item and some related items, checks out, and logs out', async ({ page }) => {
+  // Arrange
   const similarItems = ["Textbook", "The Law of Contract Singapore"];
   await login(page);
 
+  // Act and Assert
   // View more details for the item
   await page.locator(".card-body", { hasText: /novel/i })
     .getByRole('button', { name: /add to cart/i })
@@ -153,10 +160,6 @@ test('user logs in, views more details of an item, buys both the item and some r
   await expect(page.getByRole('main')).toContainText('Description : A bestselling novel');
   await expect(page.getByRole('main')).toContainText('Price :$14.99');
   await expect(page.getByRole('main')).toContainText('Category : Book');
-  // await expect(page.getByRole('heading', { name: /Novel/i })).toBeVisible();
-  // await expect(page.getByRole('heading', { name: /A bestselling novel/i })).toBeVisible();
-  // await expect(page.getByRole('heading', { name: /14.99/i })).toBeVisible();
-  // await expect(page.getByRole('heading', { name: /Book/i })).toBeVisible();
 
   // Add similar items to cart as well
   await page.getByTestId('related-product-66db427fdb0119d9234b27f1')
@@ -169,15 +172,12 @@ test('user logs in, views more details of an item, buys both the item and some r
   // User should be able to check out
   const itemsInCart = similarItems.concat(["Novel"]);
 
+  // Validate number of items in card
   await page.getByRole("link", { name: "Cart" }).click();
   const cards = page.locator(".row.card");
   await expect(cards).toHaveCount(itemsInCart.length, { timeout: 10000 });
 
-  // Check each card contains the right item
-  // for (const name of itemsInCart) {
-  //   await expect(cards.filter({ hasText: name })).toHaveCount(1);
-  // }
-
+  // Checkout and start payment process
   await page.getByRole("link", { name: "Cart" }).click();
   await expect(page.getByRole('button', { name: 'Paying with Card' })).toBeVisible();
   await page.getByRole("button", { name: "Paying with Card" }).click();
@@ -188,13 +188,11 @@ test('user logs in, views more details of an item, buys both the item and some r
     .contentFrame()
     .getByRole("textbox", { name: "Credit Card Number" })
     .fill(validCardDetails.number);
-
   await page
     .locator('iframe[name="braintree-hosted-field-expirationDate"]')
     .contentFrame()
     .getByRole("textbox", { name: "Expiration Date" })
     .fill(validCardDetails.expirationDate);
-
   await page
     .locator('iframe[name="braintree-hosted-field-cvv"]')
     .contentFrame()
@@ -210,12 +208,9 @@ test('user logs in, views more details of an item, buys both the item and some r
     page.getByRole("cell", { name: "Success" }).first()
   ).toBeVisible();
 
+  // Validate number of items in placed order
   const orderCards = page.locator(".row.card");
   await expect(orderCards).toHaveCount(itemsInCart.length, { timeout: 10000 });
-
-  // for (const item of itemsInCart) {
-  //   await expect(page.getByText(item).first()).toBeVisible();
-  // }
 
   // Log out afterwards
   await page.getByRole('button', { name: user.name }).click();
