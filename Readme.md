@@ -55,6 +55,34 @@ The distribution of testing workload for this project follows closely with the s
 - models/productModel.js
 - models/userModel.js
 
+### Integration Tests (Frontend)
+- AdminOrders.integration.test.js
+- CreateCategory.integration.test.js
+- CreateProduct.integration.test.js
+- UpdateProduct.integration.test.js
+- Products.integration.test.js
+- AdminRoute.integration.test.js
+- PrivateRoute.integration.test.js
+- admin-category.integration.test.js
+- admin-create-product.integration.test.js
+- admin-update-product.integration.test.js
+- admin-delete-product.integration.test.js
+- admin-update-orders.integration.test.js
+
+### Integration Tests (Backend)
+- createCategoryController.integration.test.js
+- updateCategoryController.integration.test.js
+- deleteCategoryController.integration.test.js
+- updateProductController.integration.test.js
+- createProductController.integration.test.js
+- deleteProductController.integration.test.js
+
+### UI Tests (E2E)
+- admin-category.spec.js
+- admin-product.spec.js
+- admin-orders.spec.js
+- authorization.spec.js
+
 ### Jabez Tho
 
 #### Unit Tests
