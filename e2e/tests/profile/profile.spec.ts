@@ -2,6 +2,7 @@
 import { test, expect } from "@playwright/test";
 import type { Page } from "@playwright/test";
 import { deleteUserByEmail } from "../../../db-util";
+import { ensureNavbarExpanded } from "../utils/navbar";
 
 test.describe.configure({ mode: "serial" });
 const salt = Math.random().toString(36).substring(7);
@@ -25,6 +26,7 @@ async function uiLogin(page: import("@playwright/test").Page) {
     .fill(E2E_USER.password);
   await page.getByRole("button", { name: "LOGIN" }).click();
   await page.waitForURL("**/");
+  await ensureNavbarExpanded(page);
   await expect(page.getByRole("button", { name: E2E_USER.name })).toBeVisible();
 }
 
@@ -143,6 +145,7 @@ test("should update user profile", async ({ request, page }) => {
     phone: "0987654321",
     address: "456 Updated Street",
   });
+  await ensureNavbarExpanded(page);
   await expect(
     page.getByRole("button", { name: "Updated Name" })
   ).toBeVisible();
@@ -233,7 +236,7 @@ test("profile update persist after session clear", async ({ page }) => {
     email: E2E_USER.email,
     address: persistedProfile.address,
   });
-
+  await ensureNavbarExpanded(page);
   await expect(
     page.getByRole("button", { name: "Persisted Name" })
   ).toBeVisible();
@@ -281,5 +284,6 @@ test("profile update fails with short password and profile page shouldn't displa
     email: E2E_USER.email,
     address: E2E_USER.address,
   });
+  await ensureNavbarExpanded(page);
   await expect(page.getByRole("button", { name: E2E_USER.name })).toBeVisible();
 });

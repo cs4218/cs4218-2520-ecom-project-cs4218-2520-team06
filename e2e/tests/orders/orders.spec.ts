@@ -1,6 +1,7 @@
 // Jabez Tho, A0273312N
 import { test, expect } from "@playwright/test";
 import { deleteUserByEmail } from "../../../db-util";
+import { ensureNavbarExpanded } from "../utils/navbar";
 
 test.describe.configure({ mode: "serial" });
 const salt = Math.random().toString(36).substring(7);
@@ -24,6 +25,7 @@ async function uiLogin(page: import("@playwright/test").Page) {
     .fill(E2E_USER.password);
   await page.getByRole("button", { name: "LOGIN" }).click();
   await page.waitForURL("**/");
+  await ensureNavbarExpanded(page);
   await expect(page.getByRole("button", { name: E2E_USER.name })).toBeVisible();
 }
 
@@ -45,6 +47,7 @@ test.afterAll(async () => {
 
 test("should be navigable via ui from initial page", async ({ page }) => {
   await page.goto("/");
+  await ensureNavbarExpanded(page);
   await page.getByRole("button", { name: E2E_USER.name }).click();
   await page.getByRole("link", { name: "DASHBOARD" }).click();
   await page.getByRole("link", { name: "Orders" }).click();
