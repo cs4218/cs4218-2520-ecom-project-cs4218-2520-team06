@@ -1,6 +1,7 @@
 import express from "express";
 import {
   brainTreePaymentController,
+  mockPaymentController,
   braintreeTokenController,
   createProductController,
   deleteProductController,
@@ -47,7 +48,12 @@ router.get("/get-product/:slug", getSingleProductController);
 router.get("/product-photo/:pid", productPhotoController);
 
 //delete rproduct
-router.delete("/delete-product/:pid", requireSignIn, isAdmin, deleteProductController);
+router.delete(
+  "/delete-product/:pid",
+  requireSignIn,
+  isAdmin,
+  deleteProductController
+);
 
 //filter product
 router.post("/product-filters", productFiltersController);
@@ -73,5 +79,8 @@ router.get("/braintree/token", braintreeTokenController);
 
 //payments
 router.post("/braintree/payment", requireSignIn, brainTreePaymentController);
+
+// mock payments (for spike tests; disabled in prod)
+router.post("/mock/payment", requireSignIn, mockPaymentController);
 
 export default router;

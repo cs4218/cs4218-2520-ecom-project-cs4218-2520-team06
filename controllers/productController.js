@@ -420,3 +420,49 @@ export const brainTreePaymentController = async (req, res) => {
     });
   }
 };
+
+// mock payment (no external gateway)
+export const mockPaymentController = async (req, res) => {
+  const mockEnabled = true;
+
+  if (!mockEnabled) {
+    return res.status(404).send({ success: false, message: "Not found" });
+  }
+
+  try {
+    const { cart } = req.body;
+
+    if (!Array.isArray(cart) || cart.length === 0) {
+      return res
+        .status(400)
+        .send({ success: false, message: "Cart is required" });
+    }
+
+    let total = 0;
+    cart.forEach((i) => {
+      total += Number(i?.price || 0);
+    });
+
+    const transactionId = `mock-${Date.now()}-${Math.random()
+      .toString(16)
+      .slice(2)}`;
+
+    await new orderModel({
+      products: cart,
+      payment: {
+        success: true,
+        mock: true,
+        amount: total,
+        transaction: { id: transactionId },
+      },
+      buyer: req.user._id,
+    }).save();
+
+    return res.status(200).send({ success: true, transactionId });
+  } catch (error) {
+    return res.status(500).send({
+      success: false,
+      message: "Mock payment failed",
+    });
+  }
+};
