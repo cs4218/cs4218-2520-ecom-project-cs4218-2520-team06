@@ -89,12 +89,7 @@ export function searchProduct(searchDuration) {
   return products[0];
 }
 
-export function checkout(
-  token,
-  product,
-  checkoutDuration,
-  checkoutSuccessRate
-) {
+export function checkout(token, product, checkoutDuration) {
   const payload = JSON.stringify({
     cart: [product],
   });
@@ -118,6 +113,5 @@ export function checkout(
     "mock payment success is true": () => body?.success === true,
   });
 
-  checkoutSuccessRate.add(success);
   return success;
 }

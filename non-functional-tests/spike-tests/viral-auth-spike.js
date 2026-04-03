@@ -24,7 +24,7 @@ export const options = {
       stages: [
         { duration: "1m", target: 500 },
         { duration: "10s", target: 5000 },
-        { duration: "30s", target: 500 },
+        { duration: "30s", target: 5000 },
         { duration: "1m", target: 0 },
       ],
     },

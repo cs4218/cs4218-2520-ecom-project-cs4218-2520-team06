@@ -67,12 +67,7 @@ export function flashSaleContentionSpike(data) {
 
     // Skip adding to cart since its purely client side
 
-    const orderSuccess = checkout(
-      token,
-      searchedProduct,
-      checkoutDuration,
-      checkoutSuccessRate
-    );
+    const orderSuccess = checkout(token, searchedProduct, checkoutDuration);
     if (!orderSuccess) return;
 
     flowCompleted = true;
