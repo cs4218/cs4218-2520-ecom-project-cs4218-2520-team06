@@ -1,4 +1,4 @@
-import { sleep, group } from "k6";
+import { group } from "k6";
 import { Trend, Counter, Rate } from "k6/metrics";
 import {
   registerUser,
@@ -17,16 +17,28 @@ const viralJourneySuccessRate = new Rate("viral_journey_success_rate");
 
 export const options = {
   scenarios: {
-    viral_auth_spike: {
+    viral_auth_spike_above_max_load: {
       exec: "viralAuthSpike",
       executor: "ramping-vus",
       startVUs: 0,
       stages: [
-        { duration: "1m", target: 500 },
-        { duration: "10s", target: 5000 },
-        { duration: "30s", target: 5000 },
+        { duration: "1m", target: 150 },
+        { duration: "10s", target: 1500 },
+        { duration: "30s", target: 1500 },
         { duration: "1m", target: 0 },
       ],
+    },
+    viral_auth_spike_within_max_load: {
+      exec: "viralAuthSpike",
+      executor: "ramping-vus",
+      startVUs: 0,
+      stages: [
+        { duration: "1m", target: 150 },
+        { duration: "10s", target: 1250 },
+        { duration: "30s", target: 1250 },
+        { duration: "1m", target: 0 },
+      ],
+      startTime: "3m50s", // Start after the first scenario finishes
     },
   },
   thresholds: {
@@ -44,14 +56,11 @@ export function viralAuthSpike() {
 
   group("Viral Auth Spike", function () {
     if (!registerUser(email, registrationDuration)) return;
-    sleep(0.3 + Math.random() * 0.7);
 
     const token = loginUser(email, loginDuration);
     if (!token) return;
-    sleep(0.3 + Math.random() * 0.7);
 
     if (!viewProfile(token, profileDuration)) return;
-    sleep(0.4 + Math.random() * 0.8);
 
     const product = searchProduct(searchDuration);
     if (!product) return;

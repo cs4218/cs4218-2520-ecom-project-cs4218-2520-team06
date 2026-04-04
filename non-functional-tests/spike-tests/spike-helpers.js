@@ -1,10 +1,10 @@
 import http from "k6/http";
-import { check, sleep } from "k6";
+import { check } from "k6";
 
 export const BASE_URL = "http://localhost:6060";
 export const SEARCH_KEYWORD = "law";
 export const PASSWORD = "password123";
-export const USER_POOL_SIZE = 5000;
+export const USER_POOL_SIZE = 1500;
 export const MOCK_PAYMENT_PATH = "/api/v1/product/mock/payment";
 
 export function parseJson(response) {
@@ -100,8 +100,6 @@ export function checkout(token, product, checkoutDuration) {
       Authorization: token,
     },
   };
-
-  sleep(0.5 + Math.random() * 1.5);
 
   const res = http.post(`${BASE_URL}${MOCK_PAYMENT_PATH}`, payload, params);
   checkoutDuration.add(res.timings.duration);

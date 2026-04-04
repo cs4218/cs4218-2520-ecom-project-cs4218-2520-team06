@@ -1,7 +1,7 @@
 import "dotenv/config";
 import { upsertUsersForLoadTest } from "../../../db-util.js";
 
-const USER_POOL_SIZE = 5000;
+const USER_POOL_SIZE = 1500;
 const PASSWORD = "password123";
 const USER_EMAIL_PREFIX = "flash-sale-user";
 const USER_EMAIL_DOMAIN = "test.com";

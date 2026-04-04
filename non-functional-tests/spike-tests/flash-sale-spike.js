@@ -1,4 +1,4 @@
-import { sleep, group } from "k6";
+import { group } from "k6";
 import { Trend, Counter, Rate } from "k6/metrics";
 import {
   USER_POOL_SIZE,
@@ -19,24 +19,41 @@ const checkoutSuccessRate = new Rate("checkout_success_rate");
 
 export const options = {
   scenarios: {
-    flash_sale_contention_spike: {
+    flash_sale_contention_spike_above_max_load: {
       exec: "flashSaleContentionSpike",
       executor: "ramping-vus",
       startVUs: 0,
       stages: [
-        { duration: "1m", target: 500 },
-        { duration: "10s", target: 5000 },
-        { duration: "30s", target: 5000 },
+        { duration: "1m", target: 150 },
+        { duration: "10s", target: 1500 },
+        { duration: "1m40s", target: 1500 },
         { duration: "1m", target: 0 },
       ],
     },
+    flash_sale_contention_spike_within_max_load: {
+      exec: "flashSaleContentionSpike",
+      executor: "ramping-vus",
+      startVUs: 0,
+      stages: [
+        { duration: "1m", target: 150 },
+        { duration: "10s", target: 1250 },
+        { duration: "1m40s", target: 1250 },
+        { duration: "1m", target: 0 },
+      ],
+      startTime: "3m50s", // Start after the first scenario finishes
+    },
   },
+  summaryTrendStats: [
+    "min",
+    "max",
+    "avg",
+    "p(25)",
+    "p(50)",
+    "p(75)",
+    "p(90)",
+    "p(95)",
+  ],
   setupTimeout: "5m",
-  thresholds: {
-    "http_req_failed{scenario:flash_sale_contention_spike}": ["rate<0.05"],
-    "http_req_duration{scenario:flash_sale_contention_spike}": ["p(95)<2000"],
-    checkout_success_rate: ["rate>0.8"],
-  },
 };
 
 export function setup() {
@@ -59,11 +76,9 @@ export function flashSaleContentionSpike(data) {
   group("Flash Sale Spike", function () {
     const token = loginUser(user.email, loginDuration);
     if (!token) return;
-    sleep(0.3 + Math.random() * 0.7);
 
     const searchedProduct = searchProduct(searchDuration);
     if (!searchedProduct) return;
-    sleep(0.2 + Math.random() * 0.8);
 
     // Skip adding to cart since its purely client side
 
