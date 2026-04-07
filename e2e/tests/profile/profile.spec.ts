@@ -270,7 +270,7 @@ test("profile update fails with short password and profile page shouldn't displa
   await page.getByRole("button", { name: "UPDATE", exact: true }).click();
 
   await expect(
-    page.getByText("Passsword is required and 6 character long")
+    page.getByText("Password must be at least 8 characters long")
   ).toBeVisible();
   await page.reload();
 

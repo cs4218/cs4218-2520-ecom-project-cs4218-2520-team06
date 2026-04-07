@@ -266,13 +266,13 @@ describe("Profile Component", () => {
 
       // Act: Type in all enabled input fields
       fireEvent.change(nameInput, { target: { value: "New Name" } });
-      fireEvent.change(passwordInput, { target: { value: "newpassword123" } });
+      fireEvent.change(passwordInput, { target: { value: "Cewpassword123!" } });
       fireEvent.change(phoneInput, { target: { value: "5555555555" } });
       fireEvent.change(addressInput, { target: { value: "New Address" } });
 
       // Assert: Verify all input values are updated
       expect(nameInput).toHaveValue("New Name");
-      expect(passwordInput).toHaveValue("newpassword123");
+      expect(passwordInput).toHaveValue("Cewpassword123!");
       expect(phoneInput).toHaveValue("5555555555");
       expect(addressInput).toHaveValue("New Address");
     });

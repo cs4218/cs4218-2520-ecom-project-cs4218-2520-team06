@@ -55,7 +55,7 @@ describe("Register Integration Test", () => {
     const newUser = {
       name: "Test User",
       email: "testuser@example.com",
-      password: "testPassword",
+      password: "testPassword23#",
       phone: "1234567890",
       address: "123 StreetName",
       dob: "2026-01-01",
@@ -110,7 +110,7 @@ describe("Register Integration Test", () => {
     const newUser = {
       name: "Test User",
       email: NON_ADMIN_USER_EMAIL,
-      password: "testPassword",
+      password: "testPassword23#",
       phone: "1234567890",
       address: "123 StreetName",
       dob: "2026-01-01",

@@ -160,7 +160,7 @@ describe("updateProfileController Integration Tests", () => {
 
     it("should hash and persist a newly submitted password", async () => {
       // Arrange
-      const newPassword = "newpassword123";
+      const newPassword = "newpassworD123!";
 
       // Act
       const response = await sendJson({
@@ -200,9 +200,9 @@ describe("updateProfileController Integration Tests", () => {
       });
 
       // Assert
-      expect(response.status).toBe(200);
+      expect(response.status).toBe(400);
       expect(response.body).toEqual({
-        error: "Passsword is required and 6 character long",
+        error: "Password must be at least 8 characters long",
       });
 
       const persistedUser = await userModel.findById(user._id);

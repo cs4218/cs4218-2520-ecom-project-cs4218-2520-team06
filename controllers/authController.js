@@ -4,6 +4,30 @@ import orderModel from "../models/orderModel.js";
 import { comparePassword, hashPassword } from "./../helpers/authHelper.js";
 import JWT from "jsonwebtoken";
 
+// By NIST standards
+function checkPasswordStrength(password) {
+  if (password.length < 8) {
+    return "Password must be at least 8 characters long";
+  }
+
+  const specialCharRegex = /[!@#$%^&*(),.?":{}|<>]/;
+  if (!specialCharRegex.test(password)) {
+    return "Password must contain at least one special character";
+  }
+
+  const uppercaseRegex = /[A-Z]/;
+  if (!uppercaseRegex.test(password)) {
+    return "Password must contain at least one uppercase letter";
+  }
+
+  const numberRegex = /[0-9]/;
+  if (!numberRegex.test(password)) {
+    return "Password must contain at least one number";
+  }
+
+  return null; // Password is strong
+}
+
 export const registerController = async (req, res) => {
   try {
     const { name, email, password, phone, address, answer } = req.body;
@@ -16,6 +40,11 @@ export const registerController = async (req, res) => {
     }
     if (!password) {
       return res.status(400).send({ message: "Password is Required" });
+    }
+
+    const passwordError = checkPasswordStrength(password);
+    if (passwordError) {
+      return res.status(400).send({ error: passwordError });
     }
     if (!phone) {
       return res.status(400).send({ message: "Phone no. is Required" });
@@ -170,8 +199,11 @@ export const updateProfileController = async (req, res) => {
     const { name, password, address, phone } = req.body;
     const user = await userModel.findById(req.user._id);
     //password
-    if (password && password.length < 6) {
-      return res.json({ error: "Passsword is required and 6 character long" });
+    if (password) {
+      const passwordError = checkPasswordStrength(password);
+      if (passwordError) {
+        return res.status(400).json({ error: passwordError });
+      }
     }
     const hashedPassword = password ? await hashPassword(password) : undefined;
     const updatedUser = await userModel.findByIdAndUpdate(
