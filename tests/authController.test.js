@@ -23,9 +23,12 @@ jest.mock("../models/userModel.js");
 jest.mock("../models/orderModel.js");
 
 jest.mock("../helpers/authHelper.js", () => ({
-  hashPassword: jest.fn().mockResolvedValue("hashedPassword"),
+  hashPassword: jest.fn().mockResolvedValue("hashedPassword123!"),
   comparePassword: jest.fn((password, hashedPassword) => {
-    if (password === "correctPassword" && hashedPassword === "hashedPassword") {
+    if (
+      password === "correctPassword123!" &&
+      hashedPassword === "hashedPassword123!"
+    ) {
       return Promise.resolve(true);
     }
     return Promise.resolve(false);
@@ -43,7 +46,7 @@ describe("registerController", () => {
   const userInfo = Object.freeze({
     name: "Bob",
     email: "abc@gmail.com",
-    password: "password",
+    password: "passworD123!",
     phone: "1234567890",
     address: "123 Street",
     answer: "Answer",
@@ -159,7 +162,7 @@ describe("registerController", () => {
       email: userInfo.email,
       phone: userInfo.phone,
       address: userInfo.address,
-      password: "hashedPassword",
+      password: "hashedPassword123!",
       answer: userInfo.answer,
     };
 
@@ -198,7 +201,7 @@ describe("loginController", () => {
     req = {
       body: {
         email: "abc@gmail.com",
-        password: "password",
+        password: "passworD123!",
       },
     };
     jest.clearAllMocks();
@@ -247,7 +250,7 @@ describe("loginController", () => {
   });
 
   test("incorrect password returns 401", async () => {
-    req.body = { email: NON_ADMIN_USER_EMAIL, password: "wrongPassword" };
+    req.body = { email: NON_ADMIN_USER_EMAIL, password: "wrongPassword123!" };
 
     await loginController(req, res);
 
@@ -280,7 +283,7 @@ describe("loginController", () => {
 
   test("successful login returns user and token", async () => {
     JWT.sign.mockReturnValueOnce("mocked-jwt-token");
-    req.body = { email: NON_ADMIN_USER_EMAIL, password: "correctPassword" };
+    req.body = { email: NON_ADMIN_USER_EMAIL, password: "correctPassword123!" };
 
     await loginController(req, res);
 
@@ -402,7 +405,7 @@ describe("forgotPasswordController", () => {
     });
     expect(userModel.findByIdAndUpdate).toHaveBeenCalledWith(
       NON_ADMIN_USER._id,
-      { password: "hashedPassword" }
+      { password: "hashedPassword123!" }
     );
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.send).toHaveBeenCalledWith(
@@ -683,13 +686,13 @@ describe("updateProfileController", () => {
     jest.clearAllMocks();
   });
 
-  test("password less than 6 characters returns error", async () => {
+  test("password less than 8 characters returns error", async () => {
     req.body = { password: "12345" };
 
     await updateProfileController(req, res);
 
     expect(res.json).toHaveBeenCalledWith({
-      error: "Passsword is required and 6 character long",
+      error: "Password must be at least 8 characters long",
     });
     expect(hashPassword).not.toHaveBeenCalled();
     expect(userModel.findByIdAndUpdate).not.toHaveBeenCalled();
@@ -731,19 +734,19 @@ describe("updateProfileController", () => {
     userModel.findById.mockResolvedValueOnce(existingUser);
     userModel.findByIdAndUpdate.mockResolvedValueOnce({
       ...existingUserWithId,
-      password: "hashedPassword",
+      password: "hashedPassword123!",
     });
 
-    req.body = { password: "newPass123" };
+    req.body = { password: "newPass123@!" };
 
     await updateProfileController(req, res);
 
-    expect(hashPassword).toHaveBeenCalledWith("newPass123");
+    expect(hashPassword).toHaveBeenCalledWith("newPass123@!");
     expect(userModel.findByIdAndUpdate).toHaveBeenCalledWith(
       NON_ADMIN_USER_ID,
       expect.objectContaining({
         ...existingUser,
-        password: "hashedPassword",
+        password: "hashedPassword123!",
       }),
       { new: true }
     );
@@ -795,7 +798,7 @@ describe("updateProfileController", () => {
       name: "Old Name",
       phone: "9876543210",
       address: "Old Address",
-      password: "hashedPassword",
+      password: "hashedPassword123!",
     };
     userModel.findById.mockResolvedValueOnce(existingUser);
     userModel.findByIdAndUpdate.mockResolvedValueOnce({
@@ -817,7 +820,7 @@ describe("updateProfileController", () => {
       NON_ADMIN_USER_ID,
       {
         name: "",
-        password: "hashedPassword",
+        password: "hashedPassword123!",
         phone: "",
         address: "",
       },
