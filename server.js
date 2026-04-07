@@ -6,7 +6,10 @@ import connectDB from "./config/db.js";
 import authRoutes from "./routes/authRoute.js";
 import categoryRoutes from "./routes/categoryRoutes.js";
 import productRoutes from "./routes/productRoutes.js";
+import auditRoutes from "./routes/auditRoutes.js";
 import cors from "cors";
+import helmet from "helmet";
+import { auditRequestMiddleware } from "./middlewares/auditMiddleware.js";
 
 // configure env
 dotenv.config();
@@ -16,15 +19,57 @@ connectDB();
 
 const app = express();
 
+const allowedOrigins = (
+  process.env.ALLOWED_ORIGINS || "http://localhost:3000,http://127.0.0.1:3000"
+)
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
+const corsOptions = {
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    return callback(new Error("Not allowed by CORS"));
+  },
+  credentials: true,
+};
+
 //middlewares
-app.use(cors());
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      useDefaults: true,
+      directives: {
+        defaultSrc: ["'self'"],
+      },
+    },
+    frameguard: { action: "deny" },
+    hsts: {
+      maxAge: 10000000,
+      includeSubDomains: true,
+      preload: true,
+    },
+    noSniff: true,
+  })
+);
+app.use(cors(corsOptions));
+app.use((req, res, next) => {
+  if (!res.getHeader("Access-Control-Allow-Origin")) {
+    res.setHeader("Access-Control-Allow-Origin", allowedOrigins[0]);
+  }
+  next();
+});
 app.use(express.json());
 app.use(morgan("dev"));
+app.use(auditRequestMiddleware);
 
 //routes
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/category", categoryRoutes);
 app.use("/api/v1/product", productRoutes);
+app.use("/api/v1/audit", auditRoutes);
 
 // rest api
 
