@@ -20,7 +20,8 @@ connectDB();
 const app = express();
 
 const allowedOrigins = (
-  process.env.ALLOWED_ORIGINS || "http://localhost:3000,http://127.0.0.1:3000"
+  process.env.ALLOWED_ORIGINS ||
+  "http://localhost:3000,http://127.0.0.1:3000,http://localhost:6060,http://127.0.0.1:6060"
 )
   .split(",")
   .map((origin) => origin.trim())
@@ -28,6 +29,7 @@ const allowedOrigins = (
 
 const corsOptions = {
   origin: (origin, callback) => {
+    console.log("CORS Origin:", origin);
     if (!origin || allowedOrigins.includes(origin)) {
       return callback(null, true);
     }

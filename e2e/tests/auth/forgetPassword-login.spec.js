@@ -13,11 +13,11 @@ describe("Forget Password to Login Tests", () => {
     email: `testForgetPasswordLogin${timestamp}${randomNum}@gmail.com`,
     phone: "91234567",
     address: "my address",
-    password: "admin123",
+    password: "admin123Strong!",
     answer: "soccer",
   };
 
-  const newPassword = "newpassword123";
+  const newPassword = "newPassword123!";
 
   beforeAll(async () => {
     dotenv.config();

@@ -1,5 +1,5 @@
 // Kok Bo Chang, A0273542E
-import { test, expect } from '@playwright/test';
+import { test, expect } from "@playwright/test";
 
 const BASE_URL = "http://localhost:3000/";
 
@@ -30,7 +30,7 @@ async function login(page) {
 }
 
 async function goToPrivacyPolicyPageAndValidate(page) {
-  await page.getByRole('link', { name: /privacy policy/i }).click();
+  await page.getByRole("link", { name: /privacy policy/i }).click();
 
   await expect(
     page.getByRole("heading", { name: /privacy policy/i })
@@ -41,26 +41,32 @@ test.beforeEach(async ({ page }) => {
   await page.goto(BASE_URL);
 });
 
-test('privacy policy page should be accessible from the home page when logged out', async ({ page }) => {
+test("privacy policy page should be accessible from the home page when logged out", async ({
+  page,
+}) => {
   // Empty Arrange
 
   // Empty Act
 
   // Assert
-  await goToPrivacyPolicyPageAndValidate(page)
+  await goToPrivacyPolicyPageAndValidate(page);
 });
 
-test('privacy policy page should be accessible from the home page when logged in', async ({ page }) => {
+test("privacy policy page should be accessible from the home page when logged in", async ({
+  page,
+}) => {
   // Empty Arrange
-  
+
   // Act
-  await login(page)
+  await login(page);
 
   // Assert
-  await goToPrivacyPolicyPageAndValidate(page)
+  await goToPrivacyPolicyPageAndValidate(page);
 });
 
-test('privacy policy page should be accessible from all sections in a dashboard when logged in', async ({ page }) => {
+test("privacy policy page should be accessible from all sections in a dashboard when logged in", async ({
+  page,
+}) => {
   // Arrange
   await login(page);
 

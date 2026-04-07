@@ -9,7 +9,7 @@ const salt = Math.random().toString(36).substring(7);
 const E2E_USER = {
   name: "Admin Order Test User",
   address: "123 Test Street",
-  password: "password123",
+  password: "passwordStrong123!",
   phone: "1234567890",
   email: `profiletest${salt}@test.com`,
   answer: "test",
@@ -77,7 +77,7 @@ test("upon creating a new basic user should display in user list with correct va
   const userToCreate = {
     name: "Admin Test User Add",
     email: `admintestuseradd${salt}@test.com`,
-    password: "password123",
+    password: "passwordStrong123!",
     phone: "1234567890",
     address: "123 Test Street",
     answer: "test answer",

@@ -57,7 +57,7 @@ describe("Forget Password Tests", () => {
       .click();
     await page
       .getByRole("textbox", { name: "Enter Your New Password" })
-      .fill("admin");
+      .fill("adminPassword123!");
     await page
       .getByRole("textbox", { name: "What is your favorite sport?" })
       .click();
@@ -81,7 +81,7 @@ describe("Forget Password Tests", () => {
       .click();
     await page
       .getByRole("textbox", { name: "Enter Your New Password" })
-      .fill("admin");
+      .fill("adminPassword123!");
     await page
       .getByRole("textbox", { name: "What is your favorite sport?" })
       .click();
@@ -108,7 +108,7 @@ describe("Forget Password Tests", () => {
       .click();
     await page
       .getByRole("textbox", { name: "Enter Your New Password" })
-      .fill("admin");
+      .fill("adminPassword123!");
     await page
       .getByRole("textbox", { name: "What is your favorite sport?" })
       .click();
