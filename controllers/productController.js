@@ -6,6 +6,7 @@ import fs from "fs";
 import slugify from "slugify";
 import braintree from "braintree";
 import dotenv from "dotenv";
+import mongoose from "mongoose";
 
 dotenv.config();
 
@@ -226,10 +227,67 @@ export const updateProductController = async (req, res) => {
 // filter products
 export const productFiltersController = async (req, res) => {
   try {
-    const { checked, radio } = req.body;
+    const { checked = [], radio = [] } = req.body || {};
     let args = {};
-    if (checked.length > 0) args.category = checked;
-    if (radio.length) args.price = { $gte: radio[0], $lte: radio[1] };
+
+    if (!Array.isArray(checked) || !Array.isArray(radio)) {
+      return res.status(400).send({
+        success: false,
+        message: "Invalid filter payload",
+      });
+    }
+
+    if (checked.length > 0) {
+      const hasInvalidCategory = checked.some(
+        (c) =>
+          typeof c !== "string" ||
+          c.includes("$") ||
+          !mongoose.Types.ObjectId.isValid(c)
+      );
+
+      if (hasInvalidCategory) {
+        return res.status(400).send({
+          success: false,
+          message: "Category values must be valid IDs",
+        });
+      }
+
+      args.category = { $in: checked };
+    }
+
+    if (radio.length) {
+      if (radio.length !== 2) {
+        return res.status(400).send({
+          success: false,
+          message: "Price range must have exactly 2 values",
+        });
+      }
+
+      const minPrice = Number(radio[0]);
+      const maxPrice = Number(radio[1]);
+
+      if (!Number.isFinite(minPrice) || !Number.isFinite(maxPrice)) {
+        return res.status(400).send({
+          success: false,
+          message: "Price range values must be numbers",
+        });
+      }
+
+      args.price = { $gte: minPrice, $lte: maxPrice };
+    }
+
+    if (
+      args.price &&
+      (args.price.$gte < 0 ||
+        args.price.$lte > 1000000 ||
+        args.price.$gte > args.price.$lte)
+    ) {
+      return res.status(400).send({
+        success: false,
+        message: "Invalid price range",
+      });
+    }
+
     const products = await productModel.find(args);
     res.status(200).send({
       success: true,
