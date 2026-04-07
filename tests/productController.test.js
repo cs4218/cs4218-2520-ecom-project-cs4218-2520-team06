@@ -932,7 +932,7 @@ describe("productPhotoController", () => {
 // Kok Bo Chang, A0273542E
 describe("productFiltersController", () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    jest.resetAllMocks();
   });
 
   afterEach(() => {
@@ -944,8 +944,8 @@ describe("productFiltersController", () => {
     // Arrange
     const req = {
       body: {
-        checked: ["c1", "c2"],
-        radio: ["r1", "r2"],
+        checked: ["507f1f77bcf86cd799439011", "507f191e810c19729de860ea"],
+        radio: [100, 200],
       }
     };
     const res = makeRes();
@@ -962,10 +962,10 @@ describe("productFiltersController", () => {
     // Assert
     expect(productModel.find).toHaveBeenCalled();
     expect(productModel.find).toHaveBeenCalledWith({
-      category: req.body.checked,
+      category: { $in: req.body.checked },
       price: {
-        $gte: "r1",
-        $lte: "r2",
+        $gte: 100,
+        $lte: 200,
       }
     });
 
@@ -1531,6 +1531,9 @@ describe("productPaymentController", () => {
     // Arrange
     const req = dummyReq;
     const res = makeRes();
+    orderModel.mockImplementationOnce(() => ({
+      save: jest.fn().mockResolvedValue(true),
+    }));
     mockSale.mockImplementation((payload, callback) => {
       callback(null, { 
         success: true, 
