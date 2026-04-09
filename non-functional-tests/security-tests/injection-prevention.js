@@ -26,7 +26,7 @@ export default function () {
   const baselineBody = parseJson(baselineResponse);
   const baselineProducts = baselineBody?.products || [];
 
-  group("Story 5: search endpoint injection probes", () => {
+  group("Search endpoint injection", () => {
     for (const payload of searchPayloads) {
       const response = http.get(
         `${BASE_URL}/api/v1/product/search/${encodeURIComponent(payload)}`
@@ -42,7 +42,7 @@ export default function () {
     }
   });
 
-  group("Story 5: filter endpoint injection probes", () => {
+  group("Filter endpoint injection", () => {
     for (const payload of filterPayloads) {
       const response = http.post(
         `${BASE_URL}/api/v1/product/product-filters`,
