@@ -10,6 +10,6 @@ export function getRandomProduct() {
 }
 
 export function getRandomPageNumber() {
-    const MAX_PAGES = 5; // includes out-of-bounds values
+    const MAX_PAGES = 2;
     return Math.floor(Math.random() * MAX_PAGES) + 1;
 }

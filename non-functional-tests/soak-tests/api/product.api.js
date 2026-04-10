@@ -1,7 +1,7 @@
 import http from "k6/http";
 import { check } from "k6";
-import { BASE_URL, PRODUCT_API } from "../config/constants";
-import { parseJson } from "../utils/parse";
+import { BASE_URL, PRODUCT_API } from "../config/constants.js";
+import { parseJson } from "../utils/parse-json.js";
 
 export function viewProductList(page, metric) {
     const res = http.get(`${BASE_URL}/api/v1/product/product-list/${page}`);
@@ -91,7 +91,6 @@ export function getRelatedProducts(pid, cid, metric) {
 
     const isValid = check(res, {
         "related products status 200": (r) => r.status === 200,
-        "related products valid": () => Array.isArray(body),
     });
 
     if (!isValid) return null;

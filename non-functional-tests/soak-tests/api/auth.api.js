@@ -1,15 +1,16 @@
 import http from "k6/http";
 import { check } from "k6";
-import { AUTH, BASE_URL } from "../config/constants";
+import { TEMP_USER, BASE_URL } from "../config/constants.js";
+import { parseJson } from "../utils/parse-json.js";
 
 export function register(email, metric) {
     const payload = JSON.stringify({
-        name: AUTH.DEFAULT_NAME,
+        name: TEMP_USER.DEFAULT_NAME,
         email: email,
-        password: AUTH.PASSWORD,
-        phone: AUTH.PHONE_NUMBER,
-        address: AUTH.ADDRESS,
-        answer: AUTH.ANSWER,
+        password: TEMP_USER.PASSWORD,
+        phone: TEMP_USER.PHONE_NUMBER,
+        address: TEMP_USER.ADDRESS,
+        answer: TEMP_USER.ANSWER,
     });
     const params = { headers: { "Content-Type": "application/json" } };
 
@@ -27,7 +28,7 @@ export function register(email, metric) {
 }
 
 export function login(email, metric) {
-    const payload = JSON.stringify({ email: email, password: AUTH.PASSWORD });
+    const payload = JSON.stringify({ email: email, password: TEMP_USER.PASSWORD });
     const params = { headers: { "Content-Type": "application/json" } };
 
     const res = http.post(`${BASE_URL}/api/v1/auth/login`, payload, params);

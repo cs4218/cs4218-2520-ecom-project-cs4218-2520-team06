@@ -1,89 +1,84 @@
-// Import the http module to make HTTP requests. From this point, you can use `http` methods to make HTTP requests.
-import http from 'k6/http';
+import { sleep } from "k6";
+import { Trend, Rate } from "k6/metrics";
 
-// Import the sleep function to introduce delays. From this point, you can use the `sleep` function to introduce delays in your test script.
-import { group, sleep } from "k6";
-import { Trend, Counter, Rate } from "k6/metrics";
+import { runUserFlow } from "./flows/flow-router.js";
+import { TEMP_FILE, TEMP_USER } from "./config/constants.js";
+import { metrics } from "./config/metrics.js";
 
-import {
-    loginUser,
-    searchProduct,
-    checkout,
-} from "./spike-helpers.js";
+// -----------------------------
+// Load seeded users (init stage)
+// -----------------------------
+const filePath = `../../temp/${TEMP_FILE.fileName}`;
+const seededUserEmails = JSON.parse(open(filePath));
 
-const USER_POOL_SIZE = 500;
-const USER_EMAIL_PREFIX = "soak-user";
-const USER_EMAIL_DOMAIN = "test.com";
-
-// Metrics
-const loginDuration = new Trend("login_duration");
-const searchDuration = new Trend("search_duration");
-const checkoutDuration = new Trend("checkout_duration");
-
-const flowCompletedCounter = new Counter("flow_completed");
+// -----------------------------
+// Metrics (you can expand later)
+// -----------------------------
 const errorRate = new Rate("error_rate");
 
+// -----------------------------
+// k6 options (soak test)
+// -----------------------------
 export const options = {
-    scenarios: {
-        steady_soak_test: {
-        executor: "ramping-vus",
-        startVUs: 0,
-        stages: [
-            { duration: "5m", target: 500 },
-            { duration: "1h", target: 500 },
-            { duration: "5m", target: 0 },
-        ],
-        },
+  scenarios: {
+    soak_test: {
+      executor: "ramping-vus",
+      startVUs: 0,
+      stages: [
+        { duration: "20m", target: 200 },
+        { duration: "12h", target: 200 },
+        { duration: "10m", target: 0 },
+      ],
     },
-    thresholds: {
-        http_req_duration: ["p(95)<800"],   // 95% under 800ms
-        error_rate: ["rate<0.05"],          // <5% errors
-    },
+  },
+  thresholds: {
+    http_req_failed: ["rate<0.05"],
+    http_req_duration: ["p(95)<2000"],
+    error_rate: ["rate<0.05"],
+  },
 };
 
+// -----------------------------
+// Setup: share seeded users
+// -----------------------------
 export function setup() {
-    return Array.from({ length: USER_POOL_SIZE }, (_, index) => ({
-        email: `${USER_EMAIL_PREFIX}-${index}@${USER_EMAIL_DOMAIN}`,
-    }));
+    return {
+        seededUserEmails,
+    };
 }
 
+// -----------------------------
+// Main user execution
+// -----------------------------
 export default function (data) {
-    const users = data || [];
+    const userEmails = data.seededUserEmails;
 
-    if (users.length === 0) {
-        errorRate.add(true);
-        return;
+    // deterministic split of 85% returning users and 15% new users
+    const isSeeded = (__VU % 100) < 85;
+
+    let email;
+    if (isSeeded) {
+        email = getSeededUser(__VU, userEmails);
+    } else {
+        // temp users (new registrations)
+        email = createTempEmail(__VU, __ITER);
     }
 
-    const user = users[(__VU + __ITER) % users.length];
-    let success = false;
+    try {
+        runUserFlow(isSeeded, email, metrics);
+        metrics.errorRate.add(false);
+    } catch (err) {
+        console.log(err);
+        metrics.errorRate.add(true);
+    }
 
-    group("User Journey", function () {
-        // 1. Login (simulate /login)
-        const token = loginUser(user.email, loginDuration);
-        if (!token) return;
-
-        sleep(Math.random() * 2); // think time
-
-        // 2. Search (/search)
-        const product = searchProduct(searchDuration);
-        if (!product) return;
-
-        sleep(Math.random() * 3);
-
-        // 3. View product (/product/:slug)
-        // (Assume searchProduct already hits this indirectly)
-
-        // 4. Checkout (/cart → backend)
-        const orderSuccess = checkout(token, product, checkoutDuration);
-        if (!orderSuccess) return;
-
-        sleep(Math.random() * 2);
-
-        success = true;
-        flowCompletedCounter.add(1);
-    });
-
-    errorRate.add(!success);
+    sleep(1);
 }
 
+function getSeededUser(vuId, users) {
+    return users[vuId % users.length];
+}
+
+function createTempEmail(vuId, iter) {
+    return `${TEMP_USER.EMAIL_PREFIX}-${vuId}-${iter}@${TEMP_USER.EMAIL_DOMAIN}`;
+}

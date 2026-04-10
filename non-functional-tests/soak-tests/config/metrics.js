@@ -1,4 +1,4 @@
-import { Trend } from "k6/metrics";
+import { Trend, Rate } from "k6/metrics";
 
 export const metrics = {
     auth: {
@@ -11,9 +11,7 @@ export const metrics = {
         list: new Trend("product_list_duration"),
         detail: new Trend("product_detail_duration"),
         search: new Trend("product_search_duration"),
-        filter: new Trend("product_filter_duration"),
         related: new Trend("product_related_duration"),
-        photo: new Trend("product_photo_duration"),
     },
 
     category: {
@@ -23,5 +21,8 @@ export const metrics = {
 
     checkout: {
         order: new Trend("checkout_order_duration"),
-    }
+        rate: new Rate("checkout_success_rate"),
+    },
+
+    errorRate: new Rate("error_rate"),
 };

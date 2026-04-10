@@ -1,7 +1,7 @@
 import http from "k6/http";
 import { check } from "k6";
 import { BASE_URL } from "../config/constants.js";
-import { parseJson } from "../utils/parse.js";
+import { parseJson } from "../utils/parse-json.js";
 
 export function getAllCategories(metric) {
     const res = http.get(`${BASE_URL}/api/v1/category/get-category`);
