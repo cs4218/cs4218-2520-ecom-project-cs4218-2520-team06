@@ -2,7 +2,7 @@ import http from "k6/http";
 import { check } from "k6";
 import { AUTH, BASE_URL } from "../config/constants";
 
-export function register(email, registrationDuration) {
+export function register(email, metric) {
     const payload = JSON.stringify({
         name: AUTH.DEFAULT_NAME,
         email: email,
@@ -14,7 +14,7 @@ export function register(email, registrationDuration) {
     const params = { headers: { "Content-Type": "application/json" } };
 
     const res = http.post(`${BASE_URL}/api/v1/auth/register`, payload, params);
-    registrationDuration.add(res.timings.duration);
+    metric.add(res.timings.duration);
 
     const body = parseJson(res);
 
@@ -26,12 +26,12 @@ export function register(email, registrationDuration) {
     return isSuccess;
 }
 
-export function login(email, loginDuration) {
+export function login(email, metric) {
     const payload = JSON.stringify({ email: email, password: AUTH.PASSWORD });
     const params = { headers: { "Content-Type": "application/json" } };
 
     const res = http.post(`${BASE_URL}/api/v1/auth/login`, payload, params);
-    loginDuration.add(res.timings.duration);
+    metric.add(res.timings.duration);
 
     const body = parseJson(res);
 
@@ -43,8 +43,7 @@ export function login(email, loginDuration) {
     return isSuccess ? body.token : null;
 }
 
-// USER NAVIGATION ACTIONS THAT LEAD TO THE LOADING OF DATA
-export function viewProfile(token, profileDuration) {
+export function viewProfile(token, metric) {
     const params = {
         headers: {
             Authorization: token,
@@ -52,7 +51,7 @@ export function viewProfile(token, profileDuration) {
     };
 
     const res = http.get(`${BASE_URL}/api/v1/auth/user-auth`, params);
-    profileDuration.add(res.timings.duration);
+    metric.add(res.timings.duration);
     const body = parseJson(res);
 
     return check(res, {
