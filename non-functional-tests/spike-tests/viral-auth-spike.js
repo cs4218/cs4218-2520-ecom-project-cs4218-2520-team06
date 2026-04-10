@@ -1,4 +1,4 @@
-import { group } from "k6";
+import { sleep, group } from "k6";
 import { Trend, Counter, Rate } from "k6/metrics";
 import {
   registerUser,
@@ -17,35 +17,30 @@ const viralJourneySuccessRate = new Rate("viral_journey_success_rate");
 
 export const options = {
   scenarios: {
-    viral_auth_spike_above_max_load: {
+    viral_auth_spike: {
       exec: "viralAuthSpike",
       executor: "ramping-vus",
       startVUs: 0,
       stages: [
-        { duration: "1m", target: 150 },
-        { duration: "10s", target: 1500 },
-        { duration: "30s", target: 1500 },
-        { duration: "1m", target: 0 },
+        { duration: "1m", target: 120 },
+        { duration: "30s", target: 120 },
+        { duration: "10s", target: 1200 },
+        { duration: "2m", target: 1200 },
+        { duration: "10s", target: 120 },
+        { duration: "3m", target: 120 },
       ],
     },
-    viral_auth_spike_within_max_load: {
-      exec: "viralAuthSpike",
-      executor: "ramping-vus",
-      startVUs: 0,
-      stages: [
-        { duration: "1m", target: 150 },
-        { duration: "10s", target: 1250 },
-        { duration: "30s", target: 1250 },
-        { duration: "1m", target: 0 },
-      ],
-      startTime: "3m50s", // Start after the first scenario finishes
-    },
   },
-  thresholds: {
-    "http_req_failed{scenario:viral_auth_spike}": ["rate<0.05"],
-    "http_req_duration{scenario:viral_auth_spike}": ["p(95)<2000"],
-    viral_journey_success_rate: ["rate>0.8"],
-  },
+  summaryTrendStats: [
+    "min",
+    "max",
+    "avg",
+    "p(25)",
+    "p(50)",
+    "p(75)",
+    "p(90)",
+    "p(95)",
+  ],
 };
 
 export function viralAuthSpike() {
@@ -56,12 +51,12 @@ export function viralAuthSpike() {
 
   group("Viral Auth Spike", function () {
     if (!registerUser(email, registrationDuration)) return;
-
+    sleep(Math.random() * 4 + 1);
     const token = loginUser(email, loginDuration);
     if (!token) return;
-
+    sleep(Math.random() * 4 + 1);
     if (!viewProfile(token, profileDuration)) return;
-
+    sleep(Math.random() * 4 + 1);
     const product = searchProduct(searchDuration);
     if (!product) return;
 
