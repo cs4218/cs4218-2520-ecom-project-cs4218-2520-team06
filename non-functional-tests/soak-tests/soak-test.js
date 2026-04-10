@@ -25,9 +25,9 @@ export const options = {
       executor: "ramping-vus",
       startVUs: 0,
       stages: [
-        { duration: "20m", target: 200 },
+        { duration: "5m", target: 200 },
         { duration: "12h", target: 200 },
-        { duration: "10m", target: 0 },
+        { duration: "5m", target: 0 },
       ],
     },
   },
@@ -53,8 +53,8 @@ export function setup() {
 export default function (data) {
     const userEmails = data.seededUserEmails;
 
-    // deterministic split of 85% returning users and 15% new users
-    const isSeeded = (__VU % 100) < 85;
+    // deterministic split of 80% returning users and 20% new users
+    const isSeeded = (__VU % 100) < 80;
 
     let email;
     if (isSeeded) {
