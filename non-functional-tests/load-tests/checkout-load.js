@@ -3,9 +3,14 @@ import { check } from "k6";
 import { baseOptions } from "./base-load.js";
 import { getRandomUserCredentials } from "./utils.js";
 import { BASE_URL } from "./scripts/constants.js";
+import { Rate, Trend, Counter } from "k6/metrics";
 
 export const options = baseOptions;
 const MOCK_PAYMENT_PATH = "/api/v1/product/mock/payment";
+
+const checkoutErrorRate = new Rate("checkout_error_rate");
+const checkoutDuration = new Trend("checkout_duration", true);
+const successfulCheckouts = new Counter("successful_checkouts");
 
 export default () => {
   // Get random product
@@ -52,6 +57,14 @@ export default () => {
     checkoutPayload,
     checkoutParams
   );
-
-  check(res, { "mock payment status is 200": (r) => r.status === 200 });
+  checkoutDuration.add(res.timings.duration);
+  const checkoutSuccessful = check(res, {
+    "mock payment status is 200": (r) => r.status === 200,
+  });
+  if (checkoutSuccessful) {
+    successfulCheckouts.add(1);
+    checkoutErrorRate.add(0);
+  } else {
+    checkoutErrorRate.add(1);
+  }
 };

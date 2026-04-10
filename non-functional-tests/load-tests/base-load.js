@@ -1,10 +1,13 @@
 import http from "k6/http";
 import { check } from "k6";
 
-const EXPECTED_USERS = 10;
+const EXPECTED_USERS = 150;
 const RAMP_UP_TIME = 1;
 const RAMP_DOWN_TIME = 3;
-const SUSTAINED_LOAD_TIME = 5;
+const SUSTAINED_LOAD_TIME = 30;
+// const RAMP_UP_TIME = 60;
+// const RAMP_DOWN_TIME = 60;
+// const SUSTAINED_LOAD_TIME = 300;
 
 export const baseOptions = {
   stages: [
@@ -16,7 +19,8 @@ export const baseOptions = {
 
 export const loadTestBasic = (...requests) => {
   const responses = http.batch(requests);
-  responses.forEach((res) => {
-    check(res, { "status was 200": (r) => r.status == 200 });
+  return responses.map((res) => {
+    const success = check(res, { "status was 200": (r) => r.status == 200 });
+    return { success, duration: res.timings.duration };
   });
 };
