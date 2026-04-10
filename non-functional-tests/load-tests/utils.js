@@ -33,3 +33,7 @@ export function getRandomPriceRange() {
   const randomIndex = Math.floor(Math.random() * priceRanges.length);
   return priceRanges[randomIndex];
 }
+
+export function getRandomBetween(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
