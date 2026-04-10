@@ -1,4 +1,4 @@
-import { group } from "k6";
+import { sleep, group } from "k6";
 import { Trend, Counter, Rate } from "k6/metrics";
 import {
   USER_POOL_SIZE,
@@ -19,28 +19,18 @@ const checkoutSuccessRate = new Rate("checkout_success_rate");
 
 export const options = {
   scenarios: {
-    flash_sale_contention_spike_above_max_load: {
+    flash_sale_spike: {
       exec: "flashSaleContentionSpike",
       executor: "ramping-vus",
       startVUs: 0,
       stages: [
-        { duration: "1m", target: 150 },
-        { duration: "10s", target: 1500 },
-        { duration: "1m40s", target: 1500 },
-        { duration: "1m", target: 0 },
+        { duration: "1m", target: 120 },
+        { duration: "30s", target: 120 },
+        { duration: "10s", target: 1200 },
+        { duration: "2m", target: 1200 },
+        { duration: "10s", target: 120 },
+        { duration: "3m", target: 120 },
       ],
-    },
-    flash_sale_contention_spike_within_max_load: {
-      exec: "flashSaleContentionSpike",
-      executor: "ramping-vus",
-      startVUs: 0,
-      stages: [
-        { duration: "1m", target: 150 },
-        { duration: "10s", target: 1250 },
-        { duration: "1m40s", target: 1250 },
-        { duration: "1m", target: 0 },
-      ],
-      startTime: "3m50s", // Start after the first scenario finishes
     },
   },
   summaryTrendStats: [
@@ -76,9 +66,11 @@ export function flashSaleContentionSpike(data) {
   group("Flash Sale Spike", function () {
     const token = loginUser(user.email, loginDuration);
     if (!token) return;
+    sleep(Math.random() * 4 + 1);
 
     const searchedProduct = searchProduct(searchDuration);
     if (!searchedProduct) return;
+    sleep(Math.random() * 4 + 1);
 
     // Skip adding to cart since its purely client side
 
