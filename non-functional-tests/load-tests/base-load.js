@@ -1,3 +1,4 @@
+// Gabriel Chang, A0276978Y
 import http from "k6/http";
 import { check } from "k6";
 
@@ -5,9 +6,6 @@ const EXPECTED_USERS = 150;
 const RAMP_UP_TIME = 1;
 const RAMP_DOWN_TIME = 3;
 const SUSTAINED_LOAD_TIME = 30;
-// const RAMP_UP_TIME = 60;
-// const RAMP_DOWN_TIME = 60;
-// const SUSTAINED_LOAD_TIME = 300;
 
 export const baseOptions = {
   stages: [

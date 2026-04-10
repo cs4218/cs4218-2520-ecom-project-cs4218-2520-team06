@@ -44,6 +44,18 @@ The distribution of testing workload for this project follows closely with the s
 - register.spec.js
 - register-login.spec.js
 
+#### Load Tests
+
+- base-load.js
+- checkout-load.js
+- filter-category-load.js
+- filter-price-load.js
+- full-flow-load.js
+- home-load.js
+- login-load.js
+- product-load.js
+- search-load.js
+
 ### Gallen Ong
 
 #### Client-Related Files

@@ -1,8 +1,14 @@
+// Gabriel Chang, A0276978Y
 import http from "k6/http";
 import { check } from "k6";
 import { baseOptions } from "./base-load.js";
 import { BASE_URL } from "./scripts/constants.js";
 import { getRandomBetween } from "./utils.js";
+import { Rate, Trend, Counter } from "k6/metrics";
+
+const productLoadErrorRate = new Rate("product_load_error_rate");
+const productLoadDuration = new Trend("product_load_duration", true);
+const successfulProductLoads = new Counter("successful_product_loads");
 
 export const options = baseOptions;
 
@@ -23,9 +29,19 @@ export default () => {
   const products = res.json().products;
 
   for (const product of products) {
-    http.get(`${BASE_URL}/api/v1/product/product-photo/${product._id}`);
-    check(res, {
+    const productRes = http.get(
+      `${BASE_URL}/api/v1/product/get-product/${product.slug}`,
+      params
+    );
+    productLoadDuration.add(productRes.timings.duration);
+    const productSuccessful = check(productRes, {
       "server responded": (r) => r.status == 200 || r.status == 404,
     });
+    if (productSuccessful) {
+      successfulProductLoads.add(1);
+      productLoadErrorRate.add(0);
+    } else {
+      productLoadErrorRate.add(1);
+    }
   }
 };
