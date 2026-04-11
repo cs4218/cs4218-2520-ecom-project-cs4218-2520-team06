@@ -1,3 +1,4 @@
+// Kok Bo Chang, A0273542E
 import {
     register,
     login,
@@ -25,7 +26,7 @@ import {
 import { gaussianThink } from "../utils/gaussian-think.js";
 
 export function newUserFlow(email, metrics) {
-    // 1. Register
+    // Register
     const registered = register(email, metrics.auth.register);
     if (!registered) {
         throw new Error("Registration failed");
@@ -33,7 +34,7 @@ export function newUserFlow(email, metrics) {
 
     gaussianThink(2.5, 1.0);
 
-    // 2. Login
+    // Login
     const token = login(email, metrics.auth.login);
     if (!token) {
         metrics.error.login.add(true);
@@ -44,6 +45,7 @@ export function newUserFlow(email, metrics) {
 
     gaussianThink(2.5, 1.0);
 
+    // View profile
     const isOk = viewProfile(token, metrics.auth.profile);
     if (!isOk) return;
 

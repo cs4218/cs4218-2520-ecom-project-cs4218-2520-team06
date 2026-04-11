@@ -1,3 +1,4 @@
+// Kok Bo Chang, A0273542E
 import http from "k6/http";
 import { check } from "k6";
 import { TEMP_USER, BASE_URL } from "../config/constants.js";

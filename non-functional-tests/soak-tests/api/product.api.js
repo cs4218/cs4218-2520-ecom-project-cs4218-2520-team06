@@ -1,3 +1,4 @@
+// Kok Bo Chang, A0273542E
 import http from "k6/http";
 import { check } from "k6";
 import { BASE_URL, PRODUCT_API } from "../config/constants.js";

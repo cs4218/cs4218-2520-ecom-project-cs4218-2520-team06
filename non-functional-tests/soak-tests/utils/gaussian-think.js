@@ -1,3 +1,4 @@
+// Kok Bo Chang, A0273542E
 import { sleep } from "k6";
 
 export function gaussianThink(mean = 3, stdDev = 1) {

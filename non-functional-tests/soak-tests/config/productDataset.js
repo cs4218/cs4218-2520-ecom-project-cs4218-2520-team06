@@ -1,3 +1,4 @@
+// Kok Bo Chang, A0273542E
 export const PRODUCTS = [
     { slug: "laptop", searchTerm: "laptop" },
     { slug: "smartphone", searchTerm: "smartphone" },

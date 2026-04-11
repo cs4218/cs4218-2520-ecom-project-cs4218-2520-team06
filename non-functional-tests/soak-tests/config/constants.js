@@ -1,3 +1,4 @@
+// Kok Bo Chang, A0273542E
 export const BASE_URL = "http://localhost:6060";
 
 export const SEEDED_USER = {

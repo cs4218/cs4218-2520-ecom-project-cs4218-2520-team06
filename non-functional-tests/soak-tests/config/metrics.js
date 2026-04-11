@@ -1,3 +1,4 @@
+// Kok Bo Chang, A0273542E
 import { Trend, Rate } from "k6/metrics";
 
 export const metrics = {

@@ -1,5 +1,5 @@
+// Kok Bo Chang, A0273542E
 import { sleep } from "k6";
-import { Trend, Rate } from "k6/metrics";
 
 import { runUserFlow } from "./flows/flow-router.js";
 import { TEMP_FILE, TEMP_USER } from "./config/constants.js";

@@ -1,3 +1,4 @@
+// Kok Bo Chang, A0273542E
 import { 
   login,
   viewProfile
@@ -28,6 +29,7 @@ export function createSeededUserFlow() {
   let token = null;
 
   return function seededUserFlow(email, metrics) {
+    // Login
     if (!token || Math.random() < 0.3) {
       // 20% chance of re-login (session expired / new device)
       token = login(email, metrics.auth.login);
@@ -40,6 +42,7 @@ export function createSeededUserFlow() {
 
     gaussianThink(2.5, 1.0);
 
+    // View profile
     const isOk = viewProfile(token, metrics.auth.profile);
     if (!isOk) return;
 
@@ -65,7 +68,7 @@ export function createSeededUserFlow() {
 
     gaussianThink(2.5, 1.0);
 
-    // pick a random product
+    // Pick a random product
     const baseProduct = products[Math.floor(Math.random() * products.length)];
     // Optional search behaviour
     if (Math.random() < 0.3) {
@@ -76,15 +79,13 @@ export function createSeededUserFlow() {
 
       gaussianThink(4, 1.5);
 
-      // optionally override product choice if search succeeds
+      // override product choice if search succeeds
       if (searchResult) {
         baseProduct.slug = searchResult.slug;
       }
     }
 
-    // -----------------------------
-    // Product detail view
-    // -----------------------------
+    // View poduct details
     const product = viewProductDetails(
       baseProduct.slug,
       metrics.product.detail
@@ -95,9 +96,7 @@ export function createSeededUserFlow() {
 
     gaussianThink(4, 1.5);
 
-    // -----------------------------
     // Checkout (higher for returning users)
-    // -----------------------------
     const willCheckout = Math.random() < 0.3;
     if (!willCheckout) return;
 
