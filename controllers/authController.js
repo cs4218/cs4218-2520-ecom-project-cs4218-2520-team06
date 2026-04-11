@@ -272,11 +272,32 @@ export const getOrdersController = async (req, res) => {
 //orders
 export const getAllOrdersController = async (req, res) => {
   try {
-    const orders = await orderModel
-      .find({})
+    const { status, limit = "100", skip = "0" } = req.query;
+
+    const filters = {};
+    if (status) {
+      const normalizedStatus = String(status).toLowerCase();
+      // Backward compatibility for existing typo in enum value.
+      const mappedStatus = normalizedStatus === "delivered" ? "deliverd" : status;
+      filters.status = mappedStatus;
+    }
+
+    const parsedLimit = Math.min(Math.max(Number.parseInt(limit, 10) || 100, 1), 500);
+    const parsedSkip = Math.max(Number.parseInt(skip, 10) || 0, 0);
+
+    let query = orderModel
+      .find(filters)
       .populate("products", "-photo")
       .populate("buyer", "name")
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .skip(parsedSkip)
+      .limit(parsedLimit);
+
+    if (typeof query.allowDiskUse === "function") {
+      query = query.allowDiskUse(true);
+    }
+
+    const orders = await query;
     res.json(orders);
   } catch (error) {
     console.log(error);
