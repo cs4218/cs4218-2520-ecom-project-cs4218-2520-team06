@@ -1,5 +1,7 @@
-import { seededUserFlow } from "./seeded-user.flow.js";
+import { createSeededUserFlow } from "./seeded-user.flow.js";
 import { newUserFlow } from "./new-user.flow.js";
+
+const seededUserFlow = createSeededUserFlow();
 
 export function runUserFlow(isSeeded, email, metrics) {
     if (isSeeded) {

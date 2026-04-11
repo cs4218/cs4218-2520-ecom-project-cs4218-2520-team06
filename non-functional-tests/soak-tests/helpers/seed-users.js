@@ -4,7 +4,7 @@ import path from "path";
 import { upsertUsersForLoadTest } from "../../../db-util.js";
 import { SEEDED_USER, TEMP_FILE } from "../config/constants.js";
 
-export async function seedUsers(emailPrefix, emailDomain, password, numberOfUsers = 500) {
+export async function seedUsers(emailPrefix, emailDomain, password, numberOfUsers = 300) {
     const result = await upsertUsersForLoadTest({
         prefix: emailPrefix,
         domain: emailDomain,

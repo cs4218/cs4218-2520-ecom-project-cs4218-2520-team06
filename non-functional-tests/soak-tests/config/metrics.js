@@ -10,6 +10,7 @@ export const metrics = {
     product: {
         list: new Trend("product_list_duration"),
         detail: new Trend("product_detail_duration"),
+        photo: new Trend("product_photo_duration"),
         search: new Trend("product_search_duration"),
         related: new Trend("product_related_duration"),
     },
@@ -21,8 +22,11 @@ export const metrics = {
 
     checkout: {
         order: new Trend("checkout_order_duration"),
-        rate: new Rate("checkout_success_rate"),
     },
 
-    errorRate: new Rate("error_rate"),
+    error: {
+        login: new Rate("login_error_rate"),
+        checkout: new Rate("checkout_error_rate"),
+        global: new Rate("global_error_rate"),
+    }
 };

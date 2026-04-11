@@ -22,18 +22,25 @@ import {
   getRandomProduct,
 } from "../config/productDataset.js";
 
-import { sleep } from "k6";
+import { gaussianThink } from "../utils/gaussian-think.js";
 
 export function newUserFlow(email, metrics) {
     // 1. Register
     const registered = register(email, metrics.auth.register);
-    if (!registered) return;
+    if (!registered) {
+        throw new Error("Registration failed");
+    }
 
     gaussianThink(2.5, 1.0);
 
     // 2. Login
     const token = login(email, metrics.auth.login);
-    if (!token) return;
+    if (!token) {
+        metrics.error.login.add(true);
+        throw new Error("Login failed");
+    } else {
+        metrics.error.login.add(false);
+    }
 
     gaussianThink(2.5, 1.0);
 
@@ -77,33 +84,22 @@ export function newUserFlow(email, metrics) {
         metrics.product.detail
     );
     if (!product) return;
-    viewProductPhoto(product._id, metrics.product.detail);
+    viewProductPhoto(product._id, metrics.product.photo);
     getRelatedProducts(product._id, product.category._id, metrics.product.related);
 
     gaussianThink(4, 1.5);
 
     // Checkout (rarer for new users)
     const willCheckout = Math.random() < 0.1;
-    if (willCheckout) {
-        const isSuccess = checkout(token, product, metrics.checkout.order);
-        metrics.checkout.rate.add(isSuccess);
-        gaussianThink(6, 2.5);
+    if (!willCheckout) return;
+
+    const isSuccess = checkout(token, product, metrics.checkout.order);
+    metrics.error.checkout.add(!isSuccess);
+    if (!isSuccess) {
+        throw new Error("Checkout failed");
     }
 
+    gaussianThink(6, 2.5);
+
     return;
-}
-
-export function gaussianThink(mean = 3, stdDev = 1) {
-  let u1 = Math.random();
-  let u2 = Math.random();
-
-  let z = Math.sqrt(-2.0 * Math.log(u1)) *
-          Math.cos(2.0 * Math.PI * u2);
-
-  let value = mean + z * stdDev;
-
-  // prevent negative sleep
-  if (value < 0) value = 0;
-
-  sleep(value);
 }

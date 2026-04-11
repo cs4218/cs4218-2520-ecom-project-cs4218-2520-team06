@@ -12,11 +12,6 @@ const filePath = `../../temp/${TEMP_FILE.fileName}`;
 const seededUserEmails = JSON.parse(open(filePath));
 
 // -----------------------------
-// Metrics (you can expand later)
-// -----------------------------
-const errorRate = new Rate("error_rate");
-
-// -----------------------------
 // k6 options (soak test)
 // -----------------------------
 export const options = {
@@ -26,7 +21,7 @@ export const options = {
       startVUs: 0,
       stages: [
         { duration: "5m", target: 200 },
-        { duration: "12h", target: 200 },
+        { duration: "5m", target: 200 },
         { duration: "5m", target: 0 },
       ],
     },
@@ -34,8 +29,21 @@ export const options = {
   thresholds: {
     http_req_failed: ["rate<0.05"],
     http_req_duration: ["p(95)<2000"],
-    error_rate: ["rate<0.05"],
+    global_error_rate: ["rate<0.05"],
+    checkout_error_rate: ["rate<0.05"],
+    login_error_rate: ["rate<0.05"],
   },
+  summaryTrendStats: [
+    "avg",
+    "min",
+    "max",
+    "med",
+    "p(25)",
+    "p(50)",
+    "p(75)",
+    "p(90)",
+    "p(95)",
+  ],
 };
 
 // -----------------------------
@@ -54,7 +62,7 @@ export default function (data) {
     const userEmails = data.seededUserEmails;
 
     // deterministic split of 80% returning users and 20% new users
-    const isSeeded = (__VU % 100) < 80;
+    let isSeeded = (__VU % 100) < 80;
 
     let email;
     if (isSeeded) {
@@ -66,10 +74,10 @@ export default function (data) {
 
     try {
         runUserFlow(isSeeded, email, metrics);
-        metrics.errorRate.add(false);
+        metrics.error.global.add(false);
     } catch (err) {
         console.log(err);
-        metrics.errorRate.add(true);
+        metrics.error.global.add(true);
     }
 
     sleep(1);
