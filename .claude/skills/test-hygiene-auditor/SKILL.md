@@ -291,18 +291,55 @@ When the user asks to unflag/whitelist findings after an initial audit:
    - If suppressions already exist in this run/session, append to the same file.
 4. On follow-up audit rerun, reload suppressions and ensure matched findings are absent from output.
 
+Optional helper for deterministic suppression authoring:
+
+- Report mode workflow (deterministic; no JSON printed inline):
+  1. Write audit JSON to file only: `.claude/skills/test-hygiene-auditor/reports/<YYYY-MM-DD>_<run-id>.json`
+  2. Generate HTML from that JSON file:
+     - `node .claude/skills/test-hygiene-auditor/tools/generate-html-report.mjs --input .claude/skills/test-hygiene-auditor/reports/<YYYY-MM-DD>_<run-id>.json --output .claude/skills/test-hygiene-auditor/reports/<YYYY-MM-DD>_<run-id>.html --date <YYYY-MM-DD> --run-id <run-id>`
+  3. Report back both file paths to the user.
+- In the HTML report, select findings to suppress and download Markdown.
+- Save the downloaded `.md` into `.claude/skills/test-hygiene-auditor/suppressions/`.
+
 Use stable finding fingerprints in this format:
 
 `<framework>|<path>|<category>|<location>|<title_slug>`
 
-## Output format (ALWAYS)
+## Output format modes
 
-Return BOTH:
+Default mode (normal run):
 
-1. A Markdown report for humans
-2. A JSON block for copy/paste
+1. Return Markdown report for humans only.
+2. Do NOT print JSON in the response.
+
+Report mode (only when user asks to generate HTML report or equivalent):
+
+1. Return Markdown report for humans.
+2. Write JSON payload to `.claude/skills/test-hygiene-auditor/reports/<YYYY-MM-DD>_<run-id>.json` (file output only).
+3. Immediately run the HTML generator tool script against that JSON file.
+4. Return the generated HTML path and JSON path to the user.
+5. Do NOT print raw JSON in the response.
+
+Follow-up report mode (user asks to generate report as a follow-up to an existing audit):
+
+1. Do NOT regenerate or restate "Findings (by file)" markdown.
+2. Write JSON payload to `.claude/skills/test-hygiene-auditor/reports/<YYYY-MM-DD>_<run-id>.json` (file output only).
+3. Immediately run the HTML generator tool script against that JSON file.
+4. Return a compact status update only:
+   - suppression context (files loaded / follow-up mode)
+   - artifact paths (JSON + HTML)
+   - brief next action (open HTML and export suppression markdown)
+5. Do NOT print raw JSON in the response.
+
+Enforcement requirement:
+
+- If the user does not explicitly request report mode / HTML generation, suppress JSON output entirely.
+- Never include a JSON block in normal responses.
 
 ### Markdown template
+
+Use this full template for normal runs and first-pass audits.
+Do not use this full template for follow-up report mode.
 
 # Test Hygiene Audit
 
@@ -351,7 +388,7 @@ For each file:
 2. ...
 3. ...
 
-### JSON schema
+### JSON schema (for report mode file output)
 
 ```json
 {
@@ -401,4 +438,22 @@ For each file:
     }
   ]
 }
+```
+
+### Follow-up report mode response template (compact)
+
+```md
+# Test Hygiene Audit (Follow-up Report)
+
+## Suppression context
+
+- suppression files loaded: <file paths or none>
+- follow-up mode: <yes/no>
+
+## Artifacts generated
+
+- json: `.claude/skills/test-hygiene-auditor/reports/<YYYY-MM-DD>_<run-id>.json`
+- html: `.claude/skills/test-hygiene-auditor/reports/<YYYY-MM-DD>_<run-id>.html`
+
+Next: open the HTML report, select findings to suppress, and download suppression markdown.
 ```
