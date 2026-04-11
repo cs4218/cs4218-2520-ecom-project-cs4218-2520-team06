@@ -101,8 +101,12 @@ export async function upsertUsersForLoadTest({
     const hashedPassword = await bcrypt.hash(plainPassword, 10);
     const now = new Date();
 
+    const emails = [];
+
     const operations = Array.from({ length: count }, (_, index) => {
       const email = `${prefix}-${index}@${domain}`;
+      emails.push(email);
+
       return {
         updateOne: {
           filter: { email: email },
@@ -129,6 +133,7 @@ export async function upsertUsersForLoadTest({
     const result = await users.bulkWrite(operations, { ordered: false });
 
     return {
+      emails: emails,
       matchedCount: result.matchedCount,
       modifiedCount: result.modifiedCount,
       upsertedCount: result.upsertedCount,
