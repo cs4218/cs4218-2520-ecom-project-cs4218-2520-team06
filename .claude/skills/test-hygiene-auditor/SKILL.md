@@ -26,6 +26,36 @@ Non-goals:
 If the user does not specify scope, infer it from the repo.
 Only ask a question if you cannot proceed safely.
 
+## Step -1: Intent routing (MANDATORY)
+
+Before running the audit workflow, classify intent and select mode with this precedence:
+
+1. `follow_up_report_mode` (highest)
+2. `report_mode_initial`
+3. `normal_mode` (lowest)
+
+Routing rules:
+
+- If the user asks for report generation as a follow-up to an existing audit/report run, use `follow_up_report_mode`.
+- If the user asks to run an audit and generate a report in the same request, use `report_mode_initial`.
+- If the user asks only for an audit/review and does not request report generation, use `normal_mode`.
+
+Report generation trigger examples:
+
+- "run audit and generate report"
+- "audit and generate html report"
+- "run hygiene audit then create report"
+- "generate audit report html"
+
+Mandatory report-mode checklist (both report modes):
+
+1. Produce the audit assessment for the run.
+2. Write JSON payload to `.claude/skills/test-hygiene-auditor/reports/<YYYY-MM-DD>_<run-id>.json`.
+3. Run `generate-html-report.mjs` on that JSON file.
+4. Verify both JSON and HTML files exist.
+5. Return artifact paths to the user.
+6. Never print raw JSON inline.
+
 ## Suppression whitelist model
 
 This skill supports follow-up audits where known false positives are whitelisted.
@@ -320,6 +350,13 @@ Report mode (only when user asks to generate HTML report or equivalent):
 4. Return the generated HTML path and JSON path to the user.
 5. Do NOT print raw JSON in the response.
 
+Combined request behavior (initial prompt includes both audit + report generation):
+
+1. Treat request as `report_mode_initial`.
+2. Return full Markdown audit report.
+3. Also generate and verify JSON + HTML artifacts in the same run.
+4. Return artifact paths in the same response.
+
 Follow-up report mode (user asks to generate report as a follow-up to an existing audit):
 
 1. Do NOT regenerate or restate "Findings (by file)" markdown.
@@ -335,6 +372,7 @@ Enforcement requirement:
 
 - If the user does not explicitly request report mode / HTML generation, suppress JSON output entirely.
 - Never include a JSON block in normal responses.
+- In report modes, never skip HTML generation when JSON is written.
 
 ### Markdown template
 

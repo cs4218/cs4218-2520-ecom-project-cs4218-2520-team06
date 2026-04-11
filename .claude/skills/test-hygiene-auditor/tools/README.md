@@ -43,6 +43,12 @@ Report mode:
 2. Run this generator against that JSON file
 3. Return both generated file paths to the user
 
+Initial combined request (`audit + generate report` in one prompt):
+
+- Always execute report mode in the same run.
+- Return full markdown audit + artifact paths (JSON + HTML).
+- Do not defer HTML generation to a follow-up unless user explicitly asks to split steps.
+
 Follow-up report requests:
 
 - Do not restate full "Findings (by file)" markdown.
