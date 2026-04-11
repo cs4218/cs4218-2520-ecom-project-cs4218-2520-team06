@@ -14,6 +14,7 @@ Primary goals:
 - Identify brittle/flaky test logic
 - Suggest improvements/refactors that reduce brittleness
 - Incorporate control-flow testing and data-dependence coverage ideas
+- Support follow-up audits by suppressing explicitly whitelisted findings
 
 Non-goals:
 
@@ -24,6 +25,55 @@ Non-goals:
 
 If the user does not specify scope, infer it from the repo.
 Only ask a question if you cannot proceed safely.
+
+## Suppression whitelist model
+
+This skill supports follow-up audits where known false positives are whitelisted.
+
+- Suppression files live in: `.claude/skills/test-hygiene-auditor/suppressions/`
+- File format: Markdown
+- File naming convention: `<YYYY-MM-DD>_<run-id>.md`
+- New suppression entries created in the same conversation/run MUST be appended to the same file.
+- A new run/session MUST create a new suppression file.
+
+Suppression file structure:
+
+```md
+# Test Hygiene Suppressions
+
+## 2026-04-11
+
+### WL-0001
+
+- type: fingerprint
+- fingerprint: playwright|tests/auth.spec.ts|blackbox_violation|test_body|direct_api_call
+- reason: Intentional local smoke shortcut
+- added_by: jabeztho
+- expires_at: 2026-05-01
+
+### WL-0002
+
+- type: rule
+- category: brittle_logic
+- path_pattern: tests/legacy/\*\*
+- location: hook
+- reason: Legacy suite pending refactor
+- added_by: jabeztho
+```
+
+Supported suppression types:
+
+- `fingerprint` (exact match): suppress when finding fingerprint matches exactly.
+- `rule` (pattern match): suppress when all provided rule keys match finding fields.
+  - Supported keys: `category`, `path_pattern`, `location`
+
+Suppression behavior requirements:
+
+- Load suppression files before every audit run.
+- Ignore expired suppressions (`expires_at` older than today).
+- If a finding matches suppression, do not display it in Markdown output.
+- If a finding matches suppression, do not include it in the main JSON findings payload.
+- Invalid suppression entries may be skipped, but never silently crash the audit.
 
 ## Step 0: Detect frameworks (Jest / Playwright)
 
@@ -45,6 +95,17 @@ If Jest detected: read `references/jest.md`.
 If Playwright detected: read `references/playwright.md`.
 
 Also note adjacent frameworks (Vitest, Cypress, Mocha) as context, but keep the audit focused on Jest/Playwright unless asked.
+
+## Step 0.5: Load and apply suppressions (MANDATORY)
+
+Before inventorying tests or drafting findings:
+
+1. Discover suppression files under `.claude/skills/test-hygiene-auditor/suppressions/*.md`.
+2. Parse date sections and entries.
+3. Build active suppression matchers (`fingerprint` + `rule`), excluding expired entries.
+4. During issue generation, filter out matched findings immediately.
+
+This step is required for every initial audit and follow-up audit.
 
 ## Step 1: Inventory test files
 
@@ -219,6 +280,21 @@ Search e2e test files for these violation patterns:
 - **Selectors**: Use semantic locators (`getByRole`, `getByLabel`) over implementation-specific attributes.
 - **Fixtures**: Use Playwright fixtures for shared authenticated state, not hardcoded credentials tied to DB seeds.
 
+## Step 9: Follow-up unflag/whitelist workflow
+
+When the user asks to unflag/whitelist findings after an initial audit:
+
+1. Identify target findings and compute stable fingerprints.
+2. Draft suppression entries (`fingerprint` preferred; `rule` when broad suppression is intentional).
+3. Write entries into the current run/session suppression file.
+   - If this is the first suppression in the run/session, create a new file using `<YYYY-MM-DD>_<run-id>.md`.
+   - If suppressions already exist in this run/session, append to the same file.
+4. On follow-up audit rerun, reload suppressions and ensure matched findings are absent from output.
+
+Use stable finding fingerprints in this format:
+
+`<framework>|<path>|<category>|<location>|<title_slug>`
+
 ## Output format (ALWAYS)
 
 Return BOTH:
@@ -234,6 +310,11 @@ Return BOTH:
 
 - jest: <yes/no + evidence>
 - playwright: <yes/no + evidence>
+
+## Suppression context
+
+- suppression files loaded: <file paths or none>
+- follow-up mode: <yes/no>
 
 ## Files reviewed
 
@@ -256,6 +337,7 @@ For each file:
   - [Data-dependence gap] ...
   - [Brittle logic] ...
   - [Blackbox violation] ... (e2e only; note location: `test_body` | `hook` | `mixed`)
+- Fingerprint: `<framework>|<path>|<category>|<location>|<title_slug>` for each issue
 - Evidence: cite the exact test/hook/fixture identifiers; include short quoted snippets only when necessary
 - Recommendations: 1-3 concrete edits/refactors
 
@@ -277,6 +359,13 @@ For each file:
     "jest": { "detected": true, "evidence": ["..."] },
     "playwright": { "detected": false, "evidence": [] }
   },
+  "suppression": {
+    "enabled": true,
+    "files_loaded": [
+      ".claude/skills/test-hygiene-auditor/suppressions/2026-04-11_run-1.md"
+    ],
+    "follow_up_mode": true
+  },
   "files": [
     {
       "path": "tests/foo.test.ts",
@@ -291,6 +380,7 @@ For each file:
           "category": "state_leak|side_effect_leak|missed_validation|edge_case_gap|control_flow_gap|data_dependence_gap|brittle_logic|blackbox_violation",
           "location": "test_body|hook|mixed",
           "severity": "high|medium|low",
+          "fingerprint": "jest|tests/foo.test.ts|control_flow_gap|test_body|missing-error-branch",
           "title": "short label",
           "details": "what and why",
           "evidence": [
