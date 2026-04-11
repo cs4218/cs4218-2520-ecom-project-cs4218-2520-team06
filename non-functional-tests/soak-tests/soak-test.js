@@ -5,24 +5,19 @@ import { runUserFlow } from "./flows/flow-router.js";
 import { TEMP_FILE, TEMP_USER } from "./config/constants.js";
 import { metrics } from "./config/metrics.js";
 
-// -----------------------------
-// Load seeded users (init stage)
-// -----------------------------
+// Load seeded users during init stage
 const filePath = `../../temp/${TEMP_FILE.fileName}`;
 const seededUserEmails = JSON.parse(open(filePath));
 
-// -----------------------------
-// k6 options (soak test)
-// -----------------------------
 export const options = {
   scenarios: {
     soak_test: {
       executor: "ramping-vus",
       startVUs: 0,
       stages: [
-        { duration: "5m", target: 200 },
-        { duration: "5m", target: 200 },
-        { duration: "5m", target: 0 },
+        { duration: "30m", target: 200 },
+        { duration: "20h", target: 200 },
+        { duration: "30m", target: 0 },
       ],
     },
   },
@@ -46,29 +41,25 @@ export const options = {
   ],
 };
 
-// -----------------------------
-// Setup: share seeded users
-// -----------------------------
+// Share seeded users during setup
 export function setup() {
     return {
         seededUserEmails,
     };
 }
 
-// -----------------------------
-// Main user execution
-// -----------------------------
+// Main user function
 export default function (data) {
     const userEmails = data.seededUserEmails;
 
     // deterministic split of 80% returning users and 20% new users
-    let isSeeded = (__VU % 100) < 80;
+    const isSeeded = (__VU % 100) < 80;
 
     let email;
     if (isSeeded) {
         email = getSeededUser(__VU, userEmails);
     } else {
-        // temp users (new registrations)
+        // temp users use a new email to register
         email = createTempEmail(__VU, __ITER);
     }
 
