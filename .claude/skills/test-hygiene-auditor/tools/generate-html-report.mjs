@@ -458,8 +458,14 @@ function renderHtml({ title, date, runId, payload, rawAudit }) {
     </section>
 
     <section class="card">
-      <h2>Suppression Markdown</h2>
+      <h2>Markdown Prompt</h2>
       <div class="controls">
+        <label>Mode
+          <select id="exportMode">
+            <option value="suppression">Suppressions</option>
+            <option value="fix_prompt">Fix prompt</option>
+          </select>
+        </label>
         <label>Date
           <input id="metaDate" type="text" value="${dateEscaped}" placeholder="YYYY-MM-DD">
         </label>
@@ -477,9 +483,11 @@ function renderHtml({ title, date, runId, payload, rawAudit }) {
         </label>
       </div>
       <div class="actions">
-        <button type="button" id="downloadMarkdown">Download Markdown</button>
+        <button type="button" id="downloadSuppression">Download Suppression Markdown</button>
+        <button type="button" class="secondary" id="copyFixPrompt">Copy Fix Prompt</button>
+        <span class="muted" id="copyStatus"></span>
       </div>
-      <p class="muted">Save the downloaded file into <code>.claude/skills/test-hygiene-auditor/suppressions/</code>.</p>
+      <p class="muted" id="promptHint">Save suppression markdown into <code>.claude/skills/test-hygiene-auditor/suppressions/</code>.</p>
       <textarea id="markdownPreview" spellcheck="false"></textarea>
     </section>
   </main>
@@ -530,6 +538,11 @@ function renderHtml({ title, date, runId, payload, rawAudit }) {
       var metaAddedBy = document.getElementById("metaAddedBy");
       var metaReason = document.getElementById("metaReason");
       var metaExpires = document.getElementById("metaExpires");
+      var exportMode = document.getElementById("exportMode");
+      var downloadSuppression = document.getElementById("downloadSuppression");
+      var copyFixPrompt = document.getElementById("copyFixPrompt");
+      var promptHint = document.getElementById("promptHint");
+      var copyStatus = document.getElementById("copyStatus");
 
       function renderStats() {
         var statsHost = document.getElementById("stats");
@@ -679,7 +692,7 @@ function renderHtml({ title, date, runId, payload, rawAudit }) {
               selectedFingerprints.delete(fp);
             }
             renderFindings();
-            refreshSuppressionPreview();
+            refreshMarkdownPreview();
           });
         }
 
@@ -718,7 +731,23 @@ function renderHtml({ title, date, runId, payload, rawAudit }) {
         selectionInfo.textContent = selectedFingerprints.size + " fingerprint(s) selected";
       }
 
-      function buildMarkdown() {
+      function selectedFindings() {
+        var rows = [];
+        var selected = Array.from(selectedFingerprints);
+        selected.sort();
+        for (var i = 0; i < selected.length; i += 1) {
+          var fp = selected[i];
+          for (var j = 0; j < findings.length; j += 1) {
+            if (findings[j].fingerprint === fp) {
+              rows.push(findings[j]);
+              break;
+            }
+          }
+        }
+        return rows;
+      }
+
+      function buildSuppressionMarkdown() {
         var dateValue = metaDate.value.trim() || "1970-01-01";
         var addedBy = metaAddedBy.value.trim() || "audit-user";
         var reason = metaReason.value.trim() || "accepted tradeoff for now";
@@ -749,7 +778,104 @@ function renderHtml({ title, date, runId, payload, rawAudit }) {
         return lines.join("\\n").trimEnd() + "\\n";
       }
 
-      function refreshSuppressionPreview() {
+      function buildFixPromptMarkdown() {
+        var dateValue = metaDate.value.trim() || "1970-01-01";
+        var runId = metaRunId.value.trim() || "run-1";
+        var rows = selectedFindings();
+
+        var lines = [];
+        lines.push("# Prompt: Fix Test Hygiene Findings");
+        lines.push("");
+        lines.push("Fix the selected test hygiene findings with minimal, deterministic edits.");
+        lines.push("Do not change product behavior; only improve test reliability/coverage quality where required.");
+        lines.push("");
+        lines.push("## Context");
+        lines.push("");
+        lines.push("- run_date: " + dateValue);
+        lines.push("- run_id: " + runId);
+        lines.push("- selected_findings: " + String(rows.length));
+        lines.push("");
+        lines.push("## Output requirements");
+        lines.push("");
+        lines.push("1. Provide exact patch/diff.");
+        lines.push("2. Explain why each edit fixes the issue.");
+        lines.push("3. List tests to run to verify changes.");
+        lines.push("");
+        lines.push("## Findings to fix");
+        lines.push("");
+
+        if (rows.length === 0) {
+          lines.push("No findings selected. Select one or more findings in the table first.");
+          lines.push("");
+        }
+
+        for (var i = 0; i < rows.length; i += 1) {
+          var row = rows[i];
+          lines.push("### " + String(i + 1) + ". " + (row.title || "Untitled finding"));
+          lines.push("");
+          lines.push("- path: " + (row.path || "unknown"));
+          lines.push("- framework: " + (row.framework || "unknown"));
+          lines.push("- test_type: " + (row.test_type || "unknown"));
+          lines.push("- severity: " + (row.severity || "low"));
+          lines.push("- category: " + (row.category || "unknown"));
+          lines.push("- location: " + (row.location || "test_body"));
+          lines.push("- fingerprint: " + (row.fingerprint || "missing-fingerprint"));
+          lines.push("");
+          lines.push("Details:");
+          lines.push("");
+          lines.push(row.details || "No details provided.");
+          lines.push("");
+
+          lines.push("Recommendations:");
+          var recs = Array.isArray(row.recommendations) ? row.recommendations : [];
+          if (recs.length === 0) {
+            lines.push("- None provided");
+          } else {
+            for (var r = 0; r < recs.length; r += 1) {
+              lines.push("- " + recs[r]);
+            }
+          }
+          lines.push("");
+
+          lines.push("Evidence:");
+          lines.push("");
+          lines.push("~~~text");
+          var evidence = Array.isArray(row.evidence) ? row.evidence : [];
+          if (evidence.length === 0) {
+            lines.push("None provided");
+          } else {
+            for (var e = 0; e < evidence.length; e += 1) {
+              lines.push("- " + evidence[e]);
+            }
+          }
+          lines.push("~~~");
+          lines.push("");
+        }
+
+        return lines.join("\\n").trimEnd() + "\\n";
+      }
+
+      function buildMarkdown() {
+        if (exportMode.value === "fix_prompt") {
+          return buildFixPromptMarkdown();
+        }
+        return buildSuppressionMarkdown();
+      }
+
+      function updateModeUi() {
+        copyStatus.textContent = "";
+        if (exportMode.value === "fix_prompt") {
+          downloadSuppression.disabled = true;
+          copyFixPrompt.disabled = false;
+          promptHint.textContent = "Copy this prompt and paste it into your LLM to generate fixes.";
+        } else {
+          downloadSuppression.disabled = false;
+          copyFixPrompt.disabled = false;
+          promptHint.innerHTML = "Save suppression markdown into <code>.claude/skills/test-hygiene-auditor/suppressions/</code>.";
+        }
+      }
+
+      function refreshMarkdownPreview() {
         markdownPreview.value = buildMarkdown();
       }
 
@@ -767,9 +893,14 @@ function renderHtml({ title, date, runId, payload, rawAudit }) {
         var metaInputs = [metaDate, metaRunId, metaAddedBy, metaReason, metaExpires];
         for (var j = 0; j < metaInputs.length; j += 1) {
           metaInputs[j].addEventListener("input", function () {
-            refreshSuppressionPreview();
+            refreshMarkdownPreview();
           });
         }
+
+        exportMode.addEventListener("change", function () {
+          updateModeUi();
+          refreshMarkdownPreview();
+        });
 
         document.getElementById("selectFiltered").addEventListener("click", function () {
           var rows = filteredFindings();
@@ -779,20 +910,40 @@ function renderHtml({ title, date, runId, payload, rawAudit }) {
             }
           }
           renderFindings();
-          refreshSuppressionPreview();
+          refreshMarkdownPreview();
         });
 
         document.getElementById("clearSelection").addEventListener("click", function () {
           selectedFingerprints.clear();
           renderFindings();
-          refreshSuppressionPreview();
+          refreshMarkdownPreview();
         });
 
-        document.getElementById("downloadMarkdown").addEventListener("click", function () {
+        copyFixPrompt.addEventListener("click", function () {
+          var prompt = buildFixPromptMarkdown();
+          exportMode.value = "fix_prompt";
+          updateModeUi();
+          refreshMarkdownPreview();
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(prompt).then(function () {
+              copyStatus.textContent = "Copied";
+            }).catch(function () {
+              markdownPreview.focus();
+              markdownPreview.select();
+              copyStatus.textContent = "Copy failed, prompt selected";
+            });
+          } else {
+            markdownPreview.focus();
+            markdownPreview.select();
+            copyStatus.textContent = "Clipboard not available, prompt selected";
+          }
+        });
+
+        downloadSuppression.addEventListener("click", function () {
           var runId = metaRunId.value.trim() || "run-1";
           var dateValue = metaDate.value.trim() || "1970-01-01";
           var fileName = dateValue + "_" + runId + ".md";
-          var markdown = buildMarkdown();
+          var markdown = buildSuppressionMarkdown();
 
           var blob = new Blob([markdown], { type: "text/markdown;charset=utf-8" });
           var link = document.createElement("a");
@@ -810,7 +961,8 @@ function renderHtml({ title, date, runId, payload, rawAudit }) {
       populateFilters();
       wireEvents();
       renderFindings();
-      refreshSuppressionPreview();
+      updateModeUi();
+      refreshMarkdownPreview();
     })();
   </script>
 </body>
