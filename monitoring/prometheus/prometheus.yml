@@ -1,0 +1,12 @@
+# Kok Bo Chang, A0273542E
+global:
+  scrape_interval: 5s
+
+scrape_configs:
+  - job_name: 'node'
+    static_configs:
+      - targets: ['node-exporter:9100']
+
+  - job_name: 'process'
+    static_configs:
+      - targets: ['process-exporter:9256']

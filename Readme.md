@@ -218,6 +218,27 @@ The following E2E tests verify user workflows:
 - shopping-flow-spec.js
 - cart-stored-on-local-browser.spec.js
 
+#### Non-Functional Testing (Soak Test)
+The following files are related to the soak test:
+- non-functional-tests/soak-tests/
+- monitoring/
+- Dockerfile
+- .dockerignore
+
+To set up the NodeJS server and Docker to monitor resource usage,,
+```
+docker compose -f monitoring/docker-compose.yml build --no-cache
+docker compose -f monitoring/docker-compose.yml up -d
+```
+To remove the images:
+```
+docker compose -f monitoring/docker-compose.yml down
+```
+Then, run `k6` to start the soak test scenario:
+```
+$env:K6_WEB_DASHBOARD="true"; $env:K6_WEB_DASHBOARD_EXPORT="soak-report.html"; k6 run .\non-functional-tests\soak-tests\soak-test.js
+```
+
 ### Hans Delano
 
 #### Client-Related Files

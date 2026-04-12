@@ -97,7 +97,7 @@ export function createSeededUserFlow() {
     gaussianThink(4, 1.5);
 
     // Checkout (higher for returning users)
-    const willCheckout = Math.random() < 0.3;
+    const willCheckout = Math.random() < 0.15;
     if (!willCheckout) return;
 
     const isSuccess = checkout(token, product, metrics.checkout.order);

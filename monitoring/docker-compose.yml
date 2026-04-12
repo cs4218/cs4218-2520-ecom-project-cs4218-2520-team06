@@ -1,0 +1,43 @@
+# Kok Bo Chang, A0273542E
+services:
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+    depends_on:
+      - node-exporter
+      - process-exporter
+
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    ports:
+      - "3000:3000"
+
+  node-exporter:
+    image: prom/node-exporter
+    container_name: node-exporter
+    ports:
+      - "9100:9100"
+  
+  process-exporter:
+    image: ncabatoff/process-exporter
+    container_name: process-exporter
+    volumes:
+      - /proc:/host/proc
+      - ./exporters/process-exporter.yml:/config.yml
+    command:
+      - '--procfs=/host/proc'
+      - '--config.path=/config.yml'
+    ports:
+      - "9256:9256"
+
+  node-app:
+    build:
+      context: ../
+    container_name: node-app
+    ports:
+      - "6060:6060"

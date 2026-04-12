@@ -92,7 +92,7 @@ export function newUserFlow(email, metrics) {
     gaussianThink(4, 1.5);
 
     // Checkout (rarer for new users)
-    const willCheckout = Math.random() < 0.1;
+    const willCheckout = Math.random() < 0.05;
     if (!willCheckout) return;
 
     const isSuccess = checkout(token, product, metrics.checkout.order);

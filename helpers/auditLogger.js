@@ -20,6 +20,7 @@ export const writeAuditLog = async ({
   success,
   metadata = {},
 }) => {
+  return;
   if (!method || !path || !action || typeof statusCode !== "number") {
     return;
   }
