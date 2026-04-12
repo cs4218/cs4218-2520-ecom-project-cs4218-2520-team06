@@ -239,6 +239,15 @@ To start the soak test, you can run `k6` with the following command:
 $env:K6_WEB_DASHBOARD="true"; $env:K6_WEB_DASHBOARD_EXPORT="soak-report.html"; k6 run .\non-functional-tests\soak-tests\soak-test.js
 ```
 
+To seed soak test users into the database:
+```
+node .\non-functional-tests\soak-tests\helpers\seed-users.js
+```
+To clean up soak test users from the database:
+```
+node .\non-functional-tests\soak-tests\helpers\clean-up-users.js
+```
+
 ### Hans Delano
 
 #### Client-Related Files
