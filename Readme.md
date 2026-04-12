@@ -225,16 +225,16 @@ The following files are related to the soak test:
 - Dockerfile
 - .dockerignore
 
-To set up the NodeJS server and Docker to monitor resource usage,,
+To set up the NodeJS server and Docker to monitor resource usage:
 ```
 docker compose -f monitoring/docker-compose.yml build --no-cache
 docker compose -f monitoring/docker-compose.yml up -d
 ```
-To remove the images:
+To remove the images (only if you need it):
 ```
 docker compose -f monitoring/docker-compose.yml down
 ```
-Then, run `k6` to start the soak test scenario:
+To start the soak test, you can run `k6` with the following command:
 ```
 $env:K6_WEB_DASHBOARD="true"; $env:K6_WEB_DASHBOARD_EXPORT="soak-report.html"; k6 run .\non-functional-tests\soak-tests\soak-test.js
 ```
