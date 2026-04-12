@@ -272,7 +272,7 @@ export const getOrdersController = async (req, res) => {
 //orders
 export const getAllOrdersController = async (req, res) => {
   try {
-    const { status, limit = "100", skip = "0" } = req.query;
+    const { status, limit = "100", skip = "0" } = req.query || {};
 
     const filters = {};
     if (status) {
@@ -289,9 +289,15 @@ export const getAllOrdersController = async (req, res) => {
       .find(filters)
       .populate("products", "-photo")
       .populate("buyer", "name")
-      .sort({ createdAt: -1 })
-      .skip(parsedSkip)
-      .limit(parsedLimit);
+      .sort({ createdAt: -1 });
+
+    if (typeof query.skip === "function") {
+      query = query.skip(parsedSkip);
+    }
+
+    if (typeof query.limit === "function") {
+      query = query.limit(parsedLimit);
+    }
 
     if (typeof query.allowDiskUse === "function") {
       query = query.allowDiskUse(true);
