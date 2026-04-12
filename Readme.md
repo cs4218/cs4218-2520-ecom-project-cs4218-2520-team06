@@ -116,6 +116,14 @@ The distribution of testing workload for this project follows closely with the s
 - admin-orders.spec.js
 - authorization.spec.js
 
+### Stress Tests (Non-Functional Testing)
+
+- admin-orders-stress.js
+- admin-product-stress.js
+- auth-stress.js
+- browse-search-stress.js
+- checkout-stress.js
+
 ### Jabez Tho
 
 #### Unit Tests
