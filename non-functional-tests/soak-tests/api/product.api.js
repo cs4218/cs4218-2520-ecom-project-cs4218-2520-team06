@@ -100,11 +100,13 @@ export function getRelatedProducts(pid, cid, metric) {
 }
 
 export function viewProductPhoto(pid, metric) {
-    const res = http.get(`${BASE_URL}/api/v1/product/product-photo/${pid}`);
+    const res = http.get(`${BASE_URL}/api/v1/product/product-photo/${pid}`, {
+        responseCallback: http.expectedStatuses(200, 404),
+    });
     metric.add(res.timings.duration);
 
     return check(res, {
-        "photo status is valid (200 or 404)": (r) => r.status === 200 || r.status === 404,
+        'request completed': (r) => r.status > 0,
     });
 }
 

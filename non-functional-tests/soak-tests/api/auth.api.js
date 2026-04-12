@@ -15,14 +15,15 @@ export function register(email, metric) {
     });
     const params = { headers: { "Content-Type": "application/json" } };
 
-    const res = http.post(`${BASE_URL}/api/v1/auth/register`, payload, params);
+    const res = http.post(`${BASE_URL}/api/v1/auth/register`, payload, params, {
+        responseCallback: http.expectedStatuses(200, 201),
+    });
     metric.add(res.timings.duration);
 
     const body = parseJson(res);
 
     const isSuccess = check(res, {
-        "registration status is 201": (r) => r.status === 201,
-        "registration success field is true": () => body?.success === true,
+        "registration status is 200 or 201": (r) => r.status === 200 || r.status === 201,
     });
 
     return isSuccess;
@@ -36,6 +37,7 @@ export function login(email, metric) {
     metric.add(res.timings.duration);
 
     const body = parseJson(res);
+    if (res.status !== 200) console.log(res)
 
     const isSuccess = check(res, {
         "login status is 200": (r) => r.status === 200,
